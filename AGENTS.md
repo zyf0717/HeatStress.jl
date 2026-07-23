@@ -27,7 +27,9 @@ This repository is `HeatStress.jl`, an independent MIT-licensed Julia implementa
 * Create or update the relevant specification before non-trivial code changes.
 * Update affected specification artifacts in the same change when design decisions, requirements, validation, or observed behaviour change.
 * Update `specs/README.md` when specification status or cross-feature sequencing changes.
-* Do not implement unresolved `[NEEDS CLARIFICATION: ...]` items without explicit approval.
+* Keep exactly one status selected in each unit’s `tasks.md`; `specs/README.md` must mirror it.
+* Treat `[NEEDS CLARIFICATION: ...]` as a blocker only for the scoped decision and its dependants. Do not implement that behaviour without explicit resolution.
+* Treat suggested commit messages and PR groupings as guidance, not acceptance evidence.
 * Do not add `.specify/`, slash-command directories, or generated agent scaffolding unless explicitly requested.
 
 ## Implementation
@@ -60,3 +62,5 @@ This repository is `HeatStress.jl`, an independent MIT-licensed Julia implementa
 * Benchmark material performance changes rather than asserting improvements.
 
 * For documentation-only changes, tests are not required; state that explicitly.
+
+* Do not tag, publish, archive or register a release until the final scientific audit explicitly authorises the audited source revision. A release commit may add only the resulting audit/evidence records; any source, fixture or scientific-contract change requires a new audit.

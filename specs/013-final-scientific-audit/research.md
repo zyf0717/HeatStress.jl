@@ -1,4 +1,4 @@
-# Final scientific audit: research
+# Final scientific audit and release authorisation: research
 
 ## Required sources
 

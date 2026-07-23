@@ -28,7 +28,7 @@ validation/
     └── simple_indices.csv
 ```
 
-`sources.toml` must map every fixture family to publications, standards, equations and generation method. `fixture-set-v1.toml` must record the package commit, Julia version, precision, timezone, random seed and schema version.
+`sources.toml` must map every fixture family to publications, standards, equations and generation method. `fixture-set-v1.toml` must record the fixture-generator revision, Julia version, precision, timezone, random seed and schema version. A validation report records the package commit being tested; regenerating fixtures must not rewrite metadata merely because unrelated package code changed.
 
 ## Fixture authority levels
 
@@ -59,7 +59,7 @@ Store independently calculated viscosity, diffusivity, convection/radiation term
 
 ### `liljegren_components.csv`
 
-Store successful Tg and Tnwb roots, final residuals, brackets and expected status. Expected roots should be generated with BigFloat and a solver tighter than the production defaults.
+Store successful Tg and Tnwb roots, Kelvin-scale validation residuals, brackets and expected status. Expected roots should be generated with BigFloat and a solver tighter than the production defaults.
 
 ### `liljegren_reference.csv`
 
@@ -101,7 +101,8 @@ Suggested starting tolerances:
 | Quantity | Tolerance |
 | --- | --- |
 | direct algebraic formula | `atol=1e-10`, `rtol=1e-10` for Float64 |
-| solar zenith | source/method-specific, initially `atol=1e-8 deg` |
+| solar zenith transcription/numerics | source/method-specific; compare against a higher-precision evaluation of the same selected method |
+| solar-method accuracy | the error bound declared in spec 004 against an independent higher-accuracy authority |
 | heat-transfer kernels | `atol=1e-10`, `rtol=1e-10` where numerically suitable |
 | Liljegren Tg/Tnwb/WBGT | `atol=1e-4 °C`, `rtol=1e-8` |
 | accepted residual | configured residual tolerance |
@@ -160,4 +161,3 @@ Fixture changes require:
 ## Suggested commit
 
 `test: add paper-derived scientific validation fixtures`
-

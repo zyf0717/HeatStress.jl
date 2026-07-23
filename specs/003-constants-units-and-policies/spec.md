@@ -54,6 +54,8 @@ const WICK_LENGTH_M = 0.0254
 
 Verify exact values against cited publications before committing. If authoritative sources disagree, record the discrepancy in `docs/src/provenance.md`, select one explicitly and add a sensitivity or compatibility note; do not silently normalise it.
 
+[NEEDS CLARIFICATION: Complete the constant provenance inventory and verify every exact value, including defaults, before implementing `src/constants.jl`.]
+
 ## Validation rules
 
 Implement internal validators for:
@@ -76,24 +78,32 @@ For scalar invalid fixed configuration, throw `ArgumentError` or `DomainError`. 
 
 Implement one internal scalar function that:
 
-1. rejects/propgates missing meteorological values;
+1. rejects or propagates missing meteorological values according to the public contract;
 2. clamps negative wind to zero;
 3. clamps negative radiation to zero;
 4. applies the dewpoint policy;
 5. calculates solar zenith;
 6. sets radiation to zero when `cos(zenith) <= 0`;
-7. marks `solar_geometry_mismatch` when supplied radiation is greater than `15 W/m²` and zenith is greater than `1.54 rad` before the kernel's historical zenith correction;
+7. marks `solar_geometry_mismatch` when supplied radiation is positive but computed solar elevation is non-positive, before night-time zeroing;
 8. floors wind at `minimum_wind_speed_m_s` only where required by component physics.
 
 Keep the distinction between supplied wind after non-negative clamping and effective wind after the model floor.
 
+Preprocessing must also report `dew_point_adjusted`, `wind_speed_clamped` and `solar_radiation_clamped` flags. The diagnostic APIs expose them; value-only API documentation must state the normalization policy.
+
+The v0.1 mismatch flag is deliberately strict and diagnostic-only. A noise threshold or near-horizon threshold may replace it only as an explicitly sourced or original documented policy with boundary tests; do not inherit historical thresholds from another implementation.
+
 ## Dewpoint policies
 
-Implement and test exactly:
+First apply the tolerance consistently:
+
+- if `dew_point_c <= air_temperature_c`, leave both unchanged;
+- if `0 < dew_point_c - air_temperature_c <= dew_point_tolerance_c`, clamp dewpoint to air temperature as round-off reconciliation under every policy;
+- if the difference is above tolerance, apply the selected policy below.
 
 ### `ClampDewPoint`
 
-If `dew_point_c - air_temperature_c > dew_point_tolerance_c`, set dewpoint equal to air temperature. Differences within tolerance are retained.
+Set dewpoint equal to air temperature.
 
 ### `SwapAirAndDewPoint`
 
@@ -101,7 +111,7 @@ Set air temperature to `max(air, dewpoint)` and dewpoint to `min(air, dewpoint)`
 
 ### `RejectInvalidDewPoint`
 
-If dewpoint exceeds air temperature, mark input `InvalidDewPoint` and do not attempt either component solver.
+Mark input `InvalidDewPoint` and do not attempt either component solver.
 
 ## Forbidden shortcuts
 
@@ -119,6 +129,7 @@ Create `test/test_validation.jl` covering:
 - three dewpoint policies;
 - dewpoint tolerance just below, equal to and above threshold;
 - negative wind/radiation;
+- diagnostic flags for every dewpoint/wind/radiation adjustment;
 - night-time radiation zeroing;
 - solar mismatch flag;
 - Float32 config construction;
@@ -134,4 +145,3 @@ Create `test/test_validation.jl` covering:
 ## Suggested commit
 
 `feat: add physical constants and input policies`
-

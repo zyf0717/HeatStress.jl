@@ -2,12 +2,13 @@
 
 ## Status
 
-- [ ] Planned
+- [x] Planned
 - [ ] In progress
 - [ ] Complete
 
 ## Tasks
 
+- [ ] Complete the constant/default provenance inventory.
 - [ ] Create typed constants with source citations.
 - [ ] Implement Celsius/Kelvin and pressure/radiation unit boundary checks.
 - [ ] Implement dew-point, wind and radiation validation policies.

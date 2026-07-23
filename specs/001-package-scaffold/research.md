@@ -2,8 +2,9 @@
 
 ## Required sources
 
-- Julia package creation guidance.
-- Julia project metadata documentation.
+- Julia package creation guidance: <https://pkgdocs.julialang.org/v1/creating-packages/>.
+- Julia project metadata documentation: <https://pkgdocs.julialang.org/v1/toml-files/>.
+- Julia style guide: <https://docs.julialang.org/en/v1/manual/style-guide/>.
 - Package policy constraints in `spec.md`.
 
 The authoritative detail and citations remain in `spec.md`; software implementations are not scientific authorities.

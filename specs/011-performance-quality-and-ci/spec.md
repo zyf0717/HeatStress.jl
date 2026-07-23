@@ -17,7 +17,7 @@ Benchmark groups:
 5. allocating serial batch;
 6. preallocated serial batch;
 7. preallocated threaded batch;
-8. diagnostics on/off;
+8. value-only versus diagnostic APIs;
 9. simple indices broadcast.
 
 Row sizes:
@@ -139,4 +139,3 @@ Do not publish speedup ratios across unequal row counts or include setup in only
 ## Suggested commit
 
 `perf: validate and optimise Julia execution paths`
-

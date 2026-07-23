@@ -17,3 +17,5 @@ Establish scientific authority, independence boundaries, release scope and confo
 ## Completion rule
 
 Do not mark this unit complete until every acceptance criterion in `spec.md` passes and the concrete evidence is recorded in `tasks.md`.
+
+The product-level v0.1.0 definition of done is not this unit’s completion gate. Once the charter is approved, its rules remain governing constraints while downstream work proceeds.

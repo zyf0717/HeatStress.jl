@@ -131,7 +131,18 @@ Add:
 
 A `NOTICE` file is optional under MIT. Use one only for scientific acknowledgements or third-party notices; do not imply extra licence conditions.
 
-## Definition of done
+## Unit acceptance criteria
+
+The project-charter unit is complete when:
+
+- the primary source, conformance hierarchy, v0.1 scope and independence/licensing boundaries are explicitly approved;
+- later specifications consistently refer to this charter where scientific or licensing authority matters;
+- private-comparison paths and repository exclusions are defined;
+- unresolved formula-level choices are delegated to their owning specifications rather than silently decided here.
+
+Completion of this unit authorises downstream implementation. It does not claim that the product-level definition of done below has been met.
+
+## Product definition of done
 
 v0.1.0 is done only when:
 
@@ -143,4 +154,3 @@ v0.1.0 is done only when:
 - no R process or copied third-party implementation is used by package load, tests or fixture generation;
 - provenance for every implemented formula family is recorded;
 - the final scientific audit in spec 13 is complete.
-

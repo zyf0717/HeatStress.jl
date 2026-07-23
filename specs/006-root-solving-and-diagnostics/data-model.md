@@ -7,7 +7,7 @@ The solver consumes a scalar residual and returns a concrete diagnostics record.
 | outcome | convergence flag and `FailureReason` |
 | accepted value | validated root or `missing` |
 | candidate | last candidate retained only for diagnostics |
-| residuals | candidate, lower and upper residuals |
+| residuals | Kelvin-scale candidate validation residual plus lower/upper location residuals in the documented native equation units |
 | bracket history | initial and final lower/upper bounds |
 | work | iteration and evaluation counts |
 | policy | root and residual tolerances used |

@@ -1,4 +1,4 @@
-# Documentation, release and registration: research
+# Documentation and release readiness: research
 
 ## Required sources
 
@@ -15,5 +15,5 @@ The authoritative detail and citations remain in `spec.md`; software implementat
 
 ## Open questions
 
-- Confirm copyright holder/year and citation authors.
+- Confirm citation authors and keep the existing `LICENSE` holder/year aligned with release metadata.
 - Choose reproducible archival service and release workflow.

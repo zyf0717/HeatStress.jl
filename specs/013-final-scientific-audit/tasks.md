@@ -1,8 +1,8 @@
-# Final scientific audit: execution checklist
+# Final scientific audit and release authorisation: execution checklist
 
 ## Status
 
-- [ ] Planned
+- [x] Planned
 - [ ] In progress
 - [ ] Complete
 
@@ -12,7 +12,8 @@
 - [ ] Generate `validation/scientific-validation-report.md`.
 - [ ] Scan repository history/source for prohibited provenance.
 - [ ] Review serial/threaded and numeric-type comparisons.
-- [ ] Record sign-off fields and known deviations.
+- [ ] Record the audited source commit, permitted audit-record paths and known deviations.
+- [ ] Define the post-commit diff-verification and tag/release-metadata procedure.
 - [ ] Block release on any listed condition.
 - [ ] Run the acceptance checks in `quickstart.md`.
 - [ ] Record test, benchmark or validation evidence and commit SHA below.

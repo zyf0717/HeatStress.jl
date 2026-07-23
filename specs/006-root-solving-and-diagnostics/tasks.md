@@ -2,12 +2,13 @@
 
 ## Status
 
-- [ ] Planned
+- [x] Planned
 - [ ] In progress
 - [ ] Complete
 
 ## Tasks
 
+- [ ] Validate and document component bracket, expansion and tolerance defaults.
 - [ ] Implement package-owned scalar solver.
 - [ ] Track iterations, evaluations and initial/final brackets.
 - [ ] Reject non-finite, unbracketed and residual-invalid candidates distinctly.

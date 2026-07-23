@@ -1,8 +1,8 @@
-# Documentation, release and registration
+# Documentation and release readiness
 
 ## Purpose
 
-Prepare a scientifically transparent MIT-licensed Julia package for public use and General registration.
+Prepare a scientifically transparent MIT-licensed Julia package for final audit. This unit establishes release and General-registration readiness; it does not publish the package.
 
 ## README structure
 
@@ -74,10 +74,10 @@ A non-normative documentation table may help users find conceptually correspondi
 - optionally use Developer Certificate of Origin sign-off;
 - add no third-party source unless its licence is recorded and compatible.
 
-## Release checklist
+## Release-readiness checklist
 
-1. all specs complete;
-2. update version to `0.1.0`;
+1. specs 000–011 are complete and this unit’s criteria are ready to close;
+2. set the candidate version to `0.1.0`;
 3. confirm MIT licence, citation and provenance;
 4. run tests on all supported platforms;
 5. build docs with no warnings;
@@ -86,10 +86,10 @@ A non-normative documentation table may help users find conceptually correspondi
 8. generate benchmark report;
 9. review exports and source citations;
 10. verify package-name conflict again;
-11. create GitHub release/tag;
-12. archive release with Zenodo and/or Software Heritage;
-13. register via Registrator;
-14. configure TagBot and CompatHelper.
+11. configure and validate the intended TagBot, CompatHelper, archival and Registrator workflow without triggering publication;
+12. freeze the candidate tree and define the handoff that will pass its post-commit SHA to the final scientific audit.
+
+Tagging, GitHub release creation, archival and registration are post-audit actions governed by spec 013. They are not acceptance criteria for this unit.
 
 ## Registration readiness
 
@@ -97,7 +97,7 @@ Confirm:
 
 - the package name is not confusingly close to an existing registered package;
 - README/docs clearly identify the scientific formulation and provenance;
-- `Project.toml` has compatible lower bounds and `license = "MIT"` where applicable;
+- `Project.toml` has compatible lower bounds for every non-stdlib dependency and the repository contains the standard MIT `LICENSE`;
 - `[compat]` entries exist for all non-stdlib dependencies;
 - tests do not download mutable remote data;
 - package loads and tests from a clean depot;
@@ -110,9 +110,9 @@ Confirm:
 - all exports have docstrings and scientific citations where applicable;
 - docs explain numerical failure rather than hiding it;
 - provenance accurately describes prior HeatStressR familiarity without presenting HeatStressR as the source;
-- release notes describe an independent MIT implementation, not a port.
+- release notes describe an independent MIT implementation, not a port;
+- no tag, archive, registry submission or other public release action has occurred before spec 013 authorises the candidate commit.
 
 ## Suggested commit
 
-`docs: prepare independent MIT implementation for release`
-
+`docs: prepare independent MIT implementation for audit`

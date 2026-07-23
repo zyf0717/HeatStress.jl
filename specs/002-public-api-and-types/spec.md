@@ -6,7 +6,7 @@ Define the stable Julia-facing vocabulary before formulas are implemented. Avoid
 
 ## Public API names
 
-Export these names when implemented:
+The Liljegren, solver and batch names below are the stable v0.1 candidates. Solar/psychrometric names are finalised by 004; secondary-index names are finalised by 009 after each exact formulation is selected. Export a name only when its owning specification is complete.
 
 ```julia
 solar_zenith
@@ -28,6 +28,8 @@ liljegren_wbgt!
 diagnose_liljegren
 diagnose_liljegren_batch
 ```
+
+The generic secondary-index names above are not commitments to unspecified formula variants. Spec 009 must either bind each name to one cited formulation or replace it with a formulation-specific name before implementation.
 
 Do not export R aliases such as `wbgt.Liljegren`, `fTg`, `fTnwb`, `wbt.Stull`, `apparentTemp` or `tashurs2vap.pres` in v0.1.0. A separate compatibility extension may be considered later.
 
@@ -77,7 +79,7 @@ Support:
 
 - `ZonedDateTime`: convert the instant to UTC before solar calculations;
 - `DateTime`: interpret explicitly as UTC and document this;
-- `Date`: valid primarily for `DateNoon`; in timestamp mode interpret as midnight UTC only if explicitly documented and tested;
+- `Date`: supported only if `DateNoonSolarTime` is retained by spec 004; do not silently interpret a date as a timestamp;
 - `Missing`: propagate as an unattempted/missing-time result at the public boundary.
 
 Do not parse arbitrary strings in hot APIs. Provide an optional convenience method only after core completion, or require callers to parse with `TimeZones.jl`/`Dates`.
@@ -122,13 +124,14 @@ Policy design:
 
 | Situation | Julia policy |
 | --- | --- |
-| dewpoint exceeds air temperature within/above tolerance; clamp to saturation | `ClampDewPoint` (provisional default) |
-| dewpoint exceeds air temperature; exchange the two values for legacy-data repair | `SwapAirAndDewPoint` |
-| dewpoint exceeds air temperature; reject row | `RejectInvalidDewPoint` |
+| dewpoint exceeds air temperature by no more than tolerance | clamp to saturation under every policy as round-off reconciliation |
+| dewpoint exceeds air temperature above tolerance; clamp to saturation | `ClampDewPoint` (provisional default) |
+| dewpoint exceeds air temperature above tolerance; exchange the two values for legacy-data repair | `SwapAirAndDewPoint` |
+| dewpoint exceeds air temperature above tolerance; reject row | `RejectInvalidDewPoint` |
 | compute solar geometry from full instant | `TimestampSolarTime` |
 | compute a documented date-at-noon approximation | `DateNoonSolarTime` |
 
-The default dewpoint policy must be justified in documentation; it is a package decision, not inherited behaviour.
+[NEEDS CLARIFICATION: Select and justify the v0.1 default dewpoint policy before implementing the default `LiljegrenConfig()` constructor. Explicit non-default policies may be implemented and tested independently.]
 
 ## Configuration types
 
@@ -150,7 +153,7 @@ struct LiljegrenConfig{T<:AbstractFloat}
 end
 ```
 
-Provide validating outer constructors. Defaults:
+Provide validating outer constructors. Candidate defaults, subject to the unresolved policy/provenance/solver gates in specs 002, 003 and 006:
 
 ```julia
 SolverConfig(
@@ -186,15 +189,15 @@ struct SolverDiagnostics{T<:AbstractFloat}
     reason::FailureReason
     value_c::Union{Missing,T}
     candidate_c::Union{Missing,T}
-    residual_k::Union{Missing,T}
+    validation_residual_k::Union{Missing,T}
     evaluations::Int
     iterations::Int
     initial_lower_k::Union{Missing,T}
     initial_upper_k::Union{Missing,T}
     final_lower_k::Union{Missing,T}
     final_upper_k::Union{Missing,T}
-    lower_residual::Union{Missing,T}
-    upper_residual::Union{Missing,T}
+    lower_location_residual::Union{Missing,T}
+    upper_location_residual::Union{Missing,T}
     root_tolerance_k::T
     residual_tolerance_k::T
 end
@@ -202,11 +205,16 @@ end
 struct DiagnosticWBGTResult{T<:AbstractFloat}
     result::WBGTResult{T}
     input_status::InputStatus
+    dew_point_adjusted::Bool
+    wind_speed_clamped::Bool
+    solar_radiation_clamped::Bool
     solar_geometry_mismatch::Bool
     globe::SolverDiagnostics{T}
     natural_wet_bulb::SolverDiagnostics{T}
 end
 ```
+
+`validation_residual_k` is the component’s Kelvin-scale acceptance residual. Endpoint location residuals remain in the documented native units of the signed equation used for bracketing (for example, a globe energy residual may not be in Kelvin); their field names must not imply Kelvin units.
 
 For batch results use structure-of-arrays types, not `Vector{DiagnosticWBGTResult}` in the main high-throughput path:
 
@@ -223,6 +231,7 @@ The diagnostic batch type may contain vectors for each diagnostic field. It must
 ## Missing and failure semantics
 
 - Missing/invalid public input: result components are `missing`; solver reason is `NotAttempted`.
+- Input-adjustment flags report whether dewpoint, negative wind or negative radiation was changed before solving; they are false when the corresponding input was missing or never inspected.
 - Failed Tg only: `globe_temperature_c=missing`, retain valid natural wet bulb, `wbgt_c=missing`.
 - Failed Tnwb only: retain valid globe temperature, natural wet bulb and WBGT are missing.
 - Complete WBGT is calculated only if both component roots validate.
@@ -247,4 +256,3 @@ The diagnostic batch type may contain vectors for each diagnostic field. It must
 ## Suggested commit
 
 `feat: define native Julia API and result types`
-

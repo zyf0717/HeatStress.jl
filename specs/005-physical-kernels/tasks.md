@@ -2,12 +2,13 @@
 
 ## Status
 
-- [ ] Planned
+- [x] Planned
 - [ ] In progress
 - [ ] Complete
 
 ## Tasks
 
+- [ ] Complete the physical-kernel source-selection table.
 - [ ] Implement convection, radiation, evaporation and atmospheric terms.
 - [ ] Keep kernels type-stable and side-effect free.
 - [ ] Add limiting-case and dimensional tests.

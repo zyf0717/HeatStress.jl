@@ -1,4 +1,4 @@
-# Documentation, release and registration: quickstart
+# Documentation and release readiness: quickstart
 
 ## Workflow
 

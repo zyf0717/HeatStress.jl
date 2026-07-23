@@ -50,7 +50,7 @@ Do not make fixture or documentation dependencies runtime dependencies.
 
 ## Main module
 
-Create `src/HeatStress.jl` with includes in dependency order. Initially export nothing except placeholder API names declared in spec 02.
+Create `src/HeatStress.jl` with includes in dependency order. Initially export nothing. Add each public name only when its owning specification is complete and its implementation and docstring exist.
 
 Required include order:
 
@@ -88,7 +88,7 @@ include("indices/heat_index.jl")
 end
 ```
 
-Empty placeholder files may be created, but no placeholder function may return fabricated numerical results. Unimplemented public functions should not be exported until their spec is complete.
+Empty placeholder files may be created, but no placeholder function may return fabricated numerical results.
 
 ## Coding conventions
 
@@ -146,4 +146,3 @@ Create:
 ## Suggested commit
 
 `chore: scaffold HeatStress Julia package`
-

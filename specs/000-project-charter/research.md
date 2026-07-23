@@ -2,8 +2,9 @@
 
 ## Required sources
 
-- Liljegren et al. (2008), DOI `10.1080/15459620802310770`.
+- Liljegren et al. (2008), DOI <https://doi.org/10.1080/15459620802310770>.
 - Supporting literature and standards identified per equation or policy.
+- Standard MIT licence text: <https://opensource.org/license/mit/>.
 
 The authoritative detail and citations remain in `spec.md`; software implementations are not scientific authorities.
 

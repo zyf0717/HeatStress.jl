@@ -55,7 +55,7 @@ Do not add a `workers` argument. Julia threads are started outside the package v
 
 ## Accepted argument shapes
 
-The primary meteorological arrays and time array must have identical length.
+The primary meteorological arrays and time array must have identical length. Row alignment is ordinal, not dependent on a shared starting index: row `j` is the `j`th element of each input. Allocating outputs use ordinary 1-based vectors; preallocated outputs are written in their own ordinal order.
 
 Allow scalar or aligned arrays for:
 
@@ -64,16 +64,18 @@ Allow scalar or aligned arrays for:
 - pressure;
 - direct fraction.
 
-Use an internal scalar-or-vector accessor, not `repeat`/materialisation:
+Use internal ordinal scalar-or-vector accessors, not `repeat`/materialisation. The concrete methods must be restricted to supported scalar types rather than accepting arbitrary objects:
 
 ```julia
-@inline _at(x::Number, i) = x
-@inline _at(x::AbstractVector, i) = @inbounds x[i]
+@inline _at(x::Real, row) = x
+@inline _at(x::Missing, row) = missing
+@inline _at(x::AbstractVector, row) =
+    @inbounds x[firstindex(x) + row - 1]
 ```
 
 Provide corresponding methods for time/location types as needed.
 
-Reject mismatched aligned lengths before mutating output arrays.
+Before mutating output arrays, validate every aligned input length, every output length and element type, scalar configuration and the full indexability assumptions used by the ordinal loop.
 
 ## Output representation
 
@@ -83,22 +85,22 @@ Preallocated output element types must accept `missing` and promoted `T`; otherw
 
 ## Serial loop
 
-Implement the serial loop first:
+Implement the serial loop first over ordinal rows `1:n`, translating each row to the corresponding index of each input/output:
 
 ```julia
-for i in eachindex(...)
-    result = liljegren_wbgt(... row i ...)
+for row in 1:n
+    result = liljegren_wbgt(... row ...)
     write outputs
 end
 ```
 
-Use `eachindex`, `@inbounds` only after length validation, and no hidden temporary row arrays.
+Use `@inbounds` only after complete validation, and create no hidden temporary row arrays.
 
 The serial batch result is the correctness oracle for the threaded batch implementation.
 
 ## Threaded loop
 
-After serial tests pass, add threading using `Threads.@threads` over stable contiguous index ranges.
+After serial tests pass, add threading using `Threads.@threads` over stable contiguous ordinal ranges.
 
 Rules:
 
@@ -132,14 +134,15 @@ The precomputed and row-by-row paths must have exact or documented-tolerance equ
 Use structure-of-arrays. Required row-aligned fields:
 
 - input status;
+- dew-point-adjusted, wind-clamped and radiation-clamped flags;
 - solar mismatch;
 - each component's converged flag;
 - failure reason;
 - accepted value;
 - candidate;
-- final residual;
+- Kelvin-scale validation residual;
 - evaluations/iterations;
-- initial/final brackets and endpoint residuals.
+- initial/final brackets and native-equation endpoint location residuals.
 
 Include batch metadata:
 
@@ -213,4 +216,3 @@ Performance goals are directional, not a registration blocker:
 ## Suggested commit
 
 `feat: add batch and threaded Liljegren execution`
-

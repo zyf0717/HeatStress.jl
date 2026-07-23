@@ -24,7 +24,7 @@ Return a concrete internal result containing:
 
 - candidate root;
 - convergence of root location;
-- final bracket and endpoint residuals;
+- final bracket and native-equation endpoint location residuals;
 - iterations;
 - evaluations;
 - location failure category.
@@ -37,7 +37,7 @@ Implement component-specific bracket expansion as strategy functions or types.
 
 ### Globe
 
-Initial bracket, in Kelvin:
+Candidate initial bracket, in Kelvin:
 
 ```text
 lower = air_temperature_k - 2
@@ -48,17 +48,15 @@ maximum = air_temperature_k + 200
 
 Choose bracket-expansion direction from the residual mathematics and verify it with sign/monotonicity tests:
 
-- if both finite endpoint residuals have the same sign;
-- two negative values expand the lower bound;
-- two positive values expand the upper bound;
+- expand the endpoint that can move toward a sign change under the documented residual orientation;
 - expansion width follows the current bracket width;
 - stop at physical search bounds.
 
-Verify sign-direction statements against the cited source before coding.
+Record the residual sign convention beside the globe residual definition in spec 005. Do not encode sign-direction rules until that convention and monotonicity have been verified.
 
 ### Natural wet bulb
 
-Initial bracket:
+Candidate initial bracket:
 
 ```text
 lower = dew_point_k - 1
@@ -68,6 +66,8 @@ maximum = air_temperature_k + 100
 ```
 
 Expand lower by up to 10 K and then upper by up to 10 K per cycle while the endpoints remain finite, same-signed and within bounds.
+
+[NEEDS CLARIFICATION: Validate the candidate component brackets, expansion increments/search bounds and default solver tolerances against the documented residuals and intended meteorological domain before implementing them as defaults.]
 
 ## Root location algorithm
 
@@ -80,10 +80,11 @@ Algorithm:
 3. return an endpoint immediately if its residual is exactly zero;
 4. if no sign change after expansion, classify `Unbracketed`;
 5. repeatedly evaluate midpoint;
-6. update the sign-changing half-bracket;
-7. stop when bracket width is at most `root_tolerance_k` or midpoint residual is exactly zero;
-8. if `maximum_iterations` is reached, classify `IterationLimit` and retain the last midpoint as candidate;
-9. do not mark final component success until model-specific validation residual passes.
+6. classify a non-finite midpoint residual as `NonFiniteResidual` and retain the midpoint only as a diagnostic candidate;
+7. update the sign-changing half-bracket;
+8. stop when bracket width is at most `root_tolerance_k` or midpoint residual is exactly zero;
+9. if `maximum_iterations` is reached, classify `IterationLimit` and retain the last midpoint as candidate;
+10. do not mark final component success until model-specific validation residual passes.
 
 Do not use minimisation of absolute residual. The equation is signed and must be solved as a root problem.
 
@@ -116,7 +117,7 @@ Preserve these implementation-independent fields:
 - final validation residual;
 - evaluations and iterations;
 - initial/final brackets;
-- endpoint residuals;
+- native-equation endpoint location residuals;
 - root and residual tolerances.
 
 Do not expose implementation-specific batch bookkeeping fields in v0.1:
@@ -175,4 +176,3 @@ Component tests:
 ## Suggested commit
 
 `feat: add safeguarded root solver and diagnostics`
-

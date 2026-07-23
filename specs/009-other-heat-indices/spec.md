@@ -14,20 +14,26 @@ wet_bulb_temperature_stull.(temperature, humidity)
 
 Optional aligned-array methods may validate dimensions or preallocate output, but must delegate to the scalar formula.
 
-## Proposed public functions
+## Formula-selection gate
 
-- `wet_bulb_temperature_stull`
-- `wbgt_bernard`
-- `simplified_wbgt`
-- `apparent_temperature`
-- `effective_temperature`
-- `humidex`
-- `discomfort_index`
-- `heat_index`
-- `relative_humidity_from_dewpoint`
-- `vapour_pressure`
+Before implementation, complete this table. Names remain candidates until the exact formulation and domain are selected:
+
+| Candidate public name | Selected publication/standard and formulation | Input/output units | Valid domain | Final public name |
+| --- | --- | --- | --- | --- |
+| `wet_bulb_temperature_stull` | | | | |
+| `wbgt_bernard` | | | | |
+| `simplified_wbgt` | | | | |
+| `apparent_temperature` | | | | |
+| `effective_temperature` | | | | |
+| `humidex` | | | | |
+| `discomfort_index` | | | | |
+| `heat_index` | | | | |
 
 Do not add a function merely because HeatStressR exports it. Before implementation, add a source record containing the publication or standard, exact formula/version, valid domain, units and known limitations.
+
+`relative_humidity_from_dewpoint` and `vapour_pressure` are psychrometric functions owned by spec 004, not secondary indices.
+
+[NEEDS CLARIFICATION: Select the v0.1 formula set and final public names. Generic names such as `simplified_wbgt`, `apparent_temperature` and `effective_temperature` must not be implemented until they are bound to an unambiguous cited formulation.]
 
 ## Formula-source requirements
 
@@ -104,4 +110,3 @@ Private black-box comparisons against HeatStressR may be run after these tests p
 ## Suggested commit
 
 `feat: implement independently sourced heat stress indices`
-

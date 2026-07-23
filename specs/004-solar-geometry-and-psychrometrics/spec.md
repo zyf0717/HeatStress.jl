@@ -13,11 +13,10 @@ Before coding, add a table to this spec:
 | solar zenith | | | | |
 | saturation vapour pressure | | | | |
 | RH from dewpoint | | | | |
-| atmospheric emissivity | | | | |
-| air viscosity | | | | |
-| diffusivity | | | | |
 
 The implementation agent must not take coefficients from HeatStressR, the original C source or memory. If the Liljegren paper delegates a subformula to another reference, obtain and cite that reference or select an independently justified authoritative formulation and document the resulting model difference.
+
+[NEEDS CLARIFICATION: Complete the source-selection table, including an accuracy target for the solar method, before implementing these formula families.]
 
 ## Solar geometry
 
@@ -42,6 +41,8 @@ Use the full instant. Convert `ZonedDateTime` to UTC. Equivalent instants with d
 ### `DateNoonSolarTime`
 
 Use the UTC calendar date at 12:00 UTC. Retain this mode only if it serves a documented scientific or compatibility use case; otherwise defer it from v0.1.0.
+
+[NEEDS CLARIFICATION: Decide whether `DateNoonSolarTime` has a supported v0.1 use case. If deferred, remove `Date` support and the enum value from the v0.1 public contract rather than leaving a dormant mode.]
 
 Use explicit policy values, not paired Boolean switches.
 
@@ -79,13 +80,11 @@ Implement, where required by the selected source set:
 relative_humidity_from_dewpoint(air_temperature_c, dew_point_c)
 vapour_pressure(air_temperature_c, relative_humidity_percent)
 saturation_vapour_pressure_hpa(...)
-emissivity_atmosphere(air_temperature_k, vapour_pressure_or_rh)
-viscosity_air(temperature_k)
-diffusivity_coefficient(pressure_hpa)
-diffusivity_air(temperature_k, pressure_hpa)
 ```
 
 Names must encode units or clearly document them. Do not combine RH percent and fraction in ambiguously named functions.
+
+Atmospheric emissivity, viscosity and diffusivity belong to the heat-transfer layer in spec 005, even when they consume psychrometric outputs. This unit owns only solar geometry and public humidity/vapour-pressure calculations.
 
 ## Formula transcription procedure
 
@@ -139,4 +138,3 @@ For each helper:
 ## Suggested commit
 
 `feat: implement sourced solar geometry and psychrometrics`
-

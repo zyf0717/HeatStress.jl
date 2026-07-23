@@ -10,7 +10,7 @@ Compose policies, solar geometry, psychrometrics, kernels and the root solver in
 
 Create an internal function that returns either:
 
-- a concrete prepared observation containing Kelvin temperatures, RH, zenith, adjusted radiation, pressure, direct fraction and flags; or
+- a concrete prepared observation containing Kelvin temperatures, RH, zenith, adjusted radiation, pressure, direct fraction, adjustment flags and solar-mismatch state; or
 - an input-status failure.
 
 Do not invoke either component solver until preprocessing reports `InputAccepted`.
@@ -21,7 +21,7 @@ Using the equations documented from the primary paper and supporting sources:
 
 1. convert air temperature to Kelvin;
 2. convert RH percent to fraction;
-3. apply historical zenith correction;
+3. apply the sourced, shared solar-forcing/horizon policy defined by specs 004–005;
 4. calculate effective wind;
 5. calculate atmospheric/surface longwave term;
 6. calculate direct/diffuse solar term using `direct_fraction`, surface albedo, globe albedo, emissivity and Stefan-Boltzmann constant;
@@ -70,7 +70,7 @@ Return `WBGTResult`.
 
 ### `diagnose_liljegren`
 
-Return `DiagnosticWBGTResult` with both component diagnostics, input status and solar mismatch flag.
+Return `DiagnosticWBGTResult` with both component diagnostics, input status, input-adjustment flags and solar mismatch flag.
 
 Value-only functions should call the same internal diagnostic computation and discard diagnostics only if profiling shows no avoidable overhead. Do not maintain two scientifically divergent solver implementations.
 
@@ -155,4 +155,3 @@ Do not compromise correctness to hit zero allocation before scientific validatio
 ## Suggested commit
 
 `feat: implement scalar Liljegren WBGT model`
-

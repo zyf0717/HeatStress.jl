@@ -15,5 +15,5 @@ The authoritative detail and citations remain in `spec.md`; software implementat
 
 ## Open questions
 
-- Finalize the documented default dew-point policy before public release.
+- Resolve the blocking default dew-point policy decision in `spec.md` before implementing `LiljegrenConfig()`.
 - Decide whether optional string-time convenience methods are warranted after core completion.

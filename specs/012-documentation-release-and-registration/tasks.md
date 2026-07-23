@@ -1,8 +1,8 @@
-# Documentation, release and registration: execution checklist
+# Documentation and release readiness: execution checklist
 
 ## Status
 
-- [ ] Planned
+- [x] Planned
 - [ ] In progress
 - [ ] Complete
 
@@ -14,6 +14,7 @@
 - [ ] Check project compat/license metadata.
 - [ ] Run clean-depot and docs builds.
 - [ ] Recheck package-name availability before registration.
+- [ ] Freeze the candidate tree and define how its post-commit SHA is passed to spec 013 without publication.
 - [ ] Run the acceptance checks in `quickstart.md`.
 - [ ] Record test, benchmark or validation evidence and commit SHA below.
 

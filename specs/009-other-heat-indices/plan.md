@@ -2,7 +2,7 @@
 
 ## Dependency gate
 
-003 Constants, units and policies; completion requires 010 Scientific fixtures and validation
+003 Constants, units and policies. Bernard WBGT additionally requires 004 psychrometrics and 006 root solving. Completion requires validation coverage from 010.
 
 ## Design
 
@@ -10,7 +10,7 @@ Implement cited secondary indices as direct, independently validated formulas wi
 
 ## Sequence
 
-1. Record source/formula/provenance for each index.
+1. Select the exact v0.1 index set and record source/formula/provenance for each index.
 2. Implement one scalar formula at a time.
 3. Add domain and unit tests.
 4. Validate each against independent fixtures before declaring completion.

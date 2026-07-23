@@ -2,14 +2,14 @@
 
 ## Status
 
-- [ ] Planned
+- [x] Planned
 - [ ] In progress
 - [ ] Complete
 
 ## Tasks
 
-- [ ] Implement Stull, Bernard and simplified WBGT variants.
-- [ ] Implement apparent/effective temperature, humidex, discomfort index and heat index.
+- [ ] Complete the formula-selection table and finalise the v0.1 index set/names.
+- [ ] Implement each selected index only after its source row is complete.
 - [ ] Document formula source and applicability for every export.
 - [ ] Test edge/domain cases and Float32/Float64 behavior.
 - [ ] Validate all index fixtures through 010.

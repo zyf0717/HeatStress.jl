@@ -2,18 +2,19 @@
 
 ## Status
 
-- [ ] Planned
+- [x] Planned
 - [ ] In progress
 - [ ] Complete
 
 ## Tasks
 
-- [ ] Create and maintain the equation/provenance inventory.
-- [ ] Keep private comparison material outside the repository.
-- [ ] Review each contribution for licensing and source provenance.
-- [ ] Do not mark downstream work complete without its stated evidence.
+- [ ] Approve the scientific authority, v0.1 scope and conformance hierarchy.
+- [ ] Approve the independent-implementation and licensing boundaries.
+- [ ] Define the equation/provenance inventory ownership and schema.
+- [ ] Define and ignore private comparison paths.
+- [ ] Confirm downstream specifications preserve the charter constraints.
 - [ ] Run the acceptance checks in `quickstart.md`.
-- [ ] Record test, benchmark or validation evidence and commit SHA below.
+- [ ] Record review evidence and the commit or PR revision below when available.
 
 ## Evidence
 

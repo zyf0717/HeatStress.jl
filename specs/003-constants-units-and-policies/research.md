@@ -16,4 +16,4 @@ The authoritative detail and citations remain in `spec.md`; software implementat
 ## Open questions
 
 - Identify source and uncertainty for each constant not fixed by the primary paper.
-- Document treatment for negative radiation and wind values.
+- Record the rationale and validation evidence for the specified negative-radiation and negative-wind clamping policy.

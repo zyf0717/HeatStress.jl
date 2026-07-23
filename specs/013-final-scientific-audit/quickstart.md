@@ -1,4 +1,4 @@
-# Final scientific audit: quickstart
+# Final scientific audit and release authorisation: quickstart
 
 ## Workflow
 
@@ -10,4 +10,4 @@
 ## Validation
 
 - Run clean-depot tests, CI, docs, Aqua/JET and scientific validation.
-- Verify release sign-off includes commit, report and approver.
+- Verify release sign-off includes the exact audited source commit, report, approver and permitted audit-record paths; verify the resulting release commit diff before tagging it.

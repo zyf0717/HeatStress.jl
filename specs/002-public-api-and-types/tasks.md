@@ -2,12 +2,13 @@
 
 ## Status
 
-- [ ] Planned
+- [x] Planned
 - [ ] In progress
 - [ ] Complete
 
 ## Tasks
 
+- [ ] Resolve and document the default dew-point policy.
 - [ ] Implement policy enums without paired Boolean switches.
 - [ ] Implement `SolverConfig` and `LiljegrenConfig` validation.
 - [ ] Implement result and diagnostics type families.

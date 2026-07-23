@@ -4,6 +4,22 @@
 
 Implement the pure heat-transfer and residual equations used by globe and natural wet-bulb solvers. These functions must not perform root finding, public validation or threading.
 
+## Source-selection gate
+
+Before implementing a formula family, record its publication/standard, equation or section, units and any deliberate package-level variation:
+
+| Component | Selected publication/standard | Equation/section | Units | Notes |
+| --- | --- | --- | --- | --- |
+| atmospheric emissivity | | | | |
+| air viscosity/conductivity | | | | |
+| diffusivity | | | | |
+| sphere convection | | | | |
+| cylinder convection | | | | |
+| globe balance/residuals | | | | |
+| natural wet-bulb balance/residual | | | | |
+
+[NEEDS CLARIFICATION: Complete the relevant rows before implementing each physical formula family.]
+
 ## Required kernel groups
 
 ### Air-property and transfer kernels
@@ -16,7 +32,8 @@ Implement the physical kernels required by the published Liljegren formulation, 
 - thermal conductivity where used;
 - diffusivity and diffusivity coefficient;
 - atmospheric emissivity;
-- saturation vapour pressure.
+
+Consume the saturation-vapour-pressure kernel owned and validated by spec 004; do not define a second formula in this layer.
 
 Recommended internal names:
 
@@ -26,7 +43,6 @@ _heat_transfer_cylinder_air
 _air_viscosity
 _air_diffusivity
 _atmospheric_emissivity
-_saturation_vapour_pressure
 ```
 
 ### Globe residuals
@@ -74,10 +90,10 @@ struct WetBulbBalance{T<:AbstractFloat}
     air_temperature_k::T
     pressure_hpa::T
     effective_wind_m_s::T
-    vapour_pressure::T
+    vapour_pressure_hpa::T
     air_density::T
     air_viscosity::T
-    diffusivity_coefficient::T
+    diffusivity_coefficient::T # document dimensions beside the final definition
     longwave_term::T
     solar_term::T
     radiation_enabled::Bool
@@ -134,7 +150,7 @@ Use independently sourced fixture rows for at least 20 ordinary and boundary com
 
 ## Acceptance criteria
 
-- all kernel fixtures pass within `rtol=1e-12, atol=1e-12` where calculations are directly equivalent Float64 arithmetic; relax only with documented reason;
+- kernel fixtures use function-specific tolerances derived from their authority and conditioning; `rtol=1e-12, atol=1e-12` is a target only for directly equivalent Float64 operation sequences;
 - kernels are independently callable in tests;
 - root-solving code is absent from kernel files;
 - no kernel emits warnings or throws for a merely non-finite intermediate residual.
@@ -142,4 +158,3 @@ Use independently sourced fixture rows for at least 20 ordinary and boundary com
 ## Suggested commit
 
 `feat: implement Liljegren physical kernels`
-

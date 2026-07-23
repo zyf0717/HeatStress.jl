@@ -2,13 +2,14 @@
 
 ## Status
 
-- [ ] Planned
+- [x] Planned
 - [ ] In progress
 - [ ] Complete
 
 ## Tasks
 
-- [ ] Implement documented UTC and date-noon modes.
+- [ ] Resolve the solar-method source/accuracy gate.
+- [ ] Implement timestamp mode and conditionally implement date-noon mode only if retained.
 - [ ] Implement `solar_zenith`, vapour pressure and humidity kernels.
 - [ ] Add below-horizon and leap/calendar boundary tests.
 - [ ] Add independent numerical fixtures and invariants.
