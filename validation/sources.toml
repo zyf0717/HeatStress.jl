@@ -368,3 +368,39 @@ provenance = "original_design"
 rationale = "Supplied radiation below the physical horizon and numerical clipping of direct-beam geometry are separate observable conditions."
 implementation = "src/validation.jl; src/types.jl; src/liljegren/scalar.jl"
 validation = "test/test_liljegren_scalar.jl night mismatch and near-horizon clipping cases"
+
+[items.batch_ordinal_alignment]
+kind = "api_design"
+owner_spec = "008"
+status = "validated"
+provenance = "original_design"
+rationale = "Ordinal alignment permits supported AbstractVectors with different first indices while preserving each caller's row order without materializing broadcast copies."
+implementation = "src/liljegren/batch.jl"
+validation = "test/test_liljegren_batch.jl view input and serial scalar-row equivalence"
+
+[items.batch_secondary_scalar_expansion]
+kind = "api_design"
+owner_spec = "008"
+status = "validated"
+provenance = "original_design"
+rationale = "Locations, pressure and direct fraction may be scalar or row-aligned inputs so fixed stations do not require repeated arrays; direct fraction remains explicit."
+implementation = "src/liljegren/batch.jl"
+validation = "test/test_liljegren_batch.jl scalar and aligned secondary-input cases"
+
+[items.batch_thread_isolation]
+kind = "numerical_policy"
+owner_spec = "008"
+status = "validated"
+provenance = "original_design"
+rationale = "Each threaded ordinal iteration owns exactly one output row and reads immutable configuration, preserving serial values without shared counters or scheduling-dependent state."
+implementation = "src/liljegren/batch.jl"
+validation = "test/test_liljegren_batch.jl two-thread value and diagnostic equivalence"
+
+[items.batch_diagnostic_structure_of_arrays]
+kind = "api_design"
+owner_spec = "008"
+status = "validated"
+provenance = "original_design"
+rationale = "Row-aligned structure-of-arrays diagnostics avoid returning a heap of per-row diagnostic objects while retaining every scalar diagnostic field."
+implementation = "src/types.jl; src/liljegren/batch.jl"
+validation = "test/test_liljegren_batch.jl input-status and component-evaluation row alignment"

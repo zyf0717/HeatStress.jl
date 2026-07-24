@@ -6,13 +6,16 @@
 
 ## Design
 
-Scale the canonical scalar behavior through ordinary Julia loops, preallocated structure-of-arrays outputs, reusable solar preprocessing and deterministic threading.
+Scale the canonical scalar behavior through ordinary Julia loops, preallocated
+structure-of-arrays outputs, and deterministic threading. v0.1 retains the
+canonical per-row solar path; grouped-time preprocessing remains a profiled
+optimization rather than a second scientific path.
 
 ## Sequence
 
 1. Implement serial aligned-input batch loop.
 2. Implement preallocated `!` path.
-3. Add solar-state reuse after profiling evidence.
+3. Profile solar-state reuse before introducing a prepared-row optimization.
 4. Add threaded scheduling without changing row semantics.
 5. Test serial/threaded equivalence.
 
