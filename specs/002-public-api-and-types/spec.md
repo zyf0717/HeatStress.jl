@@ -208,12 +208,18 @@ struct DiagnosticWBGTResult{T<:AbstractFloat}
     wind_speed_clamped::Bool
     solar_radiation_clamped::Bool
     solar_geometry_mismatch::Bool
+    direct_solar_clipped::Bool
     globe::SolverDiagnostics{T}
     natural_wet_bulb::SolverDiagnostics{T}
 end
 ```
 
 `validation_residual_k` is the component’s Kelvin-scale acceptance residual. Endpoint location residuals remain in the documented native units of the signed equation used for bracketing (for example, a globe energy residual may not be in Kelvin); their field names must not imply Kelvin units.
+
+`evaluations` includes every location and final-validation residual call.
+`direct_solar_clipped` reports the documented one-degree direct-beam numerical
+clip; it is distinct from `solar_geometry_mismatch`, which reports supplied
+radiation zeroed at or below the physical horizon.
 
 For batch results use structure-of-arrays types, not `Vector{DiagnosticWBGTResult}` in the main high-throughput path:
 

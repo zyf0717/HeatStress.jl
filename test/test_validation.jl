@@ -78,6 +78,9 @@ end
         end
 
         @test _basic_for_test(air_temperature_c = NaN).status === InvalidDomain
+        @test _basic_for_test(air_temperature_c = -40.1).status === InvalidDomain
+        @test _basic_for_test(air_temperature_c = 50.1).status === InvalidDomain
+        @test _basic_for_test(dew_point_c = -40.1).status === InvalidDomain
         @test _basic_for_test(pressure_hpa = -1.0).status === InvalidDomain
         @test _basic_for_test(pressure_hpa = NaN).status === InvalidDomain
         @test _basic_for_test(pressure_hpa = Inf).status === InvalidDomain
@@ -183,6 +186,7 @@ end
         night = _prepared_for_test(solar_zenith_rad = pi)
         @test night.solar_radiation_w_m2 == 0.0
         @test night.solar_geometry_mismatch
+        @test !night.direct_solar_clipped
         for T in (Float32, Float64)
             basic = _basic_for_test(
                 air_temperature_c = T(25),
@@ -197,14 +201,22 @@ end
             night = HeatStress._apply_solar_policy(basic, nextfloat(T(pi / 2)))
             @test dawn.solar_radiation_w_m2 == T(600)
             @test !dawn.solar_geometry_mismatch
+            @test dawn.direct_solar_clipped
             @test horizon.solar_radiation_w_m2 == zero(T)
             @test horizon.solar_geometry_mismatch
+            @test !horizon.direct_solar_clipped
             @test night.solar_radiation_w_m2 == zero(T)
             @test night.solar_geometry_mismatch
+            @test !night.direct_solar_clipped
         end
+        clipped = _prepared_for_test(
+            solar_zenith_rad = pi / 2 - HeatStress.MINIMUM_DIRECT_SOLAR_ELEVATION_RAD / 2,
+        )
+        @test clipped.direct_solar_clipped
         daylight = _prepared_for_test(solar_zenith_rad = 0.5)
         @test daylight.solar_radiation_w_m2 == 600.0
         @test !daylight.solar_geometry_mismatch
+        @test !daylight.direct_solar_clipped
     end
 
     @testset "Float32 and batch preflight" begin

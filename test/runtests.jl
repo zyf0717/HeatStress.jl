@@ -10,6 +10,8 @@ include("test_validation.jl")
 include("test_solar_geometry.jl")
 include("test_psychrometrics.jl")
 include("test_physical_kernels.jl")
+include("test_root_solver.jl")
+include("test_liljegren_scalar.jl")
 
 if get(ENV, "HEATSTRESS_QUALITY", "0") == "1"
     using Aqua

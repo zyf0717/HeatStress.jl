@@ -28,6 +28,7 @@ struct _PreparedMeteorology{T<:AbstractFloat}
     wind_speed_clamped::Bool
     solar_radiation_clamped::Bool
     solar_geometry_mismatch::Bool
+    direct_solar_clipped::Bool
 end
 
 # Input-preparation failure represented without a numerical payload.
@@ -89,13 +90,7 @@ function _normalize_basic_meteorology(
     pressure_hpa::Union{Missing,Real} = DEFAULT_PRESSURE_HPA,
     direct_fraction::Union{Missing,Real},
     config::LiljegrenConfig = LiljegrenConfig(),
-)
-    if ismissing(air_temperature_c) || ismissing(dew_point_c) || ismissing(wind_speed_m_s) ||
-       ismissing(solar_radiation_w_m2) || ismissing(pressure_hpa) || ismissing(direct_fraction)
-        return _InputPreparationFailure(MissingMeteorology)
-    end
-
-    float_type = _common_float_type(
+    float_type::Type{<:AbstractFloat} = _common_float_type(
         air_temperature_c,
         dew_point_c,
         wind_speed_m_s,
@@ -103,7 +98,13 @@ function _normalize_basic_meteorology(
         pressure_hpa,
         direct_fraction,
         config.dew_point_tolerance_c,
-    )
+    ),
+)
+    if ismissing(air_temperature_c) || ismissing(dew_point_c) || ismissing(wind_speed_m_s) ||
+       ismissing(solar_radiation_w_m2) || ismissing(pressure_hpa) || ismissing(direct_fraction)
+        return _InputPreparationFailure(MissingMeteorology)
+    end
+
     air = convert(float_type, air_temperature_c)
     dew = convert(float_type, dew_point_c)
     wind = convert(float_type, wind_speed_m_s)
@@ -112,6 +113,9 @@ function _normalize_basic_meteorology(
     fraction = convert(float_type, direct_fraction)
 
     all(isfinite, (air, dew, wind, radiation, pressure, fraction)) ||
+        return _InputPreparationFailure(InvalidDomain)
+    oftype(air, -40) <= air <= oftype(air, 50) &&
+        oftype(dew, -40) <= dew <= oftype(dew, 50) ||
         return _InputPreparationFailure(InvalidDomain)
     pressure > zero(float_type) || return _InputPreparationFailure(InvalidDomain)
     zero(float_type) <= fraction <= one(float_type) || return _InputPreparationFailure(InvalidDomain)
@@ -158,6 +162,8 @@ function _apply_solar_policy(
     below_horizon = zenith >= T(pi / 2)
     mismatch = basic.solar_radiation_w_m2 > zero(T) && below_horizon
     radiation = below_horizon ? zero(T) : basic.solar_radiation_w_m2
+    _, _, _, direct_clipped = _direct_solar_geometry(zenith)
+    direct_solar_clipped = radiation > zero(T) && basic.direct_fraction > zero(T) && direct_clipped
 
     return _PreparedMeteorology(
         basic.air_temperature_c,
@@ -173,6 +179,7 @@ function _apply_solar_policy(
         basic.wind_speed_clamped,
         basic.solar_radiation_clamped,
         mismatch,
+        direct_solar_clipped,
     )
 end
 

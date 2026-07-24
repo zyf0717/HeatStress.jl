@@ -1,0 +1,64 @@
+# Independent 256-bit reference calculations using the documented Liljegren
+# equations. The standalone generator does not import HeatStress or invoke
+# package kernels.
+schema_version = 2
+precision_bits = 256
+generator_schema_version = 2
+generator_path = "test/fixtures/generate_liljegren_scalar_references.jl"
+source_identifiers = ["liljegren_2008", "hall_2022", "specs/004", "specs/005", "specs/006", "specs/007"]
+
+[fixtures.day]
+air_temperature_c = 30.0
+dew_point_c = 20.0
+wind_speed_m_s = 1.0
+solar_radiation_w_m2 = 800.0
+time = "2024-06-21T12:00:00"
+longitude_deg = 0.0
+latitude_deg = 0.0
+pressure_hpa = 1010.0
+direct_fraction = 0.7
+globe_temperature_c = "47.579753735266816801861105430923300453557763277954657"
+natural_wet_bulb_c = "25.810915417689403486778864245324209319804354560154467"
+wbgt_c = "30.583591539435945801117426057911606614574600847699058"
+
+[fixtures.night]
+air_temperature_c = 30.0
+dew_point_c = 20.0
+wind_speed_m_s = 1.0
+solar_radiation_w_m2 = 800.0
+time = "2024-06-21T00:00:00"
+longitude_deg = 0.0
+latitude_deg = 0.0
+pressure_hpa = 1010.0
+direct_fraction = 0.7
+globe_temperature_c = "29.004522298914998980263989078613042419122348432858472"
+natural_wet_bulb_c = "22.877485501562371507106476196883300730480912397994288"
+wbgt_c = "24.815144310876659851027331153540918995161108365167696"
+
+[fixtures.subminute]
+air_temperature_c = 30.0
+dew_point_c = 20.0
+wind_speed_m_s = 1.0
+solar_radiation_w_m2 = 800.0
+time = "2024-06-21T12:00:30.250"
+longitude_deg = 0.0
+latitude_deg = 0.0
+pressure_hpa = 1010.0
+direct_fraction = 0.7
+globe_temperature_c = "47.579676885270140155382102998205981123671741889538169"
+natural_wet_bulb_c = "25.810892255005056783984656597042716292293061454571344"
+wbgt_c = "30.583559955557567779865680217571097629339491396107575"
+
+[fixtures.saturated]
+air_temperature_c = 30.0
+dew_point_c = 30.0
+wind_speed_m_s = 1.0
+solar_radiation_w_m2 = 800.0
+time = "2024-06-21T12:00:00"
+longitude_deg = 0.0
+latitude_deg = 0.0
+pressure_hpa = 1010.0
+direct_fraction = 0.7
+globe_temperature_c = "48.346890748704589753876682528017886664196466165322449"
+natural_wet_bulb_c = "32.213303119913659235063644077155601376562801177637172"
+wbgt_c = "35.218690333680479415319887359612498296433254057410510"

@@ -35,3 +35,4 @@ JuliaLocalPreferences.toml
 # Local benchmark scratch output.
 benchmark/*.log
 benchmark/*.tmp
+benchmark/results/

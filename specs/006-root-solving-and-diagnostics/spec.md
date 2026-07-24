@@ -52,7 +52,12 @@ Choose bracket-expansion direction from the residual mathematics and verify it w
 - expansion width follows the current bracket width;
 - stop at physical search bounds.
 
-Record the residual sign convention beside the globe residual definition in spec 005. Do not encode sign-direction rules until that convention and monotonicity have been verified.
+The selected energy residual is `Tg^4 - equilibrium_radicand(Tg)`. It is
+negative below and positive above the ordinary physical root, as documented in
+spec 005. For same-positive endpoints expand the lower endpoint; for
+same-negative endpoints expand the upper endpoint. Each expansion uses the
+current bracket width. The ±200 K search bounds are intentionally guardrails,
+not claimed meteorological operating limits.
 
 ### Natural wet bulb
 
@@ -65,9 +70,18 @@ minimum = air_temperature_k - 100
 maximum = air_temperature_k + 100
 ```
 
-Expand lower by up to 10 K and then upper by up to 10 K per cycle while the endpoints remain finite, same-signed and within bounds.
+Expand lower by up to 10 K and then upper by up to 10 K per cycle while the endpoints remain finite, same-signed and within bounds. The initial lower endpoint is clipped to the stated minimum when a valid dew point lies more than 99 K below air temperature.
 
-[NEEDS CLARIFICATION: Validate the candidate component brackets, expansion increments/search bounds and default solver tolerances against the documented residuals and intended meteorological domain before implementing them as defaults.]
+The natural-wet-bulb residual is candidate temperature minus its signed
+fixed-point equilibrium temperature, and is negative below and positive above
+the ordinary physical root. Its fixed-step two-sided expansion avoids assuming
+which endpoint is initially nearest the root. The ±100 K bounds are numerical
+search guardrails. Existing `SolverConfig` defaults (`1e-6 K` location,
+`1e-4 K` validation, 128 iterations) are retained from spec 002; at the
+widest selected brackets, bisection needs fewer than 29 iterations to reach
+the Float64 location tolerance. Float32 stops at adjacent representable
+endpoints when that requested width is unrepresentable, while retaining the
+actual final bracket in diagnostics.
 
 ## Root location algorithm
 
@@ -119,6 +133,10 @@ Preserve these implementation-independent fields:
 - initial/final brackets;
 - native-equation endpoint location residuals;
 - root and residual tolerances.
+
+`evaluations` includes the component wrapper's final validation-residual call
+when location converges. Failed location attempts do not evaluate a separate
+validation residual.
 
 Do not expose implementation-specific batch bookkeeping fields in v0.1:
 
