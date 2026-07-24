@@ -1,5 +1,0 @@
-id,expected_globe_c,expected_natural_wet_bulb_c,globe_residual_tolerance_k,wet_bulb_residual_tolerance_k,authority,source_id
-day,47.5797537352668168,25.8109154176894035,1e-4,1e-4,high_precision,liljegren_2008
-night,29.0045222989149990,22.8774855015623715,1e-4,1e-4,high_precision,liljegren_2008
-subminute,47.5796768852701402,25.8108922550050568,1e-4,1e-4,high_precision,liljegren_2008
-saturated,48.3468907487045898,32.2133031199136592,1e-4,1e-4,high_precision,liljegren_2008

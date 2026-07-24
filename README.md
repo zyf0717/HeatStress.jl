@@ -73,3 +73,9 @@ See [the documentation](docs/src/index.md), [citation metadata](CITATION.cff),
 and [contribution policy](CONTRIBUTING.md). Released benchmark numbers are
 host-specific local evidence, not a universal performance guarantee or a
 cross-language claim.
+
+## AI assistance and release review
+
+Generative AI tools assisted implementation, testing, and documentation.
+Release approval is contingent on human review of the exported runtime code,
+scientific equations, numerical policies, and validation evidence.
