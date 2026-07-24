@@ -49,10 +49,6 @@ export DewPointPolicy,
     WBGTResult,
     SolverDiagnostics,
     DiagnosticWBGTResult,
-    WBGTBatchResult,
-    globe_temperature,
-    natural_wet_bulb_temperature,
-    liljegren_wbgt,
-    diagnose_liljegren
+    WBGTBatchResult
 
 end

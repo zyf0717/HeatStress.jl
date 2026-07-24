@@ -3,8 +3,13 @@ using HeatStress
 using Dates: Date, DateTime
 using TimeZones: TimeZone, ZonedDateTime
 
+const _diagnose_liljegren = HeatStress.diagnose_liljegren
+const _liljegren_wbgt = HeatStress.liljegren_wbgt
+const _globe_temperature = HeatStress.globe_temperature
+const _natural_wet_bulb_temperature = HeatStress.natural_wet_bulb_temperature
+
 function _scalar_fixture(; kwargs...)
-    return diagnose_liljegren(
+    return _diagnose_liljegren(
         30.0,
         20.0,
         1.0,
@@ -20,7 +25,7 @@ end
 @testset "Liljegren scalar model" begin
     @testset "ordinary value and diagnostic agreement" begin
         diagnostic = _scalar_fixture()
-        value = liljegren_wbgt(
+        value = _liljegren_wbgt(
             30.0,
             20.0,
             1.0,
@@ -35,9 +40,9 @@ end
         @test diagnostic.globe.reason === NoFailure
         @test diagnostic.natural_wet_bulb.reason === NoFailure
         @test diagnostic.result == value
-        @test globe_temperature(30.0, 20.0, 1.0, 800.0, DateTime(2024, 6, 21, 12), 0.0, 0.0; direct_fraction = 0.7) ==
+        @test _globe_temperature(30.0, 20.0, 1.0, 800.0, DateTime(2024, 6, 21, 12), 0.0, 0.0; direct_fraction = 0.7) ==
               value.globe_temperature_c
-        @test natural_wet_bulb_temperature(30.0, 20.0, 1.0, 800.0, DateTime(2024, 6, 21, 12), 0.0, 0.0; direct_fraction = 0.7) ==
+        @test _natural_wet_bulb_temperature(30.0, 20.0, 1.0, 800.0, DateTime(2024, 6, 21, 12), 0.0, 0.0; direct_fraction = 0.7) ==
               value.natural_wet_bulb_c
         @test value.wbgt_c ≈
               0.7 * value.natural_wet_bulb_c + 0.2 * value.globe_temperature_c + 3.0
@@ -47,7 +52,7 @@ end
     end
 
     @testset "solar, wind, and dew-point policies" begin
-        night = diagnose_liljegren(
+        night = _diagnose_liljegren(
             30.0,
             20.0,
             1.0,
@@ -61,7 +66,7 @@ end
         @test night.solar_geometry_mismatch
         @test !ismissing(night.result.wbgt_c)
 
-        zero_wind = diagnose_liljegren(
+        zero_wind = _diagnose_liljegren(
             30.0,
             20.0,
             0.0,
@@ -75,7 +80,7 @@ end
         @test zero_wind.globe.converged
         @test zero_wind.natural_wet_bulb.converged
 
-        saturated = diagnose_liljegren(
+        saturated = _diagnose_liljegren(
             30.0,
             30.0,
             1.0,
@@ -89,13 +94,13 @@ end
         @test !saturated.dew_point_adjusted
 
         policy_input = (30.0, 31.0, 1.0, 800.0, DateTime(2024, 6, 21, 12), 0.0, 0.0)
-        clamp = diagnose_liljegren(policy_input...; direct_fraction = 0.7)
-        swap = diagnose_liljegren(
+        clamp = _diagnose_liljegren(policy_input...; direct_fraction = 0.7)
+        swap = _diagnose_liljegren(
             policy_input...;
             direct_fraction = 0.7,
             config = LiljegrenConfig(dew_point_policy = SwapAirAndDewPoint, dew_point_tolerance_c = 0.0),
         )
-        reject = diagnose_liljegren(
+        reject = _diagnose_liljegren(
             policy_input...;
             direct_fraction = 0.7,
             config = LiljegrenConfig(dew_point_policy = RejectInvalidDewPoint, dew_point_tolerance_c = 0.0),
@@ -110,7 +115,7 @@ end
     end
 
     @testset "failures and partial component retention" begin
-        missing_time = diagnose_liljegren(
+        missing_time = _diagnose_liljegren(
             30.0,
             20.0,
             1.0,
@@ -123,7 +128,7 @@ end
         @test missing_time.input_status === MissingTime
         @test missing_time.globe.reason === NotAttempted
 
-        missing_meteorology = diagnose_liljegren(
+        missing_meteorology = _diagnose_liljegren(
             missing,
             20.0,
             1.0,
@@ -135,22 +140,22 @@ end
         )
         @test missing_meteorology.input_status === MissingMeteorology
 
-        invalid_pressure = diagnose_liljegren(
+        invalid_pressure = _diagnose_liljegren(
             30.0, 20.0, 1.0, 800.0, DateTime(2024, 6, 21, 12), 0.0, 0.0;
             pressure_hpa = 0.0, direct_fraction = 0.7,
         )
-        invalid_fraction = diagnose_liljegren(
+        invalid_fraction = _diagnose_liljegren(
             30.0, 20.0, 1.0, 800.0, DateTime(2024, 6, 21, 12), 0.0, 0.0;
             direct_fraction = 1.1,
         )
         @test invalid_pressure.input_status === InvalidDomain
         @test invalid_fraction.input_status === InvalidDomain
         @test_throws ArgumentError LiljegrenConfig(globe_diameter_m = 0.0)
-        @test_throws MethodError diagnose_liljegren(30.0, 20.0, 1.0, 800.0, Date(2024, 6, 21), 0.0, 0.0; direct_fraction = 0.7)
+        @test_throws MethodError _diagnose_liljegren(30.0, 20.0, 1.0, 800.0, Date(2024, 6, 21), 0.0, 0.0; direct_fraction = 0.7)
 
         # Near-horizon direct forcing can exceed the globe guardrail while the
         # natural-wet-bulb balance remains valid; retain the valid component.
-        partial = diagnose_liljegren(
+        partial = _diagnose_liljegren(
             30.0,
             20.0,
             1.0,
@@ -170,15 +175,15 @@ end
     @testset "time-zone and Float32 consistency" begin
         utc = ZonedDateTime(DateTime(2024, 6, 21, 12), TimeZone("UTC"))
         new_york = ZonedDateTime(DateTime(2024, 6, 21, 8), TimeZone("America/New_York"))
-        first = diagnose_liljegren(30.0, 20.0, 1.0, 800.0, utc, -74.0, 40.7; direct_fraction = 0.7)
-        second = diagnose_liljegren(30.0, 20.0, 1.0, 800.0, new_york, -74.0, 40.7; direct_fraction = 0.7)
+        first = _diagnose_liljegren(30.0, 20.0, 1.0, 800.0, utc, -74.0, 40.7; direct_fraction = 0.7)
+        second = _diagnose_liljegren(30.0, 20.0, 1.0, 800.0, new_york, -74.0, 40.7; direct_fraction = 0.7)
         @test first.result == second.result
 
         config32 = LiljegrenConfig(
             solver = SolverConfig(root_tolerance_k = 1f-6, residual_tolerance_k = 1f-4),
             dew_point_tolerance_c = 1f-4,
         )
-        diagnostic32 = diagnose_liljegren(
+        diagnostic32 = _diagnose_liljegren(
             30f0, 20f0, 1f0, 800f0, DateTime(2024, 6, 21, 12), 0f0, 0f0;
             direct_fraction = 0.7f0, config = config32,
         )
