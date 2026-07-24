@@ -1,0 +1,90 @@
+schema_version = 2
+
+[registry]
+item_key_format = "lowercase_snake_case"
+item_table_format = "items.<item_key>"
+source_table_format = "sources.<source_key>"
+
+[registry.item]
+required_fields = ["kind", "owner_spec", "status"]
+allowed_kinds = [
+    "equation",
+    "coefficient",
+    "physical_constant",
+    "model_policy",
+    "numerical_policy",
+    "api_design",
+]
+allowed_statuses = ["research", "specified", "implemented", "validated", "superseded"]
+owner_spec_format = "three-digit specification identifier, for example 004"
+implementation_format = "repository-relative Julia source path"
+location_format = "nonempty publication locator, for example equation 6, p. 648"
+
+[registry.item.provenance]
+rule = "Exactly one of source or provenance is required."
+source = "A key in sources.<source_key>; location is then required."
+provenance = "The literal original_design; rationale is then required."
+
+[registry.item.lifecycle]
+research = "The provenance rule is satisfied; implementation is optional while a source-file target remains undecided."
+specified = "source or provenance fields satisfy the provenance rule; implementation identifies the intended source file."
+implemented = "specified requirements plus the implementation path contains the item."
+validated = "implemented requirements plus validation identifies committed tests, fixtures, or an invariant."
+superseded = "replacement identifies the successor item key and rationale explains the change."
+
+[items]
+
+# Each [items.<item_key>] entry represents exactly one equation, coefficient,
+# physical constant, model policy, numerical policy, or API design decision.
+#
+# Required for every item:
+#   kind, owner_spec, status
+# Required for sourced items:
+#   source, location
+# Required for original-design items:
+#   provenance = "original_design", rationale
+# Required for equation, coefficient, and physical_constant items:
+#   units (use "dimensionless" where applicable)
+# Required at status = "specified", "implemented", or "validated":
+#   implementation
+# Required at status = "validated":
+#   validation
+# Required at status = "superseded":
+#   replacement, rationale
+#
+# An item is entered with status = "specified" before its Julia implementation
+# is written. `implementation` names the planned source file at that stage and
+# the actual containing file at later stages. `validation` is a
+# repository-relative test/fixture path or a named invariant and must state the
+# asserted quantity or behavior.
+
+# Example sourced item (not yet selected or populated):
+# [items.saturation_vapour_pressure]
+# kind = "equation"
+# owner_spec = "004"
+# source = "liljegren_2008"
+# location = "equation/page/section selected during spec 004 research"
+# units = "Pa"
+# implementation = "src/psychrometrics.jl"
+# status = "specified"
+#
+# Example original-design item (not yet populated):
+# [items.root_acceptance_policy]
+# kind = "numerical_policy"
+# owner_spec = "006"
+# provenance = "original_design"
+# rationale = "Explain the numerical invariant and rejected alternatives."
+# implementation = "src/liljegren/root_solver.jl"
+# status = "specified"
+
+[sources.liljegren_2008]
+kind = "journal_article"
+authors = "Liljegren, J. C.; Carhart, R. A.; Lawday, P.; Tschopp, S.; Sharp, R."
+title = "Modeling the Wet Bulb Globe Temperature Using Standard Meteorological Measurements"
+journal = "Journal of Occupational and Environmental Hygiene"
+year = 2008
+volume = "5"
+issue = "10"
+pages = "645-655"
+doi = "10.1080/15459620802310770"
+role = "Primary source for the outdoor Liljegren WBGT model"

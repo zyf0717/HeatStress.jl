@@ -105,24 +105,15 @@ Mandatory:
 - public functions have docstrings before export;
 - internal names may begin with `_`, but meaningful words are preferred over abbreviations.
 
-## CI scaffold
+## Initial CI scaffold
 
 Create CI before scientific code.
 
-Matrix:
-
-- OS: Ubuntu, macOS, Windows
-- Julia: minimum supported version (`1.10`) and latest stable
-- architecture: default GitHub-hosted x86-64; macOS runner architecture may follow availability
-
-Jobs:
-
-1. instantiate;
-2. precompile;
-3. run `Pkg.test()`;
-4. run Aqua on latest stable Ubuntu;
-5. run JET smoke analysis on latest stable Ubuntu;
-6. build docs on latest stable Ubuntu.
+The initial workflow runs only when changes are pushed to `main`. It uses one
+`ubuntu-latest` runner with Julia `1.10` and runs instantiation plus
+`Pkg.test()`. Aqua, JET, documentation, latest-Julia, and cross-platform CI
+remain available as local checks and are deferred as required CI gates to
+spec 012.
 
 Tests must not depend on internet access after package instantiation.
 
@@ -140,7 +131,7 @@ Create:
 - `julia --project -e 'using Pkg; Pkg.instantiate(); Pkg.test()'` passes.
 - `using HeatStress` succeeds without warnings.
 - Aqua has no stale dependencies, undefined exports or project-file errors.
-- CI runs on all three operating systems.
+- CI runs `Pkg.test()` on `ubuntu-latest` with Julia 1.10 for pushes to `main`.
 - No scientific function contains placeholder numbers.
 
 ## Suggested commit

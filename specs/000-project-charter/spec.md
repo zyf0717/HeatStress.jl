@@ -22,6 +22,18 @@ Create `validation/sources.toml` and `docs/src/provenance.md`. Every equation, c
 
 Do not treat any software implementation as the scientific authority.
 
+## Provenance inventory contract
+
+`validation/sources.toml` is the versioned provenance registry. Its
+`[registry]` tables define controlled item kinds, statuses, field formats, and
+the lifecycle requirements for `[items.<item_key>]` entries. Before coding an
+equation, coefficient, constant, or policy, add its item with `status =
+"specified"`, its owning specification, intended Julia source path, and
+exactly one provenance route: a bibliographic source key plus publication
+locator, or `provenance = "original_design"` plus a rationale. Formula and
+constant items also record units. Implemented and validated items add the
+actual source path and validation reference respectively.
+
 ## Implementation-independence rule
 
 `HeatStress.jl` must be newly written Julia source under MIT. It is not a code migration from HeatStressR or the original C implementation.
@@ -136,6 +148,7 @@ A `NOTICE` file is optional under MIT. Use one only for scientific acknowledgeme
 The project-charter unit is complete when:
 
 - the primary source, conformance hierarchy, v0.1 scope and independence/licensing boundaries are explicitly approved;
+- the provenance inventory contract is defined before any scientific item is implemented;
 - later specifications consistently refer to this charter where scientific or licensing authority matters;
 - private-comparison paths and repository exclusions are defined;
 - unresolved formula-level choices are delegated to their owning specifications rather than silently decided here.
