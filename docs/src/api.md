@@ -3,6 +3,10 @@
 The public surface currently covers Liljegren outdoor WBGT and its supporting
 configuration, status, result, and diagnostic types.
 
+`solar_zenith`, `solar_zenith_batch`, `saturation_vapour_pressure_hpa`,
+`vapour_pressure`, and `relative_humidity_from_dewpoint` are also exported
+helpers. See [Inputs and policies](@ref) for their units and timestamp rules.
+
 ## Scalar calls
 
 ```julia

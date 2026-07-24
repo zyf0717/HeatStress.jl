@@ -13,11 +13,12 @@ include("test_physical_kernels.jl")
 include("test_root_solver.jl")
 include("test_liljegren_scalar.jl")
 include("test_liljegren_batch.jl")
+include("test_scientific_validation.jl")
 
 if get(ENV, "HEATSTRESS_QUALITY", "0") == "1"
     using Aqua
     using JET
 
     Aqua.test_all(HeatStress; ambiguities = false)
-    JET.test_package(HeatStress; target_defined_modules = true)
+    JET.test_package(HeatStress; target_modules = (HeatStress,))
 end

@@ -12,7 +12,9 @@ makedocs(
         "Architecture" => "architecture.md",
         "Public API" => "api.md",
         "Liljegren pipeline" => "liljegren.md",
-        "Units and input policies" => "units-and-policies.md",
+        "Inputs and policies" => "inputs.md",
+        "Numerical behaviour" => "numerical-behaviour.md",
+        "Performance" => "performance.md",
         "Scientific provenance" => "provenance.md",
     ],
 )

@@ -1,0 +1,4 @@
+id,temperature_k,pressure_hpa,wind_speed_m_s,expected_viscosity_pa_s,expected_conductivity_w_mk,expected_diffusivity_m2_s,authority,source_id,rtol
+cool_still,270.0,1013.25,0.0,1.7009893731884383e-5,0.0238172675384395,2.0641141526259348e-5,analytic,bird_stewart_lightfoot_2002,2e-14
+temperate_wind,300.0,1013.25,0.13,1.8447812854633166e-5,0.0260692623386395,2.6395609490249917e-5,analytic,bird_stewart_lightfoot_2002,2e-14
+hot_wind,340.0,1013.25,3.0,2.0267253611046905e-5,0.0289304610322395,3.535106307695993e-5,analytic,bird_stewart_lightfoot_2002,2e-14

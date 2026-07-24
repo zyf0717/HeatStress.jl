@@ -2,21 +2,21 @@
 
 ## Status
 
-- [x] Planned
-- [ ] In progress
+- [ ] Planned
+- [x] In progress
 - [ ] Complete
 
 ## Tasks
 
-- [ ] Make README scope, installation, scalar/batch examples, units, timestamp
+- [x] Make README scope, installation, scalar/batch examples, units, timestamp
   semantics, diagnostics, provenance and limitations accurate for v0.1.0.
-- [ ] Complete API, inputs, numerical-behaviour, performance and provenance
+- [x] Complete API, inputs, numerical-behaviour, performance and provenance
   documentation for the released Liljegren surface.
-- [ ] Add/verify MIT, citation and contribution material; audit exports,
+- [x] Add/verify MIT, citation and contribution material; audit exports,
   docstrings, licences and `[compat]`.
 - [ ] Configure and run documentation, Aqua, JET, clean-depot and
   Linux/macOS/Windows (including threaded) quality gates.
-- [ ] Confirm host-specific benchmark documentation and scoped scientific
+- [x] Confirm host-specific benchmark documentation and scoped scientific
   validation evidence; make no unsupported cross-language performance claim.
 - [ ] Recheck package-name availability and validate Registrator, TagBot,
   CompatHelper and archival workflow without publication.
@@ -27,5 +27,11 @@
 
 ## Evidence
 
-- Evidence: pending
-- Commit: pending
+- Evidence: `julia --project=docs docs/make.jl` passed on 2026-07-25 with
+  exported helper API coverage. README and docs now describe the Liljegren-only
+  v0.1 scope, executable scalar/batch use, UTC/ZonedDateTime semantics,
+  diagnostics/missingness, provenance, limitations and host-specific benchmark
+  evidence. MIT text, `CITATION.cff`, `CONTRIBUTING.md`, exports and compat were
+  reviewed. Platform/clean-depot and registration checks remain active until CI
+  runs for this branch.
+- Commit: pending release-readiness commit

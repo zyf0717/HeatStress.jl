@@ -47,10 +47,10 @@ reproducible, correctness-gated report in this repository.
 | 000 | [Project charter](./000-project-charter/) | Complete | None; approve this governing specification before implementation. |
 | 001 | [Package scaffold](./001-package-scaffold/) | Complete | 000 Project charter approved |
 | 002 | [Public API and types](./002-public-api-and-types/) | Complete | 001 Package scaffold |
-| 003 | [Constants, units and policies](./003-constants-units-and-policies/) | In progress | 002 Public API and types |
-| 004 | [Solar geometry and psychrometrics](./004-solar-geometry-and-psychrometrics/) | In progress | 003 Constants, units and policies |
-| 005 | [Physical kernels](./005-physical-kernels/) | In progress | 003 Constants, units and policies; 004 supplies solar/psychrometric inputs where composed |
-| 006 | [Root solving and diagnostics](./006-root-solving-and-diagnostics/) | In progress | 005 Physical kernels |
+| 003 | [Constants, units and policies](./003-constants-units-and-policies/) | Complete | 002 Public API and types |
+| 004 | [Solar geometry and psychrometrics](./004-solar-geometry-and-psychrometrics/) | Complete | 003 Constants, units and policies |
+| 005 | [Physical kernels](./005-physical-kernels/) | Complete | 003 Constants, units and policies; 004 supplies solar/psychrometric inputs where composed |
+| 006 | [Root solving and diagnostics](./006-root-solving-and-diagnostics/) | Complete | 005 Physical kernels |
 | 007 | [Liljegren scalar model](./007-liljegren-scalar-model/) | Complete | 004 Solar geometry and psychrometrics; 005 Physical kernels; 006 Root solving and diagnostics |
 | 008 | [Batch interfaces and threading](./008-batch-interfaces-and-threading/) | Complete | 007 Liljegren scalar model |
 | 009 | [Other heat indices](./009-other-heat-indices/) | Planned | Post-v0.1 feature unit; its released formulas require their own 010 validation coverage |

@@ -12,6 +12,11 @@ Run focused tests for changed behaviour and the full suite before proposing a
 change. Run quality checks from the test environment and build documentation
 from `docs/` when those areas change.
 
+```sh
+HEATSTRESS_QUALITY=1 julia --project=. -e 'using Pkg; Pkg.test()'
+julia --project=docs docs/make.jl
+```
+
 ## Scientific and source provenance
 
 Implementations must follow the relevant unit in `specs/`. Record the

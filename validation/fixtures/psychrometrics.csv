@@ -1,0 +1,4 @@
+id,air_temperature_c,dew_point_c,relative_humidity_percent,expected_saturation_hpa,expected_actual_hpa,authority,source_id,rtol
+freezing,0.0,0.0,100.0,6.108,6.108,analytic,fao56,1e-12
+temperate,25.0,15.0,53.83415075783599,31.67777717506847,17.05346232115772,analytic,fao56,1e-12
+hot_saturated,30.0,30.0,100.0,42.43065058759014,42.43065058759014,analytic,fao56,1e-12

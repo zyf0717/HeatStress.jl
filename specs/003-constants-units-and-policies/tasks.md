@@ -3,8 +3,8 @@
 ## Status
 
 - [ ] Planned
-- [x] In progress
-- [ ] Complete
+- [ ] In progress
+- [x] Complete
 
 ## Tasks
 
@@ -15,11 +15,15 @@
 - [x] Test tolerance boundaries and missingness behavior.
 - [x] Document the public numeric-unit contract.
 - [x] Run the acceptance checks in `quickstart.md`.
-- [ ] Integrate `_normalize_basic_meteorology` and `_apply_solar_policy` with the sourced solar-geometry kernel once spec 004 resolves its source-selection gate.
-- [ ] Add an actual mutating-batch preflight/no-output-mutation test when spec 008 introduces its batch API.
-- [ ] Record test, benchmark or validation evidence and commit SHA below.
+- [x] Integrate `_normalize_basic_meteorology` and `_apply_solar_policy` with the sourced solar-geometry kernel once spec 004 resolves its source-selection gate.
+- [x] Add an actual mutating-batch preflight/no-output-mutation test when spec 008 introduces its batch API.
+- [x] Record test, benchmark or validation evidence and commit SHA below.
 
 ## Evidence
 
-- Evidence: `julia --project=. -e 'using Pkg; Pkg.test()'`, `HEATSTRESS_QUALITY=1 julia --project=. -e 'using Pkg; Pkg.test()'`, and `julia --project=docs docs/make.jl` (all pass; 2026-07-24). Basic meteorology normalization and solar forcing policy are separately tested; public orchestration remains gated on spec 004 solar source selection.
-- Commit: pending
+- Evidence: Public row execution calls the spec-004 sourced solar kernel before
+  `_apply_solar_policy`; `test/test_validation.jl` covers its policy boundary.
+  `test/test_liljegren_batch.jl` asserts input/output/alias preflight failures
+  leave all caller outputs unchanged. Full tests, quality checks and docs passed
+  on 2026-07-25.
+- Commit: pending v0.1 readiness commit

@@ -1,5 +1,25 @@
 schema_version = 2
 
+[fixture_families.solar_geometry]
+sources = ["nrel_spa", "nrel_spa_pvlib_0152", "spencer_1971"]
+generation_method = "Independently computed unrefracted NREL-SPA references using pvlib 0.15.2 (altitude 0 m, pressure 0 Pa); 2 degrees is a conservative selected-Spencer-approximation acceptance bound, not a fitted fixture tolerance."
+
+[fixture_families.psychrometrics]
+sources = ["fao56"]
+generation_method = "Analytic FAO-56 saturation-vapour-pressure identities."
+
+[fixture_families.physical_kernels]
+sources = ["bird_stewart_lightfoot_2002", "kannuluik_carman_1951", "oke_1987"]
+generation_method = "Independent direct evaluation of the cited equations."
+
+[fixture_families.liljegren_reference]
+sources = ["liljegren_2008", "hall_2022"]
+generation_method = "Standalone 256-bit calculation; validation/generate_validation_cases.jl deterministically regenerates only this CSV and never imports HeatStress."
+
+[fixture_families.liljegren_failures]
+sources = ["package_contract"]
+generation_method = "Declared input and numerical-policy invariants."
+
 [registry]
 item_key_format = "lowercase_snake_case"
 item_table_format = "items.<item_key>"
@@ -88,6 +108,40 @@ issue = "10"
 pages = "645-655"
 doi = "10.1080/15459620802310770"
 role = "Primary source for the outdoor Liljegren WBGT model"
+
+[sources.nrel_spa]
+kind = "technical_report"
+authors = "Reda, I.; Andreas, A."
+title = "Solar Position Algorithm for Solar Radiation Applications"
+year = 2008
+report_number = "NREL/TP-560-34302"
+role = "High-accuracy geometric solar-position method authority"
+
+[sources.nrel_spa_pvlib_0152]
+kind = "software_reference_calculation"
+title = "pvlib-python 0.15.2 NREL SPA geometric solar-zenith calculation"
+year = 2026
+role = "Independent fixture calculation method: arbitrary UTC/date/location rows, altitude 0 m, pressure 0 Pa, unrefracted geometric zenith"
+
+[sources.spencer_1971]
+kind = "journal_article"
+authors = "Spencer, J. W."
+title = "Fourier series representation of the position of the sun"
+year = 1971
+role = "Selected solar declination and equation-of-time approximation"
+
+[sources.fao56]
+kind = "technical_report"
+authors = "Allen, R. G.; Pereira, L. S.; Raes, D.; Smith, M."
+title = "Crop Evapotranspiration: Guidelines for Computing Crop Water Requirements"
+year = 1998
+role = "Saturation vapour pressure equation"
+
+[sources.package_contract]
+kind = "repository_specification"
+title = "HeatStress.jl Liljegren input and solver contract"
+year = 2026
+role = "Input-status and solver-failure invariant fixtures"
 
 [sources.bird_stewart_lightfoot_2002]
 kind = "book"

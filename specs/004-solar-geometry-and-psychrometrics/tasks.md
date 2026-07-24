@@ -3,8 +3,8 @@
 ## Status
 
 - [ ] Planned
-- [x] In progress
-- [ ] Complete
+- [ ] In progress
+- [x] Complete
 
 ## Tasks
 
@@ -15,7 +15,7 @@
 - [x] Add independent numerical fixtures and invariants.
 - [x] Document numerical precision and units.
 - [x] Run the acceptance checks in `quickstart.md`.
-- [ ] Benchmark fixed-coordinate, repeated-coordinate and unique-coordinate batch workloads.
+- [x] Benchmark fixed-coordinate, repeated-coordinate and unique-coordinate batch workloads.
 - [x] Record test and validation evidence below; commit SHA remains pending.
 
 ## Evidence
@@ -24,5 +24,9 @@
   `HEATSTRESS_QUALITY=1 julia --project=. -e 'using Pkg; Pkg.test()'`
   (pass: 184 tests; quality checks pass; 2026-07-24); 15 NREL-SPA fixtures
   have a maximum absolute zenith error of 0.344 degrees and are recorded in
-  `research.md`. `julia --project=docs docs/make.jl` also passes.
-- Commit: pending
+  `research.md`. `julia --project=docs docs/make.jl` also passes. The committed
+  scientific corpus adds NREL-SPA cases plus leap/horizon coverage. `julia
+  --project=benchmark -e 'include("benchmark/solar_geometry_e2e.jl");
+  main(10000)'` passed scalar/batch equivalence for fixed, grouped and unique
+  coordinates (0.0019 s smoke measurements on `znver3`).
+- Commit: pending v0.1 readiness commit
