@@ -2,6 +2,7 @@ using Test
 using HeatStress
 using Dates: Date, DateTime
 using TimeZones: TimeZone, ZonedDateTime
+using TOML
 
 const _diagnose_liljegren = HeatStress.diagnose_liljegren
 const _liljegren_wbgt = HeatStress.liljegren_wbgt
@@ -20,6 +21,18 @@ function _scalar_fixture(; kwargs...)
         direct_fraction = 0.7,
         kwargs...,
     )
+end
+
+function _scalar_value_call()
+    return _liljegren_wbgt(
+        30.0, 20.0, 1.0, 800.0, DateTime(2024, 6, 21, 12), 0.0, 0.0;
+        direct_fraction = 0.7,
+    )
+end
+
+function _scalar_value_allocations()
+    _scalar_value_call() # compile and warm the public call before measuring it
+    return @allocated _scalar_value_call()
 end
 
 @testset "Liljegren scalar model" begin
@@ -49,6 +62,30 @@ end
         @test abs(diagnostic.globe.validation_residual_k) <= diagnostic.globe.residual_tolerance_k
         @test abs(diagnostic.natural_wet_bulb.validation_residual_k) <=
               diagnostic.natural_wet_bulb.residual_tolerance_k
+    end
+
+    @testset "independent scalar component fixtures" begin
+        fixture_path = joinpath(@__DIR__, "fixtures", "liljegren_scalar_reference.toml")
+        fixture_data = TOML.parsefile(fixture_path)
+        @test fixture_data["schema_version"] == 1
+        @test fixture_data["precision_bits"] == 256
+        for fixture in values(fixture_data["fixtures"])
+            diagnostic = _diagnose_liljegren(
+                fixture["air_temperature_c"],
+                fixture["dew_point_c"],
+                fixture["wind_speed_m_s"],
+                fixture["solar_radiation_w_m2"],
+                DateTime(fixture["time"]),
+                fixture["longitude_deg"],
+                fixture["latitude_deg"];
+                pressure_hpa = fixture["pressure_hpa"],
+                direct_fraction = fixture["direct_fraction"],
+            )
+            result = diagnostic.result
+            @test result.globe_temperature_c ≈ parse(Float64, fixture["globe_temperature_c"]) atol = 1e-4 rtol = 1e-8
+            @test result.natural_wet_bulb_c ≈ parse(Float64, fixture["natural_wet_bulb_c"]) atol = 1e-4 rtol = 1e-8
+            @test result.wbgt_c ≈ parse(Float64, fixture["wbgt_c"]) atol = 1e-4 rtol = 1e-8
+        end
     end
 
     @testset "solar, wind, and dew-point policies" begin
@@ -219,5 +256,37 @@ end
         @test diagnostic32 isa DiagnosticWBGTResult{Float32}
         @test diagnostic32.globe.converged
         @test diagnostic32.natural_wet_bulb.converged
+    end
+
+    @testset "public-call inference and scalar allocations" begin
+        @test (@inferred Union{Missing,Float64} _globe_temperature(
+            30.0, 20.0, 1.0, 800.0, DateTime(2024, 6, 21, 12), 0.0, 0.0;
+            direct_fraction = 0.7,
+        )) isa Float64
+        @test (@inferred Union{Missing,Float64} _natural_wet_bulb_temperature(
+            30.0, 20.0, 1.0, 800.0, DateTime(2024, 6, 21, 12), 0.0, 0.0;
+            direct_fraction = 0.7,
+        )) isa Float64
+        @test (@inferred _liljegren_wbgt(
+            30.0, 20.0, 1.0, 800.0, DateTime(2024, 6, 21, 12), 0.0, 0.0;
+            direct_fraction = 0.7,
+        )) isa WBGTResult{Float64}
+        @test (@inferred _diagnose_liljegren(
+            30.0, 20.0, 1.0, 800.0, DateTime(2024, 6, 21, 12), 0.0, 0.0;
+            direct_fraction = 0.7,
+        )) isa DiagnosticWBGTResult{Float64}
+
+        config32 = LiljegrenConfig(
+            solver = SolverConfig(root_tolerance_k = 1f-6, residual_tolerance_k = 1f-4),
+            dew_point_tolerance_c = 1f-4,
+        )
+        @test (@inferred _diagnose_liljegren(
+            30f0, 20f0, 1f0, 800f0, DateTime(2024, 6, 21, 12), 0f0, 0f0;
+            direct_fraction = 0.7f0, config = config32,
+        )) isa DiagnosticWBGTResult{Float32}
+
+        # Current public composition allocates fixed diagnostic/root state;
+        # retain a measured ceiling until a dedicated zero-allocation redesign.
+        @test _scalar_value_allocations() <= 4096
     end
 end

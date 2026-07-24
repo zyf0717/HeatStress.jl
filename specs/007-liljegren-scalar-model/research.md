@@ -40,7 +40,15 @@ The authoritative detail and citations remain in `spec.md`; software implementat
 
 ## Remaining validation
 
-- Spec 010 owns the independently sourced/high-precision scalar fixture set.
-  The present tests establish API, policy, diagnostic, Float32, and
-  partial-failure invariants but are not a substitute for that scientific
-  acceptance evidence.
+- `test/fixtures/liljegren_scalar_reference.toml` records independent 256-bit
+  calculations of the documented equations for daytime, supplied-radiation
+  night-time, and saturated-air cases. Its generator is standalone and does
+  not import HeatStress or call package kernels; component and WBGT values use
+  the scalar tolerance in `spec.md`.
+- The scalar test suite checks each documented scalar call with `@inferred`.
+  The value-only Float64 path currently allocates 1,904 bytes after
+  warm-up on the recorded host; the test enforces a conservative 4 KiB ceiling
+  pending a dedicated zero-allocation redesign.
+- Spec 010 still owns the broader independently sourced scientific fixture set
+  and source-identifier metadata. These local fixtures establish an immediate
+  independent scalar regression gate but do not replace that acceptance work.
