@@ -1,0 +1,30 @@
+cff-version: 1.2.0
+message: "If you use HeatStress.jl, please cite it using the metadata below."
+title: "HeatStress.jl"
+version: 0.1.0-dev
+license: MIT
+authors:
+  - family-names: Zheng
+    given-names: Yifei
+    email: zyf0717@gmail.com
+preferred-citation:
+  type: article
+  authors:
+    - family-names: Liljegren
+      given-names: James C.
+    - family-names: Carhart
+      given-names: Richard A.
+    - family-names: Lawday
+      given-names: Philip
+    - family-names: Tschopp
+      given-names: Stephen
+    - family-names: Sharp
+      given-names: Robert
+  title: "Modeling the Wet Bulb Globe Temperature Using Standard Meteorological Measurements"
+  journal: "Journal of Occupational and Environmental Hygiene"
+  volume: 5
+  issue: 10
+  start: 645
+  end: 655
+  doi: 10.1080/15459620802310770
+  year: 2008

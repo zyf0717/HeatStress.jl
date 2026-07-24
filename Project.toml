@@ -1,0 +1,20 @@
+name = "HeatStress"
+uuid = "c9d8216c-ea74-476f-aa8c-bb789241bdba"
+authors = ["Yifei Zheng <zyf0717@gmail.com>"]
+version = "0.1.0"
+
+[deps]
+Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
+TimeZones = "f269a46b-ccf7-5d73-abea-4c690281aa53"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test"]
+
+[compat]
+Dates = "1"
+Test = "1"
+TimeZones = "1"
+julia = "1.10"

@@ -2,21 +2,23 @@
 
 ## Status
 
-- [x] Planned
+- [ ] Planned
 - [ ] In progress
-- [ ] Complete
+- [x] Complete
 
 ## Tasks
 
-- [ ] Approve the scientific authority, v0.1 scope and conformance hierarchy.
-- [ ] Approve the independent-implementation and licensing boundaries.
-- [ ] Define the equation/provenance inventory ownership and schema.
-- [ ] Define and ignore private comparison paths.
-- [ ] Confirm downstream specifications preserve the charter constraints.
-- [ ] Run the acceptance checks in `quickstart.md`.
-- [ ] Record review evidence and the commit or PR revision below when available.
+- [x] Approve the scientific authority, v0.1 scope and conformance hierarchy.
+- [x] Approve the independent-implementation and licensing boundaries.
+- [x] Define the equation/provenance inventory ownership and schema.
+- [x] Define and ignore private comparison paths.
+- [x] Confirm downstream specifications preserve the charter constraints.
+- [x] Run the acceptance checks in `quickstart.md`.
+- [x] Record review evidence and the commit or PR revision below when available.
 
 ## Evidence
 
-- Evidence: pending
-- Commit: pending
+- Evidence: User authorised Julia setup and spec 001 scaffolding on 2026-07-24;
+  `validation/sources.toml`, `docs/src/provenance.md`, and private-path
+  exclusions establish the provenance and comparison boundaries.
+- Commit: pending (uncommitted working tree)

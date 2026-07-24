@@ -1,0 +1,16 @@
+schema_version = 1
+
+[sources.liljegren_2008]
+kind = "journal_article"
+authors = "Liljegren, J. C.; Carhart, R. A.; Lawday, P.; Tschopp, S.; Sharp, R."
+title = "Modeling the Wet Bulb Globe Temperature Using Standard Meteorological Measurements"
+journal = "Journal of Occupational and Environmental Hygiene"
+year = 2008
+volume = "5"
+issue = "10"
+pages = "645-655"
+doi = "10.1080/15459620802310770"
+role = "Primary source for the outdoor Liljegren WBGT model"
+
+# Add formula-family entries as implementations are specified. Each entry must
+# identify a source key above or explicitly state an original design decision.

@@ -2,21 +2,26 @@
 
 ## Status
 
-- [x] Planned
+- [ ] Planned
 - [ ] In progress
-- [ ] Complete
+- [x] Complete
 
 ## Tasks
 
-- [ ] Create `Project.toml` with a stable UUID and Julia 1.10 compatibility.
-- [ ] Add the prescribed source, test, docs, benchmark and CI layout.
-- [ ] Configure cross-platform test, Aqua, JET and documentation jobs.
-- [ ] Add contribution, security, citation and ignore policies.
-- [ ] Run clean-depot instantiate, precompile and tests.
-- [ ] Run the acceptance checks in `quickstart.md`.
-- [ ] Record test, benchmark or validation evidence and commit SHA below.
+- [x] Create `Project.toml` with a stable UUID and Julia 1.10 compatibility.
+- [x] Add the prescribed source, test, docs, benchmark and CI layout.
+- [x] Configure cross-platform test, Aqua, JET and documentation jobs.
+- [x] Add contribution, security, citation and ignore policies.
+- [x] Run clean-depot instantiate, precompile and tests.
+- [x] Run the acceptance checks in `quickstart.md`.
+- [x] Record test, benchmark or validation evidence and commit SHA below.
 
 ## Evidence
 
-- Evidence: pending
-- Commit: pending
+- Evidence: Julia 1.10.11; clean depot `/tmp/heatstress-julia-depot.HuYhfo`:
+  `using Pkg; Pkg.instantiate(); Pkg.precompile(); Pkg.test()` passed on
+  2026-07-24. `HEATSTRESS_QUALITY=1 julia --project=. -e 'using Pkg;
+  Pkg.test()'` passed Aqua and JET. Documentation built successfully with
+  `julia --project=docs docs/make.jl`. The same test, quality, and docs
+  commands passed on Julia 1.12.6 (the installed `release` channel).
+- Commit: pending (uncommitted working tree)
