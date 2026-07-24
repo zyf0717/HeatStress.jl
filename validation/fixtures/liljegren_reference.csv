@@ -1,0 +1,5 @@
+id,air_temperature_c,dew_point_c,wind_speed_m_s,solar_radiation_w_m2,time,longitude_deg,latitude_deg,pressure_hpa,direct_fraction,expected_globe_c,expected_natural_wet_bulb_c,expected_wbgt_c,authority,source_id,atol_c
+day,30.0,20.0,1.0,800.0,2024-06-21T12:00:00,0.0,0.0,1010.0,0.7,47.5797537352668168,25.8109154176894035,30.5835915394359458,high_precision,liljegren_2008,1e-4
+night,30.0,20.0,1.0,800.0,2024-06-21T00:00:00,0.0,0.0,1010.0,0.7,29.0045222989149990,22.8774855015623715,24.8151443108766599,high_precision,liljegren_2008,1e-4
+subminute,30.0,20.0,1.0,800.0,2024-06-21T12:00:30.250,0.0,0.0,1010.0,0.7,47.5796768852701402,25.8108922550050568,30.5835599555575678,high_precision,liljegren_2008,1e-4
+saturated,30.0,30.0,1.0,800.0,2024-06-21T12:00:00,0.0,0.0,1010.0,0.7,48.3468907487045898,32.2133031199136592,35.2186903336804794,high_precision,liljegren_2008,1e-4

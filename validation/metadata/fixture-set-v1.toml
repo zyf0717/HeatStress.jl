@@ -1,0 +1,9 @@
+schema_version = 1
+fixture_set = "liljegren-core-v1"
+generator = "validation/generate_validation_cases.jl"
+generator_revision = "v1"
+julia_version = "1.10"
+precision_bits = 256
+timezone = "UTC"
+random_seed = 0
+numerical_columns = "generated; do not edit manually"

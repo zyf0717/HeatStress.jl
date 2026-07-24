@@ -2,21 +2,21 @@
 
 ## Status
 
-- [x] Planned
-- [ ] In progress
+- [ ] Planned
+- [x] In progress
 - [ ] Complete
 
 ## v0.1 release slice
 
-- [ ] Audit existing independent Liljegren scalar/component/reference/failure
+- [x] Audit existing independent Liljegren scalar/component/reference/failure
   fixtures and their source identifiers.
-- [ ] Verify scalar, allocating/preallocated/threaded batch, exact
+- [x] Verify scalar, allocating/preallocated/threaded batch, exact
   status/missingness and diagnostic coverage.
-- [ ] Verify residual acceptance, Float32/Float64 and applicable fixed/grouped/
+- [x] Verify residual acceptance, Float32/Float64 and applicable fixed/grouped/
   unique-coordinate coverage.
-- [ ] Confirm provenance for every solar, psychrometric, physical and
+- [x] Confirm provenance for every solar, psychrometric, physical and
   Liljegren formula released in v0.1.0.
-- [ ] Run the release-slice acceptance checks in `quickstart.md` and record
+- [x] Run the release-slice acceptance checks in `quickstart.md` and record
   evidence.
 
 ## Post-v0.1 validation
@@ -30,5 +30,10 @@
 
 ## Evidence
 
-- Evidence: pending
-- Commit: pending
+- Evidence: `julia --project=test -e 'using HeatStress, CSV, Dates, Test;
+  include("test/test_scientific_validation.jl")'` passed 62 assertions on
+  2026-07-25. The committed corpus records NREL-SPA solar authority rows,
+  analytic psychrometric/physical rows, standalone 256-bit Liljegren component
+  references, failure classifications, residual acceptance, Float32 convergence
+  and scalar/fixed/grouped/unique threaded batch equivalence.
+- Commit: pending validation commit

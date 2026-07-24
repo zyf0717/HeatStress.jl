@@ -1,0 +1,4 @@
+id,air_temperature_c,dew_point_c,wind_speed_m_s,solar_radiation_w_m2,time,longitude_deg,latitude_deg,pressure_hpa,direct_fraction,expected_input_status,expected_globe_reason,expected_wet_bulb_reason,authority,source_id
+missing_meteorology,,20.0,1.0,800.0,2024-06-21T12:00:00,0.0,0.0,1010.0,0.7,MissingMeteorology,NotAttempted,NotAttempted,invariant,package_contract
+invalid_pressure,30.0,20.0,1.0,800.0,2024-06-21T12:00:00,0.0,0.0,0.0,0.7,InvalidDomain,NotAttempted,NotAttempted,invariant,package_contract
+partial_unbracketed,30.0,20.0,1.0,1200.0,2024-09-22T06:00:00,0.0,0.0,1010.0,0.8,InputAccepted,Unbracketed,NoFailure,invariant,package_contract

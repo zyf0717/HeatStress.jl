@@ -1,5 +1,29 @@
 schema_version = 2
 
+[fixture_families.solar_geometry]
+sources = ["nrel_spa", "spencer_1971"]
+generation_method = "Published NREL SPA geometric zenith references; package uses the documented Spencer approximation."
+
+[fixture_families.psychrometrics]
+sources = ["fao56"]
+generation_method = "Analytic FAO-56 saturation-vapour-pressure identities."
+
+[fixture_families.physical_kernels]
+sources = ["bird_stewart_lightfoot_2002", "kannuluik_carman_1951", "oke_1987"]
+generation_method = "Independent direct evaluation of the cited equations."
+
+[fixture_families.liljegren_components]
+sources = ["liljegren_2008", "hall_2022"]
+generation_method = "Standalone 256-bit calculation with tighter bracketed solves."
+
+[fixture_families.liljegren_reference]
+sources = ["liljegren_2008", "hall_2022"]
+generation_method = "Standalone 256-bit calculation; generator never imports HeatStress."
+
+[fixture_families.liljegren_failures]
+sources = ["package_contract"]
+generation_method = "Declared input and numerical-policy invariants."
+
 [registry]
 item_key_format = "lowercase_snake_case"
 item_table_format = "items.<item_key>"
@@ -88,6 +112,33 @@ issue = "10"
 pages = "645-655"
 doi = "10.1080/15459620802310770"
 role = "Primary source for the outdoor Liljegren WBGT model"
+
+[sources.nrel_spa]
+kind = "technical_report"
+authors = "Reda, I.; Andreas, A."
+title = "Solar Position Algorithm for Solar Radiation Applications"
+year = 2008
+role = "Independent geometric solar-zenith fixture authority"
+
+[sources.spencer_1971]
+kind = "journal_article"
+authors = "Spencer, J. W."
+title = "Fourier series representation of the position of the sun"
+year = 1971
+role = "Selected solar declination and equation-of-time approximation"
+
+[sources.fao56]
+kind = "technical_report"
+authors = "Allen, R. G.; Pereira, L. S.; Raes, D.; Smith, M."
+title = "Crop Evapotranspiration: Guidelines for Computing Crop Water Requirements"
+year = 1998
+role = "Saturation vapour pressure equation"
+
+[sources.package_contract]
+kind = "repository_specification"
+title = "HeatStress.jl Liljegren input and solver contract"
+year = 2026
+role = "Input-status and solver-failure invariant fixtures"
 
 [sources.bird_stewart_lightfoot_2002]
 kind = "book"

@@ -65,6 +65,11 @@ export DewPointPolicy,
     diagnose_liljegren,
     liljegren_wbgt_batch,
     liljegren_wbgt!,
-    diagnose_liljegren_batch
+    diagnose_liljegren_batch,
+    solar_zenith,
+    solar_zenith_batch,
+    saturation_vapour_pressure_hpa,
+    vapour_pressure,
+    relative_humidity_from_dewpoint
 
 end
