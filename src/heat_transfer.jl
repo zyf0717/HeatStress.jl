@@ -38,8 +38,8 @@ end
         inv(convert(T, MOLAR_MASS_DRY_AIR)) + inv(convert(T, MOLAR_MASS_WATER)),
     )
     return convert(T, 0.000364) * reduced_temperature^convert(T, 2.334) *
-           critical_pressure_product^convert(T, 1 / 3) *
-           critical_temperature_product^convert(T, 5 / 12) * molecular_mass_term /
+           critical_pressure_product^convert(T, 1 // 3) *
+           critical_temperature_product^convert(T, 5 // 12) * molecular_mass_term /
            ((pressure_hpa / convert(T, 1013.25)) * convert(T, 10_000))
 end
 
@@ -59,7 +59,7 @@ end
 
 """Atmospheric long-wave emissivity from vapour pressure in hPa (Oke 1987)."""
 @inline function _atmospheric_emissivity(vapour_pressure_hpa::T) where {T<:AbstractFloat}
-    return convert(T, 0.575) * vapour_pressure_hpa^convert(T, 1 / 7)
+    return convert(T, 0.575) * vapour_pressure_hpa^convert(T, 1 // 7)
 end
 
 @inline function _heat_transfer_sphere_air(
@@ -83,6 +83,9 @@ end
         wind_speed_m_s::T,
         diameter_m::T,
     ) where {T<:AbstractFloat}
+    # The forced-convection correlation returns zero at zero wind. Callers
+    # constructing an irradiated wet-bulb balance must apply their configured
+    # effective-wind floor before entering this kernel.
     density = _air_density(air_temperature_k, pressure_hpa)
     viscosity = _air_viscosity(air_temperature_k)
     return _heat_transfer_cylinder_air(

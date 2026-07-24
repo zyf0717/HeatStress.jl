@@ -29,13 +29,23 @@ end
 
 """Direct-beam geometry shared by globe and wick solar forcing.
 
-At and below the geometric horizon direct radiation is physically absent; no
-near-horizon cap is introduced.  Diffuse forcing is handled by the caller.
+Zenith is in radians. At and below the geometric horizon direct radiation is
+physically absent. Within one degree of the horizon direct radiation is
+discarded by the documented numerical policy in `constants.jl`; diffuse
+forcing remains active. The last tuple value distinguishes that clip from
+physical night-time zeroing.
 """
-@inline function _direct_solar_geometry(zenith_deg::T) where {T<:AbstractFloat}
-    zenith_deg >= convert(T, 90) && return (zero(T), zero(T), false)
-    zenith_rad = zenith_deg * (convert(T, π) / convert(T, 180))
-    return inv(convert(T, 2) * cos(zenith_rad)), tan(zenith_rad) / convert(T, π), true
+@inline function _direct_solar_geometry(zenith_rad::T) where {T<:AbstractFloat}
+    horizon_rad = convert(T, π / 2)
+    zenith_rad >= horizon_rad && return (zero(T), zero(T), false, false)
+    zenith_rad > horizon_rad - convert(T, MINIMUM_DIRECT_SOLAR_ELEVATION_RAD) &&
+        return (zero(T), zero(T), false, true)
+    return (
+        inv(convert(T, 2) * cos(zenith_rad)),
+        tan(zenith_rad) / convert(T, π),
+        true,
+        false,
+    )
 end
 
 @inline function _globe_longwave_term(
@@ -49,12 +59,12 @@ end
 @inline function _globe_solar_term(
         solar_radiation_w_m2::T,
         direct_fraction::T,
-        zenith_deg::T,
+        zenith_rad::T,
         surface_albedo::T,
         globe_albedo::T,
         globe_emissivity::T,
     ) where {T<:AbstractFloat}
-    globe_projection, _, _ = _direct_solar_geometry(zenith_deg)
+    globe_projection, _, _, _ = _direct_solar_geometry(zenith_rad)
     forcing = one(T) - direct_fraction + direct_fraction * globe_projection + surface_albedo
     return solar_radiation_w_m2 * (one(T) - globe_albedo) * forcing /
            (convert(T, 2) * globe_emissivity * convert(T, STEFAN_BOLTZMANN))
@@ -73,13 +83,13 @@ end
 @inline function _wet_bulb_solar_term(
         solar_radiation_w_m2::T,
         direct_fraction::T,
-        zenith_deg::T,
+        zenith_rad::T,
         surface_albedo::T,
         wick_albedo::T,
         wick_diameter_m::T,
         wick_length_m::T,
     ) where {T<:AbstractFloat}
-    _, wick_projection, _ = _direct_solar_geometry(zenith_deg)
+    _, wick_projection, _, _ = _direct_solar_geometry(zenith_rad)
     diffuse_geometry = one(T) + wick_diameter_m / (convert(T, 4) * wick_length_m)
     direct_geometry = wick_projection + wick_diameter_m / (convert(T, 4) * wick_length_m)
     forcing = (one(T) - direct_fraction) * diffuse_geometry +
@@ -87,7 +97,10 @@ end
     return solar_radiation_w_m2 * (one(T) - wick_albedo) * forcing
 end
 
-@inline function _globe_equilibrium_k(globe_temperature_k::T, balance::GlobeBalance{T}) where {T<:AbstractFloat}
+@inline function _globe_equilibrium_radicand_k4(
+        globe_temperature_k::T,
+        balance::GlobeBalance{T},
+    ) where {T<:AbstractFloat}
     film_temperature_k = (globe_temperature_k + balance.air_temperature_k) / convert(T, 2)
     coefficient = _heat_transfer_sphere_air(
         film_temperature_k,
@@ -95,13 +108,17 @@ end
         balance.effective_wind_m_s,
         balance.globe_diameter_m,
     )
-    radicand_k4 = (
+    return (
         balance.longwave_term -
         coefficient * (globe_temperature_k - balance.air_temperature_k) /
         (balance.globe_emissivity * convert(T, STEFAN_BOLTZMANN)) +
         balance.solar_term
     )
-    return radicand_k4 >= zero(T) ? radicand_k4^convert(T, 1 / 4) : oftype(radicand_k4, NaN)
+end
+
+@inline function _globe_equilibrium_k(globe_temperature_k::T, balance::GlobeBalance{T}) where {T<:AbstractFloat}
+    radicand_k4 = _globe_equilibrium_radicand_k4(globe_temperature_k, balance)
+    return radicand_k4 >= zero(T) ? radicand_k4^convert(T, 1 // 4) : oftype(radicand_k4, NaN)
 end
 
 """Fourth-power globe energy residual in K^4; use this to locate a root."""
@@ -109,7 +126,7 @@ end
         globe_temperature_k::T,
         balance::GlobeBalance{T},
     ) where {T<:AbstractFloat}
-    return globe_temperature_k^4 - _globe_equilibrium_k(globe_temperature_k, balance)^4
+    return globe_temperature_k^4 - _globe_equilibrium_radicand_k4(globe_temperature_k, balance)
 end
 
 """Kelvin-scale globe fixed-point residual; use this for final acceptance."""
@@ -125,9 +142,8 @@ end
         wet_bulb_temperature_k::T,
         balance::WetBulbBalance{T},
     ) where {T<:AbstractFloat}
-    film_temperature_k = (wet_bulb_temperature_k + balance.air_temperature_k) / convert(T, 2)
     coefficient = _heat_transfer_cylinder_air(
-        film_temperature_k,
+        balance.air_temperature_k,
         balance.effective_wind_m_s,
         balance.wick_diameter_m,
         balance.air_density,

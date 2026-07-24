@@ -17,8 +17,9 @@ Before implementing a formula family, record its publication/standard, equation 
 | cylinder convection | Liljegren et al. (2008) | eq. 10 | K, hPa, m s⁻¹, m → W m⁻² K⁻¹ | `Nu=0.281Re^0.6Pr^0.44`, for the wick in cross-flow. |
 | globe balance/residuals | Liljegren et al. (2008) | globe balance; independently transcribed by Hall et al. (2022), eqs. 21–23 | K⁴ root residual; K acceptance residual | Fourth-power equation is retained for bracketing; the fixed-point residual is separately evaluated in Kelvin. |
 | natural wet-bulb balance/residual | Liljegren et al. (2008) | eqs. 10–11; independently transcribed by Hall et al. (2022), eqs. 6, 16, 18–20 | K residual | Uses FAO-56 saturation pressure from spec 004; latent-heat fit is Oke (1987), table A3.1. |
+| near-horizon direct forcing | Original package numerical policy | `MINIMUM_DIRECT_SOLAR_ELEVATION_RAD` | rad | At solar elevation <1°, discard the singular direct horizontal-to-normal transformation and retain diffuse forcing; distinct from physical night zeroing. |
 
-[NEEDS CLARIFICATION: Complete the relevant rows before implementing each physical formula family.]
+The source-selection gate is complete for this unit.
 
 ## Required kernel groups
 

@@ -30,7 +30,7 @@ their remaining spec 010 fixtures are also outside the benchmark critical path.
 | 002 | [Public API and types](./002-public-api-and-types/) | Complete | 001 Package scaffold |
 | 003 | [Constants, units and policies](./003-constants-units-and-policies/) | In progress | 002 Public API and types |
 | 004 | [Solar geometry and psychrometrics](./004-solar-geometry-and-psychrometrics/) | In progress | 003 Constants, units and policies |
-| 005 | [Physical kernels](./005-physical-kernels/) | Complete | 003 Constants, units and policies; 004 supplies solar/psychrometric inputs where composed |
+| 005 | [Physical kernels](./005-physical-kernels/) | In progress | 003 Constants, units and policies; 004 supplies solar/psychrometric inputs where composed |
 | 006 | [Root solving and diagnostics](./006-root-solving-and-diagnostics/) | Planned | 005 Physical kernels |
 | 007 | [Liljegren scalar model](./007-liljegren-scalar-model/) | Planned | 004 Solar geometry and psychrometrics; 005 Physical kernels; 006 Root solving and diagnostics |
 | 008 | [Batch interfaces and threading](./008-batch-interfaces-and-threading/) | Planned | 007 Liljegren scalar model |

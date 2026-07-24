@@ -9,7 +9,7 @@ function _globe_balance_fixture(::Type{T} = Float64) where {T<:AbstractFloat}
         T(1013.25),
         T(1),
         HeatStress._globe_longwave_term(air_temperature_k, atmospheric_emissivity),
-        HeatStress._globe_solar_term(T(800), T(0.7), T(30), T(0.45), T(0.05), T(0.95)),
+        HeatStress._globe_solar_term(T(800), T(0.7), T(π / 6), T(0.45), T(0.05), T(0.95)),
         T(0.0508),
         T(0.95),
     )
@@ -31,7 +31,7 @@ function _wet_bulb_balance_fixture(::Type{T} = Float64) where {T<:AbstractFloat}
         viscosity,
         HeatStress._diffusivity_coefficient(air_temperature_k, pressure_hpa, density, viscosity),
         HeatStress._wet_bulb_longwave_term(air_temperature_k, atmospheric_emissivity, T(0.95)),
-        HeatStress._wet_bulb_solar_term(T(800), T(0.7), T(30), T(0.45), T(0.4), T(0.007), T(0.0254)),
+        HeatStress._wet_bulb_solar_term(T(800), T(0.7), T(π / 6), T(0.45), T(0.4), T(0.007), T(0.0254)),
         true,
         T(0.007),
         T(0.95),
@@ -105,34 +105,58 @@ end
     end
 
     @testset "solar forcing horizon policy" begin
-        near_horizon = HeatStress._direct_solar_geometry(89.999)
-        at_horizon = HeatStress._direct_solar_geometry(90.0)
-        below_horizon = HeatStress._direct_solar_geometry(90.001)
-        @test near_horizon[1] > 10_000
-        @test near_horizon[2] > 10_000
-        @test near_horizon[3]
-        @test at_horizon == (0.0, 0.0, false)
-        @test below_horizon == (0.0, 0.0, false)
+        threshold = HeatStress.MINIMUM_DIRECT_SOLAR_ELEVATION_RAD
+        active = HeatStress._direct_solar_geometry(pi / 2 - threshold - 1e-6)
+        clipped = HeatStress._direct_solar_geometry(pi / 2 - threshold + 1e-6)
+        at_horizon = HeatStress._direct_solar_geometry(pi / 2)
+        below_horizon = HeatStress._direct_solar_geometry(pi / 2 + 1e-6)
+        @test active[1] < 30
+        @test active[2] < 20
+        @test active[3:4] == (true, false)
+        @test clipped == (0.0, 0.0, false, true)
+        @test at_horizon == (0.0, 0.0, false, false)
+        @test below_horizon == (0.0, 0.0, false, false)
 
-        globe_day = HeatStress._globe_solar_term(800.0, 0.7, 30.0, 0.45, 0.05, 0.95)
-        globe_night = HeatStress._globe_solar_term(800.0, 0.7, 90.0, 0.45, 0.05, 0.95)
-        wet_day = HeatStress._wet_bulb_solar_term(800.0, 0.7, 30.0, 0.45, 0.4, 0.007, 0.0254)
-        wet_night = HeatStress._wet_bulb_solar_term(800.0, 0.7, 90.0, 0.45, 0.4, 0.007, 0.0254)
-        @test globe_day > globe_night > 0
-        @test wet_day > wet_night > 0
+        globe_day = HeatStress._globe_solar_term(800.0, 0.7, pi / 6, 0.45, 0.05, 0.95)
+        globe_clipped = HeatStress._globe_solar_term(800.0, 0.7, pi / 2 - threshold / 2, 0.45, 0.05, 0.95)
+        wet_day = HeatStress._wet_bulb_solar_term(800.0, 0.7, pi / 6, 0.45, 0.4, 0.007, 0.0254)
+        wet_clipped = HeatStress._wet_bulb_solar_term(800.0, 0.7, pi / 2 - threshold / 2, 0.45, 0.4, 0.007, 0.0254)
+        @test globe_day > globe_clipped > 0
+        @test wet_day > wet_clipped > 0
     end
 
     @testset "residual separation and sign brackets" begin
         globe = _globe_balance_fixture()
         @test isbitstype(typeof(globe))
+        # Independently retained reference values for the documented
+        # fourth-power balance; the energy residual must not take a fourth root.
+        for (candidate_k, radicand_k4, energy_residual_k4) in (
+            (320.0, 1.0878865385319973e10, -3.93105385319973e8),
+            (325.0, 9.332922338171188e9, 1.8237182868288116e9),
+            (360.0, -1.4794397468130836e9, 1.8275599746813084e10),
+        )
+            @test HeatStress._globe_equilibrium_radicand_k4(candidate_k, globe) ≈ radicand_k4 rtol = 2e-14
+            @test HeatStress._globe_energy_residual_k4(candidate_k, globe) ≈ energy_residual_k4 rtol = 2e-14
+        end
         @test HeatStress._globe_energy_residual_k4(320.0, globe) < 0
         @test HeatStress._globe_energy_residual_k4(325.0, globe) > 0
         globe_root = _bisect_root(t -> HeatStress._globe_energy_residual_k4(t, globe), 320.0, 325.0)
+        @test globe_root ≈ 320.89173511564036 atol = 1e-11
         @test abs(HeatStress._globe_fixed_point_residual_k(globe_root, globe)) < 1e-11
-        @test isnan(HeatStress._globe_energy_residual_k4(360.0, globe))
+        @test isfinite(HeatStress._globe_energy_residual_k4(360.0, globe))
+        @test isnan(HeatStress._globe_fixed_point_residual_k(360.0, globe))
 
         wet_bulb = _wet_bulb_balance_fixture()
         @test isbitstype(typeof(wet_bulb))
+        @test HeatStress._heat_transfer_cylinder_air(
+            wet_bulb.air_temperature_k,
+            wet_bulb.effective_wind_m_s,
+            wet_bulb.wick_diameter_m,
+            wet_bulb.air_density,
+            wet_bulb.air_viscosity,
+        ) ≈ 34.923577024519275 rtol = 2e-14
+        @test HeatStress._natural_wet_bulb_residual(295.0, wet_bulb) ≈ -11.260804115125609 rtol = 2e-14
+        @test HeatStress._natural_wet_bulb_residual(300.0, wet_bulb) ≈ 10.265976145484615 rtol = 2e-14
         @test HeatStress._natural_wet_bulb_residual(295.0, wet_bulb) < 0
         @test HeatStress._natural_wet_bulb_residual(300.0, wet_bulb) > 0
         wet_root = _bisect_root(t -> HeatStress._natural_wet_bulb_residual(t, wet_bulb), 295.0, 300.0)
@@ -153,6 +177,14 @@ end
 
         globe64 = _globe_balance_fixture()
         wet_bulb64 = _wet_bulb_balance_fixture()
+        @test @inferred(HeatStress._air_viscosity(300.0)) isa Float64
+        @test @inferred(HeatStress._air_thermal_conductivity(300.0)) isa Float64
+        @test @inferred(HeatStress._air_diffusivity(300.0, 1013.25)) isa Float64
+        @test @inferred(HeatStress._heat_transfer_sphere_air(300.0, 1013.25, 1.0, 0.0508)) isa Float64
+        @test @inferred(HeatStress._heat_transfer_cylinder_air(300.0, 1013.25, 1.0, 0.007)) isa Float64
+        @test @inferred(HeatStress._globe_energy_residual_k4(320.0, globe64)) isa Float64
+        @test @inferred(HeatStress._natural_wet_bulb_residual(295.0, wet_bulb64)) isa Float64
+
         globe_allocations, wet_bulb_allocations = _residual_allocations(globe64, wet_bulb64)
         @test globe_allocations == 0
         @test wet_bulb_allocations == 0

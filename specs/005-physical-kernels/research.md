@@ -23,21 +23,29 @@
 - `GlobeBalance.longwave_term` and `.solar_term` are K⁴.  Wet-bulb forcing
   fields are W m⁻².  This makes units explicit at the residual boundary.
 - The globe root equation is fourth-power energy balance; acceptance is its
-  separate Kelvin fixed-point residual.  The wet-bulb residual is signed as
-  candidate minus fixed-point equilibrium temperature.
+  separate Kelvin fixed-point residual. `_globe_energy_residual_k4` subtracts
+  the raw radicand directly; only the Kelvin residual applies a fourth root.
+  The wet-bulb residual is signed as candidate minus fixed-point equilibrium
+  temperature.
 - Direct horizontal-beam geometry is singular as zenith approaches 90°:
-  `1/(2cos θ)` for the globe and `tan θ/π` for the wick.  No undocumented
-  near-horizon cap is applied.  At/after the geometric horizon the shared
-  helper zeroes only direct forcing; diffuse radiation remains.  Spec 007
-  must surface an input diagnostic if supplied direct radiation conflicts with
-  computed night geometry.
+  `1/(2cos θ)` for the globe and `tan θ/π` for the wick. The package applies
+  the original `MINIMUM_DIRECT_SOLAR_ELEVATION_RAD = 1°` numerical policy:
+  below that positive elevation it discards direct forcing, retains diffuse
+  forcing, and returns a helper flag distinct from physical night-time
+  zeroing. The scalar diagnostic path in spec 007 must carry that flag when
+  constructing the public result.
+- Internal solar zenith is radians, matching `_PreparedMeteorology` and the
+  spec-003 unit contract. Wet-bulb transport properties are evaluated
+  consistently at ambient air temperature, then stored in `WetBulbBalance` as
+  specified for reuse across residual candidates.
 - The residual layer calls the spec-004 FAO-56 formula through its unchecked
   internal kernel so non-finite candidate temperatures yield non-finite
   residuals rather than a public-input `ArgumentError`.
 
 ## Validation method
 
-- Hard-coded Float64 fixtures are calculated from the cited equations and
-  published constants, independently of package kernel calls.
-- Boundary tests cover 90° direct-beam removal, zero/low/ordinary wind,
-  fourth-power versus Kelvin residuals, and wet-bulb sign brackets.
+- Hard-coded Float64 fixtures record raw globe radicands, fourth-power energy
+  residuals and fixed-point roots separately from the kernel assertions.
+- Boundary tests cover the numerical direct-forcing threshold, physical
+  horizon zeroing, zero/low/ordinary wind, fourth-power versus Kelvin
+  residuals, and wet-bulb sign brackets.
