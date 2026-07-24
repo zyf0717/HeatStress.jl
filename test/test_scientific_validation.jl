@@ -166,7 +166,7 @@ end
 
     @testset "reference fixture regeneration" begin
         generator = joinpath(_VALIDATION_ROOT, "generate_validation_cases.jl")
-        command = `$(Base.julia_cmd()) --startup-file=no --project=$(normpath(joinpath(@__DIR__, ".."))) $generator --check`
-        @test success(command)
+        include(generator)
+        @test ValidationReferenceGenerator.reference_matches()
     end
 end
