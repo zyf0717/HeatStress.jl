@@ -21,4 +21,4 @@
 - Evidence: User authorised Julia setup and spec 001 scaffolding on 2026-07-24;
   `validation/sources.toml`, `docs/src/provenance.md`, and private-path
   exclusions establish the provenance and comparison boundaries.
-- Commit: pending (uncommitted working tree)
+- Commit: `6ee2c6f` (`chore: scaffold HeatStress Julia package`)

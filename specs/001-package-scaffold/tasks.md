@@ -24,4 +24,4 @@
   Pkg.test()'` passed Aqua and JET. Documentation built successfully with
   `julia --project=docs docs/make.jl`. The same test, quality, and docs
   commands passed on Julia 1.12.6 (the installed `release` channel).
-- Commit: pending (uncommitted working tree)
+- Commit: `6ee2c6f` (`chore: scaffold HeatStress Julia package`)
