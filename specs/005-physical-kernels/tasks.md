@@ -2,22 +2,23 @@
 
 ## Status
 
-- [x] Planned
-- [ ] In progress
+- [ ] Planned
+- [x] In progress
 - [ ] Complete
 
 ## Tasks
 
-- [ ] Complete the physical-kernel source-selection table.
-- [ ] Implement convection, radiation, evaporation and atmospheric terms.
-- [ ] Keep kernels type-stable and side-effect free.
-- [ ] Add limiting-case and dimensional tests.
-- [ ] Record source citations beside each formula family.
-- [ ] Measure scalar allocations after correctness passes.
-- [ ] Run the acceptance checks in `quickstart.md`.
+- [x] Complete the physical-kernel source-selection table.
+- [x] Implement convection, radiation, evaporation and atmospheric terms.
+- [x] Keep kernels type-stable and side-effect free.
+- [x] Add limiting-case and dimensional tests.
+- [x] Record source citations beside each formula family.
+- [x] Measure scalar allocations after correctness passes.
+- [x] Run the acceptance checks in `quickstart.md`.
 - [ ] Record test, benchmark or validation evidence and commit SHA below.
 
 ## Evidence
 
-- Evidence: pending
-- Commit: pending
+- Evidence: pre-correction evidence superseded; rerun after the residual,
+  radians and near-horizon corrections.
+- Commit: `955aaed` contains the initial implementation; correction pending.

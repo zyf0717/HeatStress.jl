@@ -88,3 +88,128 @@ issue = "10"
 pages = "645-655"
 doi = "10.1080/15459620802310770"
 role = "Primary source for the outdoor Liljegren WBGT model"
+
+[sources.bird_stewart_lightfoot_2002]
+kind = "book"
+authors = "Bird, R. B.; Stewart, W. E.; Lightfoot, E. N."
+title = "Transport Phenomena"
+publisher = "John Wiley & Sons"
+year = "2002"
+edition = "2"
+role = "Transport-property and convection correlations"
+
+[sources.oke_1987]
+kind = "book"
+authors = "Oke, T. R."
+title = "Boundary Layer Climates"
+publisher = "Routledge"
+year = "1987"
+edition = "2"
+role = "Atmospheric emissivity and latent-heat correlation"
+
+[sources.kannuluik_carman_1951]
+kind = "journal_article"
+authors = "Kannuluik, W. G.; Carman, E. H."
+title = "The temperature dependence of the thermal conductivity of air"
+year = "1951"
+role = "Air thermal-conductivity correlation"
+
+[sources.hall_2022]
+kind = "journal_article"
+authors = "Hall, A.; et al."
+title = "Spatial analysis of outdoor wet bulb globe temperature under RCP4.5 and RCP8.5 scenarios across a range of temperate to hot climates"
+journal = "Weather and Climate Extremes"
+year = "2022"
+volume = "35"
+article = "100420"
+doi = "10.1016/j.wace.2022.100420"
+role = "Independent published transcription of Liljegren balance equations and unit conversions"
+
+[items.atmospheric_emissivity]
+kind = "equation"
+owner_spec = "005"
+status = "validated"
+source = "oke_1987"
+location = "p. 374, eq. 2"
+units = "vapour pressure hPa to dimensionless emissivity"
+implementation = "src/heat_transfer.jl"
+validation = "test/test_physical_kernels.jl atmospheric-emissivity fixtures"
+
+[items.air_viscosity]
+kind = "equation"
+owner_spec = "005"
+status = "validated"
+source = "bird_stewart_lightfoot_2002"
+location = "eq. 1.4-14; air Lennard-Jones parameters selected by Liljegren model"
+units = "K to Pa s"
+implementation = "src/heat_transfer.jl"
+validation = "test/test_physical_kernels.jl 270/300/340 K fixtures"
+
+[items.air_thermal_conductivity]
+kind = "equation"
+owner_spec = "005"
+status = "validated"
+source = "kannuluik_carman_1951"
+location = "temperature correlation; CGS-to-SI conversion reproduced by Hall et al. (2022), eq. 10"
+units = "K to W m^-1 K^-1"
+implementation = "src/heat_transfer.jl"
+validation = "test/test_physical_kernels.jl 270/300/340 K fixtures"
+
+[items.air_diffusivity]
+kind = "equation"
+owner_spec = "005"
+status = "validated"
+source = "bird_stewart_lightfoot_2002"
+location = "eq. 17.2-1; SI conversion documented by Hall et al. (2022), eq. 14"
+units = "K and hPa to m^2 s^-1"
+implementation = "src/heat_transfer.jl"
+validation = "test/test_physical_kernels.jl 270/300/340 K fixtures"
+
+[items.sphere_convection]
+kind = "equation"
+owner_spec = "005"
+status = "validated"
+source = "bird_stewart_lightfoot_2002"
+location = "eqs. 14.2-3 and 14.4-5"
+units = "K, hPa, m s^-1 and m to W m^-2 K^-1"
+implementation = "src/heat_transfer.jl"
+validation = "test/test_physical_kernels.jl zero/low/ordinary-wind fixtures"
+
+[items.cylinder_convection]
+kind = "equation"
+owner_spec = "005"
+status = "validated"
+source = "liljegren_2008"
+location = "eq. 10"
+units = "K, hPa, m s^-1 and m to W m^-2 K^-1"
+implementation = "src/heat_transfer.jl"
+validation = "test/test_physical_kernels.jl zero/low/ordinary-wind fixtures"
+
+[items.globe_balance]
+kind = "equation"
+owner_spec = "005"
+status = "validated"
+source = "hall_2022"
+location = "eqs. 21-23, transcribing Liljegren globe balance"
+units = "K^4 root residual and K fixed-point acceptance residual"
+implementation = "src/liljegren/residuals.jl"
+validation = "test/test_physical_kernels.jl raw-radicand and fixed-point residual fixtures"
+
+[items.wet_bulb_balance]
+kind = "equation"
+owner_spec = "005"
+status = "validated"
+source = "hall_2022"
+location = "eqs. 6, 16, 18-20, transcribing Liljegren wick balance"
+units = "K signed residual"
+implementation = "src/liljegren/residuals.jl"
+validation = "test/test_physical_kernels.jl wet-bulb residual sign brackets"
+
+[items.direct_solar_elevation_clip]
+kind = "numerical_policy"
+owner_spec = "005"
+status = "validated"
+provenance = "original_design"
+rationale = "Direct horizontal-to-normal geometry is singular at the horizon while the API does not provide direct-normal irradiance; 1 degree bounds both shared direct terms while retaining diffuse forcing and distinguishing physical night zeroing."
+implementation = "src/constants.jl; src/liljegren/residuals.jl"
+validation = "test/test_physical_kernels.jl direct-forcing threshold and horizon boundaries"

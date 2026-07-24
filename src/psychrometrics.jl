@@ -9,7 +9,13 @@ function saturation_vapour_pressure_hpa(air_temperature_c::Real)
     temperature = float(air_temperature_c)
     isfinite(temperature) && -40 <= temperature <= 50 ||
         throw(ArgumentError("air_temperature_c must be finite and in [-40, 50]"))
-    T = typeof(temperature)
+    return _saturation_vapour_pressure_hpa_unchecked(temperature)
+end
+
+# The physical kernels evaluate candidate root temperatures.  They retain the
+# FAO-56 relation but deliberately bypass the public-input domain check so a
+# non-finite candidate becomes a non-finite residual for solver classification.
+@inline function _saturation_vapour_pressure_hpa_unchecked(temperature::T) where {T<:AbstractFloat}
     return convert(T, 6108 // 1000) * exp(
         convert(T, 1727 // 100) * temperature /
         (temperature + convert(T, 2373 // 10)),

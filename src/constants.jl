@@ -33,3 +33,10 @@ const WICK_EMISSIVITY = 0.95
 const WICK_ALBEDO = 0.4
 const WICK_DIAMETER_M = 0.007
 const WICK_LENGTH_M = 0.0254
+
+# Original numerical policy: direct-beam terms expressed from horizontal
+# irradiance are discarded below 1 degree solar elevation.  The `1/cos(θ)`
+# and `tan(θ)` transformations are otherwise unbounded at the horizon while
+# the package has no direct-normal irradiance input to constrain them.  Diffuse
+# forcing remains active.  This is not a physical night-time threshold.
+const MINIMUM_DIRECT_SOLAR_ELEVATION_RAD = π / 180

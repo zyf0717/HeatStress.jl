@@ -10,15 +10,16 @@ Before implementing a formula family, record its publication/standard, equation 
 
 | Component | Selected publication/standard | Equation/section | Units | Notes |
 | --- | --- | --- | --- | --- |
-| atmospheric emissivity | | | | |
-| air viscosity/conductivity | | | | |
-| diffusivity | | | | |
-| sphere convection | | | | |
-| cylinder convection | | | | |
-| globe balance/residuals | | | | |
-| natural wet-bulb balance/residual | | | | |
+| atmospheric emissivity | Oke (1987) | p. 374, eq. 2 | vapour pressure hPa → dimensionless | `εₐ=0.575eₐ^(1/7)`; the hPa convention is retained. |
+| air viscosity/conductivity | Bird, Stewart & Lightfoot (2006); Kannuluik & Carman (1951) | Bird eq. 1.4-14; Kannuluik–Carman fit | K → Pa s; K → W m⁻¹ K⁻¹ | Air molecular mass and Lennard–Jones parameters follow the Liljegren convention. |
+| diffusivity | Bird, Stewart & Lightfoot (2006) | eq. 17.2-1 | K, hPa → m² s⁻¹ | Critical-property correlation with its published CGS-to-SI conversion. |
+| sphere convection | Bird, Stewart & Lightfoot (2006) | eqs. 14.2-3, 14.4-5 | K, hPa, m s⁻¹, m → W m⁻² K⁻¹ | `Nu=2+0.6Re^0.5Pr^(1/3)`. |
+| cylinder convection | Liljegren et al. (2008) | eq. 10 | K, hPa, m s⁻¹, m → W m⁻² K⁻¹ | `Nu=0.281Re^0.6Pr^0.44`, for the wick in cross-flow. |
+| globe balance/residuals | Liljegren et al. (2008) | globe balance; independently transcribed by Hall et al. (2022), eqs. 21–23 | K⁴ root residual; K acceptance residual | Fourth-power equation is retained for bracketing; the fixed-point residual is separately evaluated in Kelvin. |
+| natural wet-bulb balance/residual | Liljegren et al. (2008) | eqs. 10–11; independently transcribed by Hall et al. (2022), eqs. 6, 16, 18–20 | K residual | Uses FAO-56 saturation pressure from spec 004; latent-heat fit is Oke (1987), table A3.1. |
+| near-horizon direct forcing | Original package numerical policy | `MINIMUM_DIRECT_SOLAR_ELEVATION_RAD` | rad | At solar elevation <1°, discard the singular direct horizontal-to-normal transformation and retain diffuse forcing; distinct from physical night zeroing. |
 
-[NEEDS CLARIFICATION: Complete the relevant rows before implementing each physical formula family.]
+The source-selection gate is complete for this unit.
 
 ## Required kernel groups
 
