@@ -20,5 +20,5 @@ if get(ENV, "HEATSTRESS_QUALITY", "0") == "1"
     using JET
 
     Aqua.test_all(HeatStress; ambiguities = false)
-    JET.test_package(HeatStress; target_defined_modules = true)
+    JET.test_package(HeatStress; target_modules = (HeatStress,))
 end
