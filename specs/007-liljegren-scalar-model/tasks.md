@@ -22,4 +22,5 @@
   (41 scalar-model assertions covering ordinary, night, zero-wind, saturated,
   dew-point policy, missing/invalid, partial-component, timezone and Float32
   cases). Independently sourced scalar fixtures remain owned by spec 010.
-- Commit: `d2edb95` (`feat: implement root solver and scalar Liljegren model`)
+- Commits: `d2edb95` (`feat: implement root solver and scalar Liljegren model`);
+  `e9455fc` (keep incomplete scalar API unexported).
