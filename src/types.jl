@@ -290,6 +290,10 @@ struct WBGTBatchResult{T<:AbstractFloat,V<:AbstractVector{Union{Missing,T}}}
     end
 end
 
-function WBGTBatchResult(wbgt_c::V, natural_wet_bulb_c::V, globe_temperature_c::V) where {T<:AbstractFloat,V<:AbstractVector{Union{Missing,T}}}
-    return WBGTBatchResult{T,V}(wbgt_c, natural_wet_bulb_c, globe_temperature_c)
+function WBGTBatchResult(wbgt_c::V, natural_wet_bulb_c::V, globe_temperature_c::V) where {V<:AbstractVector}
+    element_type = eltype(V)
+    float_type = Base.nonmissingtype(element_type)
+    float_type <: AbstractFloat && element_type === Union{Missing,float_type} ||
+        throw(ArgumentError("batch result vectors must have Union{Missing, T} floating-point elements"))
+    return WBGTBatchResult{float_type,V}(wbgt_c, natural_wet_bulb_c, globe_temperature_c)
 end
