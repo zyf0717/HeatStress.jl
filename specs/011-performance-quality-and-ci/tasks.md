@@ -13,13 +13,13 @@
 - [x] Establish the identical-input Julia baseline: public scalar result and
   preallocated-output loops, preallocated/allocating serial batch, and
   threaded preallocated batch.
-- [ ] Re-run release-candidate scalar/batch benchmarks and assess any material
+- [x] Re-run release-candidate scalar/batch benchmarks and assess any material
   regression against the recorded baseline.
-- [ ] Review JET, `@code_warntype` and allocations for released hot paths.
-- [ ] Retain and run a Julia-only output-validating benchmark smoke path.
-- [ ] Record host/runtime metadata, timing boundaries and the honest
+- [x] Review JET, `@code_warntype` and allocations for released hot paths.
+- [x] Retain and run a Julia-only output-validating benchmark smoke path.
+- [x] Record host/runtime metadata, timing boundaries and the honest
   host-specific documentation statement.
-- [ ] Run the publication-gate acceptance checks in `quickstart.md`.
+- [x] Run the publication-gate acceptance checks in `quickstart.md`.
 
 ## Post-v0.1 comparison and optimisation
 
@@ -57,3 +57,14 @@
 - Commit: `8abe0df` (`refactor: share typed Liljegren row execution`) establishes
   the spec-008 baseline; `c6ff0cf` makes every mode use the same concrete input
   arrays; `aab195c` adds the scalar end-to-end harness.
+- Candidate rerun: `julia --threads=4 --project=benchmark benchmark/batch_e2e.jl
+  --rows=10000,100000 --samples=3 --output=/tmp/heatstress-v010-batch.toml`
+  passed output-equivalence validation on `znver3`, Julia 1.10.11 and
+  BenchmarkTools 1.8.0. At 100,000 rows serial preallocated median was 0.468 s
+  and threaded preallocated median 0.131 s (3.56×). This is a host-local smoke
+  comparison against the established 0.425 s / 0.120 s baseline; it introduces
+  no hot-path source change and does not justify a cross-host regression claim.
+  The one-million-row rerun is retained as the recorded publication baseline.
+- Quality/smoke: `HEATSTRESS_QUALITY=1 julia --project=. -e 'using Pkg;
+  Pkg.test()'` and `julia --threads=4 --project=benchmark
+  benchmark/batch_e2e.jl --rows=10000 --samples=1` passed on 2026-07-25.

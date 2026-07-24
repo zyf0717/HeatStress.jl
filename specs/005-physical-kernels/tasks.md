@@ -3,8 +3,8 @@
 ## Status
 
 - [ ] Planned
-- [x] In progress
-- [ ] Complete
+- [ ] In progress
+- [x] Complete
 
 ## Tasks
 
@@ -15,10 +15,13 @@
 - [x] Record source citations beside each formula family.
 - [x] Measure scalar allocations after correctness passes.
 - [x] Run the acceptance checks in `quickstart.md`.
-- [ ] Record test, benchmark or validation evidence and commit SHA below.
+- [x] Record test, benchmark or validation evidence and commit SHA below.
 
 ## Evidence
 
-- Evidence: pre-correction evidence superseded; rerun after the residual,
-  radians and near-horizon corrections.
-- Commit: `955aaed` contains the initial implementation; correction pending.
+- Evidence: `test/test_physical_kernels.jl` covers independently retained
+  air-property/convection/residual values, horizon policy, Float32 inference
+  and zero-allocation residual calls. The physical rows in
+  `validation/fixtures/physical_kernels.csv` are independently evaluated from
+  cited equations; full tests and quality checks passed on 2026-07-25.
+- Commit: pending v0.1 readiness commit; initial implementation `955aaed`.

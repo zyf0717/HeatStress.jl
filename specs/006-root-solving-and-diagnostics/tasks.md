@@ -3,8 +3,8 @@
 ## Status
 
 - [ ] Planned
-- [x] In progress
-- [ ] Complete
+- [ ] In progress
+- [x] Complete
 
 ## Tasks
 
@@ -24,7 +24,8 @@
   and total diagnostic evaluation accounting.
 - Provenance: `validation/sources.toml` records every bracket, guardrail,
   tolerance, endpoint-stop, validation and evaluation-count policy with its
-  implementation and regression invariant.
+  implementation and regression invariant. The v0.1 scientific corpus verifies
+  accepted scalar component residuals and batch diagnostic equivalence.
 - Commits: `3ae4106` (`fix: harden scalar diagnostics and root expansion`);
   `b9564d2` (`feat: complete scalar Liljegren validation`). This unit remains
   in progress while spec 005 is in progress.

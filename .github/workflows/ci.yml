@@ -10,12 +10,20 @@ permissions:
 
 jobs:
   test:
-    name: Julia 1.10 / ${{ matrix.threads }} threads
-    runs-on: ubuntu-latest
+    name: ${{ matrix.os }} / Julia 1.10 / ${{ matrix.threads }} threads
+    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        threads: [1, 4]
+        include:
+          - os: ubuntu-latest
+            threads: 1
+          - os: ubuntu-latest
+            threads: 4
+          - os: macos-latest
+            threads: 1
+          - os: windows-latest
+            threads: 1
     env:
       JULIA_NUM_THREADS: ${{ matrix.threads }}
       HEATSTRESS_EXPECT_MULTITHREADED: ${{ matrix.threads == 4 && 'true' || 'false' }}
@@ -40,3 +48,25 @@ jobs:
           version: '1.10'
       - name: Quality
         run: julia --project=. -e 'using Pkg; Pkg.instantiate(); Pkg.test()'
+
+  docs:
+    name: Documentation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: julia-actions/setup-julia@v2
+        with:
+          version: '1.10'
+      - name: Build documentation
+        run: julia --project=docs -e 'using Pkg; Pkg.develop(path="."); Pkg.instantiate()' && julia --project=docs docs/make.jl
+
+  benchmark-smoke:
+    name: Benchmark output smoke
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: julia-actions/setup-julia@v2
+        with:
+          version: '1.10'
+      - name: Validate benchmark outputs
+        run: julia --project=benchmark -e 'using Pkg; Pkg.develop(path="."); Pkg.instantiate()' && julia --project=benchmark benchmark/batch_e2e.jl --rows=100 --samples=1
