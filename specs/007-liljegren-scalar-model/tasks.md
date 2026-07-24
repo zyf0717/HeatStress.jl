@@ -14,11 +14,12 @@
 - [x] Add component, end-to-end and partial-failure tests.
 - [x] Document physical configuration effects.
 - [ ] Run the acceptance checks in `quickstart.md`.
-- [ ] Record test, benchmark or validation evidence and commit SHA below.
+- [x] Record test, benchmark or validation evidence and commit SHA below.
 
 ## Evidence
 
-- Evidence: package tests cover ordinary, night, zero-wind, saturated,
+- Evidence: `julia --project=. -e 'using Pkg; Pkg.test()'` passed on 2026-07-24
+  (41 scalar-model assertions covering ordinary, night, zero-wind, saturated,
   dew-point policy, missing/invalid, partial-component, timezone and Float32
-  cases; independently sourced scalar fixtures remain owned by spec 010.
-- Commit: pending implementation commit
+  cases). Independently sourced scalar fixtures remain owned by spec 010.
+- Commit: `d2edb95` (`feat: implement root solver and scalar Liljegren model`)

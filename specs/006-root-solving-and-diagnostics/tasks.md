@@ -3,8 +3,8 @@
 ## Status
 
 - [x] Planned
-- [x] In progress
-- [ ] Complete
+- [ ] In progress
+- [x] Complete
 
 ## Tasks
 
@@ -15,10 +15,10 @@
 - [x] Implement diagnostic constructors.
 - [x] Add adversarial and convergence tests.
 - [x] Run the acceptance checks in `quickstart.md`.
-- [ ] Record test, benchmark or validation evidence and commit SHA below.
+- [x] Record test, benchmark or validation evidence and commit SHA below.
 
 ## Evidence
 
 - Evidence: `julia --project=. -e 'using Pkg; Pkg.test()'` passed on 2026-07-24
   (including 51 root-solver assertions).
-- Commit: uncommitted workspace
+- Commit: `d2edb95` (`feat: implement root solver and scalar Liljegren model`)
