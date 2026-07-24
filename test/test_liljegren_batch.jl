@@ -149,6 +149,13 @@ end
         wbgt, wet, globe = _sentinel_outputs(4)
         _assert_premutation_failure(() -> liljegren_wbgt!(wbgt[1:3], wet, globe, air, dew, wind, radiation, time, 0.0, 0.0; direct_fraction = 0.7), wbgt, wet, globe)
         _assert_premutation_failure(() -> liljegren_wbgt!(Vector{Float64}(undef, 4), wet, globe, air, dew, wind, radiation, time, 0.0, 0.0; direct_fraction = 0.7), wbgt, wet, globe)
+        for output_rows in (3, 5, 0)
+            wbgt, wet, globe = _sentinel_outputs(output_rows)
+            _assert_premutation_failure(
+                () -> liljegren_wbgt!(wbgt, wet, globe, air, dew, wind, radiation, time, 0.0, 0.0; direct_fraction = 0.7),
+                wbgt, wet, globe,
+            )
+        end
 
         invalid_cases = (
             (Any[30.0, 30.0, 30.0, "bad"], dew, wind, radiation, time, 0.0, 0.0, 1010.0, 0.7),
@@ -201,6 +208,27 @@ end
         missing_fraction = Union{Missing,Float64}[0.7, 0.7, missing, 0.7]
         batch = liljegren_wbgt_batch(air, dew, wind, radiation, time, 0.0, 0.0; pressure_hpa = missing_pressure, direct_fraction = missing_fraction)
         _assert_matches_scalar(batch, _scalar_row_results(air, dew, wind, radiation, time, 0.0, 0.0; pressure_hpa = missing_pressure, direct_fraction = missing_fraction))
+
+        all_missing_air = fill(missing, 4)
+        all_missing_batch = liljegren_wbgt_batch(
+            all_missing_air, dew, wind, radiation, time, 0.0, 0.0; direct_fraction = 0.7,
+        )
+        _assert_matches_scalar(
+            all_missing_batch,
+            _scalar_row_results(all_missing_air, dew, wind, radiation, time, 0.0, 0.0; direct_fraction = 0.7),
+        )
+        all_missing_pressure = fill(missing, 4)
+        all_missing_pressure_batch = liljegren_wbgt_batch(
+            air, dew, wind, radiation, time, 0.0, 0.0;
+            pressure_hpa = all_missing_pressure, direct_fraction = 0.7,
+        )
+        _assert_matches_scalar(
+            all_missing_pressure_batch,
+            _scalar_row_results(
+                air, dew, wind, radiation, time, 0.0, 0.0;
+                pressure_hpa = all_missing_pressure, direct_fraction = 0.7,
+            ),
+        )
 
         limited = LiljegrenConfig(solver = SolverConfig(maximum_iterations = 1))
         rejected_and_failed = liljegren_wbgt_batch(

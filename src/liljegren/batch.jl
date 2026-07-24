@@ -3,6 +3,7 @@
 @inline _at(values::AbstractVector, row::Int) = @inbounds values[firstindex(values) + row - 1]
 
 @inline _batch_value_type(::Type{Missing}) = Union{}
+@inline _batch_value_type(::Type{Union{}}) = Union{}
 @inline _batch_value_type(::Type{T}) where {T<:Real} = typeof(float(zero(T)))
 @inline _batch_value_type(::Type{<:AbstractVector{T}}) where {T} =
     _batch_value_type(Base.nonmissingtype(T))
@@ -30,6 +31,10 @@ function _validate_numeric_vector(
 )
     length(value) == rows || throw(ArgumentError("$name vector must have $rows elements"))
     element_type = eltype(value)
+    if element_type === Missing
+        allow_missing || throw(ArgumentError("$name must not permit Missing"))
+        return nothing
+    end
     nonmissing_type = Base.nonmissingtype(element_type)
     isconcretetype(nonmissing_type) && nonmissing_type <: Real ||
         throw(ArgumentError("$name vector must have a concrete Real element type$(allow_missing ? " optionally unioned with Missing" : "")"))
@@ -83,7 +88,12 @@ function _validate_batch_inputs(
 end
 
 function _validate_batch_outputs(rows::Int, T::Type{<:AbstractFloat}, outputs::AbstractVector...)
-    _validate_batch_result_vectors(T, outputs...)
+    for output in outputs
+        length(output) == rows ||
+            throw(ArgumentError("output vectors must have $rows elements"))
+        Missing <: eltype(output) && T <: eltype(output) ||
+            throw(ArgumentError("output element type must accept Missing and $T"))
+    end
     return nothing
 end
 
