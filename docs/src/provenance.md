@@ -15,3 +15,40 @@ Every implemented equation, coefficient, physical constant, and model policy
 will be linked to the source inventory in `validation/sources.toml` or marked
 as an original numerical or API design decision. Cross-implementation results
 are advisory validation evidence, never scientific authority.
+
+## Constants and fixed instrument parameters
+
+Spec 003 centralizes the values used by the Liljegren model. The source of the
+model and device values is Liljegren et al. (2008), Table 1 and its instrument
+description. Independent literature confirms the globe and wick geometry,
+emissivities and albedos, and the 1003.5 J kg⁻¹ K⁻¹ dry-air heat capacity
+(Hall et al., 2022, §2.3). NIST SP 250-39 supplies the SI temperature offset,
+the relation between molar and specific gas constants, and modern reference
+values for dry-air and water molar masses.
+
+| Group | Values selected | Basis |
+| --- | --- | --- |
+| Thermodynamic model constants | `σ=5.6696e-8`, `cₚ=1003.5`, `Mₐ=28.97`, `M_w=18.015`, `R=8314.34` | Liljegren model convention; units are W m⁻² K⁻⁴, J kg⁻¹ K⁻¹, kg kmol⁻¹, kg kmol⁻¹, and J kmol⁻¹ K⁻¹ respectively. |
+| Derived constant | `R_d=R/Mₐ` | Formula; J kg⁻¹ K⁻¹. |
+| Globe | diameter 0.0508 m, emissivity 0.95, albedo 0.05 | Liljegren instrument parameters. |
+| Wick | diameter 0.007 m, length 0.0254 m, emissivity 0.95, albedo 0.4 | Liljegren instrument parameters. |
+| Surface | emissivity 0.999, default albedo 0.45 | Liljegren model convention; 0.45 is independently described as its assumed ground albedo. |
+| Pressure fallback | 1010 hPa | Package API fallback only; canonical Liljegren calculations take observed pressure explicitly. |
+| Minimum wind | 0.13 m/s | Canonical computational wind floor, configurable by package policy. |
+| Direct-fraction fallback | 0.8 | Reserved package approximation only when a spec-004 solar derivation is unavailable; not a canonical Liljegren default. |
+
+The current CODATA/NIST Stefan–Boltzmann value (5.670374419e-8 W m⁻² K⁻⁴)
+differs from the historical model value. The package retains `5.6696e-8` so
+scientific fixtures can reproduce the selected published model convention;
+future work changing it requires a fixture sensitivity comparison and an
+explicit model-version decision.
+
+References:
+
+- Liljegren et al. (2008), DOI: https://doi.org/10.1080/15459620802310770.
+- Hall et al. (2022), *Weather and Climate Extremes*, 35, 100420,
+  https://doi.org/10.1016/j.wace.2022.100420.
+- NIST SP 250-39 (2009), Appendix A,
+  https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=902889.
+- NIST CODATA fundamental constants,
+  https://physics.nist.gov/cuu/Constants/.

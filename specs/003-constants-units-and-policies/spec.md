@@ -41,7 +41,8 @@ const DEFAULT_PRESSURE_HPA = 1010.0
 const DEFAULT_SURFACE_ALBEDO = 0.45
 const DEFAULT_GLOBE_DIAMETER_M = 0.0508
 const DEFAULT_MINIMUM_WIND_SPEED_M_S = 0.13
-const DEFAULT_DIRECT_FRACTION = 0.8
+# Reserved package fallback; not a canonical Liljegren default.
+const FALLBACK_DIRECT_FRACTION = 0.8
 
 const GLOBE_EMISSIVITY = 0.95
 const GLOBE_ALBEDO = 0.05
@@ -76,16 +77,24 @@ For scalar invalid fixed configuration, throw `ArgumentError` or `DomainError`. 
 
 ## Meteorological normalisation
 
-Implement one internal scalar function that:
+Implement two composable internal scalar functions:
 
-1. rejects or propagates missing meteorological values according to the public contract;
-2. clamps negative wind to zero;
-3. clamps negative radiation to zero;
-4. applies the dewpoint policy;
-5. calculates solar zenith;
-6. sets radiation to zero when `cos(zenith) <= 0`;
-7. marks `solar_geometry_mismatch` when supplied radiation is positive but computed solar elevation is non-positive, before night-time zeroing;
-8. floors wind at `minimum_wind_speed_m_s` only where required by component physics.
+1. `_normalize_basic_meteorology(...)` must:
+
+   - reject or propagate missing meteorological values according to the public contract;
+   - clamp negative wind and radiation to zero;
+   - apply the dewpoint policy;
+   - retain the supplied non-negative wind for later component physics.
+
+2. `_apply_solar_policy(...)` must accept a validated solar zenith from the
+   spec-004 kernel, reject zenith outside `[0, π]`, zero radiation at and below
+   the mathematical horizon (`zenith >= π/2`), and set
+   `solar_geometry_mismatch` when positive supplied radiation is zeroed.
+
+Public orchestration owns time-type validation and solar-zenith calculation.
+It calls the two functions in sequence after the spec-004 source-selection gate
+is resolved. Wind is floored at `minimum_wind_speed_m_s` only where required by
+component physics.
 
 Keep the distinction between supplied wind after non-negative clamping and effective wind after the model floor.
 

@@ -1,17 +1,17 @@
-"""Policy for reconciling a dew point that exceeds air temperature."""
+"""Unitless policy for reconciling a dew point that exceeds air temperature."""
 @enum DewPointPolicy::UInt8 begin
     ClampDewPoint
     SwapAirAndDewPoint
     RejectInvalidDewPoint
 end
 
-"""Method used to derive solar time from a supported temporal input."""
+"""Unitless method for deriving solar time from a supported temporal input."""
 @enum SolarTimeMode::UInt8 begin
     TimestampSolarTime
     DateNoonSolarTime
 end
 
-"""Public-input disposition for a scalar or batch row."""
+"""Unitless public-input disposition for a scalar or batch row."""
 @enum InputStatus::UInt8 begin
     InputAccepted
     MissingMeteorology
@@ -20,7 +20,7 @@ end
     InvalidDomain
 end
 
-"""Reason a numerical component solve did not produce an accepted root."""
+"""Unitless reason a numerical component solve did not produce an accepted root."""
 @enum FailureReason::UInt8 begin
     NoFailure
     NotAttempted
@@ -53,7 +53,7 @@ function _require_finite_nonnegative(value::T, name::Symbol) where {T<:AbstractF
     return value
 end
 
-"""Numerical acceptance criteria and iteration limit for a scalar root solve."""
+"""Numerical acceptance criteria: root/residual tolerances are K; iterations are unitless."""
 struct SolverConfig{T<:AbstractFloat}
     root_tolerance_k::T
     residual_tolerance_k::T
@@ -87,7 +87,7 @@ function SolverConfig(
     )
 end
 
-"""Physical constants, input policies, and solver settings for the Liljegren model."""
+"""Liljegren settings: dew-point tolerance is °C, globe diameter is m, and minimum wind is m/s."""
 struct LiljegrenConfig{T<:AbstractFloat}
     solver::SolverConfig{T}
     dew_point_policy::DewPointPolicy
@@ -129,9 +129,9 @@ function LiljegrenConfig(
     dew_point_policy::DewPointPolicy = ClampDewPoint,
     dew_point_tolerance_c::Real = typeof(solver.root_tolerance_k)(1e-4),
     solar_time_mode::SolarTimeMode = TimestampSolarTime,
-    surface_albedo::Real = typeof(solver.root_tolerance_k)(0.45),
-    globe_diameter_m::Real = typeof(solver.root_tolerance_k)(0.0508),
-    minimum_wind_speed_m_s::Real = typeof(solver.root_tolerance_k)(0.13),
+    surface_albedo::Real = typeof(solver.root_tolerance_k)(DEFAULT_SURFACE_ALBEDO),
+    globe_diameter_m::Real = typeof(solver.root_tolerance_k)(DEFAULT_GLOBE_DIAMETER_M),
+    minimum_wind_speed_m_s::Real = typeof(solver.root_tolerance_k)(DEFAULT_MINIMUM_WIND_SPEED_M_S),
 )
     float_type = _common_float_type(
         solver.root_tolerance_k,
@@ -156,7 +156,7 @@ function LiljegrenConfig(
     )
 end
 
-"""Value-only outcome of a Liljegren WBGT calculation, in degrees Celsius."""
+"""Value-only Liljegren outcome; WBGT and component temperatures are °C."""
 struct WBGTResult{T<:AbstractFloat}
     wbgt_c::Union{Missing,T}
     natural_wet_bulb_c::Union{Missing,T}
@@ -184,7 +184,7 @@ function WBGTResult(
     )
 end
 
-"""Convergence trace for one component root solve."""
+"""Component-solver trace: `*_c` fields are °C and residual/tolerance fields are K."""
 struct SolverDiagnostics{T<:AbstractFloat}
     converged::Bool
     reason::FailureReason
@@ -223,6 +223,8 @@ struct SolverDiagnostics{T<:AbstractFloat}
         iterations >= 0 || throw(ArgumentError("iterations must be non-negative"))
         _require_finite_positive(root_tolerance_k, :root_tolerance_k)
         _require_finite_positive(residual_tolerance_k, :residual_tolerance_k)
+        residual_tolerance_k <= T(0.01) ||
+            throw(ArgumentError("residual_tolerance_k must not exceed 0.01 K"))
         return new{T}(
             converged,
             reason,
@@ -243,7 +245,7 @@ struct SolverDiagnostics{T<:AbstractFloat}
     end
 end
 
-"""Value result plus explicit input-normalisation and solver diagnostics."""
+"""Value result (°C) plus unitless input-normalisation flags and solver diagnostics."""
 struct DiagnosticWBGTResult{T<:AbstractFloat}
     result::WBGTResult{T}
     input_status::InputStatus
@@ -277,7 +279,7 @@ struct DiagnosticWBGTResult{T<:AbstractFloat}
     end
 end
 
-"""Structure-of-arrays value result for aligned batch calculations."""
+"""Aligned batch result; all three arrays contain °C values or `missing`."""
 struct WBGTBatchResult{T<:AbstractFloat,V<:AbstractVector{Union{Missing,T}}}
     wbgt_c::V
     natural_wet_bulb_c::V
