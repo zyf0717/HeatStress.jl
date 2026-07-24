@@ -23,7 +23,8 @@ end
 
 function reference_matches()
     destination = joinpath(FIXTURES, "liljegren_reference.csv")
-    return reference_csv() == read(destination, String)
+    committed = replace(read(destination, String), "\r\n" => "\n")
+    return reference_csv() == committed
 end
 
 function main(args::Vector{String} = ARGS)
