@@ -1,6 +1,7 @@
 using Test
 using HeatStress
 using Dates
+using TOML
 
 function _batch_inputs(rows = 4)
     return (
@@ -55,6 +56,27 @@ end
     @test diagnostic_threaded.input_status == diagnostic_serial.input_status
     @test diagnostic_threaded.globe.evaluations == diagnostic_serial.globe.evaluations
     @test_throws ArgumentError diagnose_liljegren_batch(air, dew, wind, radiation, time, [0.0, 1.0], 0.0; direct_fraction = 0.7)
+
+    fixture_data = TOML.parsefile(joinpath(@__DIR__, "fixtures", "liljegren_scalar_reference.toml"))
+    fixtures = collect(values(fixture_data["fixtures"]))
+    fixture_air = [fixture["air_temperature_c"] for fixture in fixtures]
+    fixture_dew = [fixture["dew_point_c"] for fixture in fixtures]
+    fixture_wind = [fixture["wind_speed_m_s"] for fixture in fixtures]
+    fixture_radiation = [fixture["solar_radiation_w_m2"] for fixture in fixtures]
+    fixture_time = DateTime[DateTime(fixture["time"]) for fixture in fixtures]
+    fixture_longitude = [fixture["longitude_deg"] for fixture in fixtures]
+    fixture_latitude = [fixture["latitude_deg"] for fixture in fixtures]
+    fixture_pressure = [fixture["pressure_hpa"] for fixture in fixtures]
+    fixture_direct_fraction = [fixture["direct_fraction"] for fixture in fixtures]
+    fixture_serial = liljegren_wbgt_batch(fixture_air, fixture_dew, fixture_wind, fixture_radiation, fixture_time, fixture_longitude, fixture_latitude; pressure_hpa = fixture_pressure, direct_fraction = fixture_direct_fraction)
+    fixture_threaded = liljegren_wbgt_batch(fixture_air, fixture_dew, fixture_wind, fixture_radiation, fixture_time, fixture_longitude, fixture_latitude; pressure_hpa = fixture_pressure, direct_fraction = fixture_direct_fraction, threaded = true)
+    for row in eachindex(fixtures)
+        fixture = fixtures[row]
+        @test fixture_serial.globe_temperature_c[row] ≈ parse(Float64, fixture["globe_temperature_c"]) atol = 1e-4 rtol = 1e-8
+        @test fixture_serial.natural_wet_bulb_c[row] ≈ parse(Float64, fixture["natural_wet_bulb_c"]) atol = 1e-4 rtol = 1e-8
+        @test fixture_serial.wbgt_c[row] ≈ parse(Float64, fixture["wbgt_c"]) atol = 1e-4 rtol = 1e-8
+    end
+    @test fixture_threaded.wbgt_c == fixture_serial.wbgt_c
 
     @test @allocated(liljegren_wbgt!(wbgt, wet, globe, air, dew, wind, radiation, time, 0.0, 0.0; direct_fraction = 0.7)) <
           @allocated(liljegren_wbgt_batch(air, dew, wind, radiation, time, 0.0, 0.0; direct_fraction = 0.7))
