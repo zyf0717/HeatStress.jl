@@ -28,6 +28,7 @@ struct _PreparedMeteorology{T<:AbstractFloat}
     wind_speed_clamped::Bool
     solar_radiation_clamped::Bool
     solar_geometry_mismatch::Bool
+    direct_solar_clipped::Bool
 end
 
 # Input-preparation failure represented without a numerical payload.
@@ -113,6 +114,9 @@ function _normalize_basic_meteorology(
 
     all(isfinite, (air, dew, wind, radiation, pressure, fraction)) ||
         return _InputPreparationFailure(InvalidDomain)
+    oftype(air, -40) <= air <= oftype(air, 50) &&
+        oftype(dew, -40) <= dew <= oftype(dew, 50) ||
+        return _InputPreparationFailure(InvalidDomain)
     pressure > zero(float_type) || return _InputPreparationFailure(InvalidDomain)
     zero(float_type) <= fraction <= one(float_type) || return _InputPreparationFailure(InvalidDomain)
 
@@ -158,6 +162,8 @@ function _apply_solar_policy(
     below_horizon = zenith >= T(pi / 2)
     mismatch = basic.solar_radiation_w_m2 > zero(T) && below_horizon
     radiation = below_horizon ? zero(T) : basic.solar_radiation_w_m2
+    _, _, _, direct_clipped = _direct_solar_geometry(zenith)
+    direct_solar_clipped = radiation > zero(T) && basic.direct_fraction > zero(T) && direct_clipped
 
     return _PreparedMeteorology(
         basic.air_temperature_c,
@@ -173,6 +179,7 @@ function _apply_solar_policy(
         basic.wind_speed_clamped,
         basic.solar_radiation_clamped,
         mismatch,
+        direct_solar_clipped,
     )
 end
 

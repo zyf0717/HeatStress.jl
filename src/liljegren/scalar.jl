@@ -23,6 +23,7 @@ function _input_failure_diagnostic(status::InputStatus, config::LiljegrenConfig{
         false,
         false,
         false,
+        false,
         diagnostics,
         diagnostics,
     )
@@ -99,10 +100,7 @@ function _diagnose_prepared_liljegren(
     prepared::_PreparedMeteorology{T},
     config::LiljegrenConfig{T},
 ) where {T<:AbstractFloat}
-    saturation_pressure_hpa = _saturation_vapour_pressure_hpa_unchecked(prepared.air_temperature_c)
     vapour_pressure_hpa = _saturation_vapour_pressure_hpa_unchecked(prepared.dew_point_c)
-    # The ratio is the internal RH fraction used by the published balances.
-    relative_humidity_fraction = vapour_pressure_hpa / saturation_pressure_hpa
     atmospheric_emissivity = _atmospheric_emissivity(vapour_pressure_hpa)
     effective_wind_speed_m_s = _effective_wind_speed_m_s(
         prepared.wind_speed_m_s,
@@ -116,6 +114,14 @@ function _diagnose_prepared_liljegren(
         air_density,
         air_viscosity,
     )
+    all(isfinite, (
+        vapour_pressure_hpa,
+        atmospheric_emissivity,
+        effective_wind_speed_m_s,
+        air_density,
+        air_viscosity,
+        mass_transfer_ratio,
+    )) || return _input_failure_diagnostic(InvalidDomain, config)
 
     globe = _solve_globe_balance(
         _globe_balance(prepared, atmospheric_emissivity, effective_wind_speed_m_s, config),
@@ -136,9 +142,6 @@ function _diagnose_prepared_liljegren(
         config.solver,
     )
 
-    # Keep this explicit rather than deriving vapour pressure through a public
-    # RH helper: root kernels operate on normalized floating-point inputs.
-    relative_humidity_fraction >= zero(T) || throw(ArgumentError("relative humidity must be non-negative"))
     wbgt_c = if !ismissing(globe.value_c) && !ismissing(natural_wet_bulb.value_c)
         convert(T, 0.7) * natural_wet_bulb.value_c +
         convert(T, 0.2) * globe.value_c +
@@ -154,6 +157,7 @@ function _diagnose_prepared_liljegren(
         prepared.wind_speed_clamped,
         prepared.solar_radiation_clamped,
         prepared.solar_geometry_mismatch,
+        prepared.direct_solar_clipped,
         globe,
         natural_wet_bulb,
     )
@@ -197,6 +201,9 @@ function _diagnose_liljegren(
         )
         pressure_hpa = convert(input_type, DEFAULT_PRESSURE_HPA)
     end
+    isfinite(longitude_deg) && -180 <= longitude_deg <= 180 &&
+        isfinite(latitude_deg) && -90 <= latitude_deg <= 90 ||
+        return _input_failure_diagnostic(InvalidDomain, config)
     basic = _normalize_basic_meteorology(
         air_temperature_c,
         dew_point_c,

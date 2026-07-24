@@ -134,6 +134,10 @@ Preserve these implementation-independent fields:
 - native-equation endpoint location residuals;
 - root and residual tolerances.
 
+`evaluations` includes the component wrapper's final validation-residual call
+when location converges. Failed location attempts do not evaluate a separate
+validation residual.
+
 Do not expose implementation-specific batch bookkeeping fields in v0.1:
 
 - `batch_iterations`;

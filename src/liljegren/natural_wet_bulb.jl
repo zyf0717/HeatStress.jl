@@ -18,7 +18,9 @@ function _solve_natural_wet_bulb_balance(
         maximum_k,
         config,
     )
-    validation_residual_k = ismissing(solve.candidate_k) ?
-                            missing : _natural_wet_bulb_residual(solve.candidate_k, balance)
-    return _solver_diagnostics(solve, validation_residual_k, config)
+    if solve.converged && !ismissing(solve.candidate_k)
+        validation_residual_k = _natural_wet_bulb_residual(solve.candidate_k, balance)
+        return _solver_diagnostics(solve, validation_residual_k, config, 1)
+    end
+    return _solver_diagnostics(solve, missing, config)
 end

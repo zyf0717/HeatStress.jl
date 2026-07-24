@@ -31,6 +31,12 @@ The authoritative detail and citations remain in `spec.md`; software implementat
   the natural wet bulb remains valid.
 - The public default pressure is converted to the call's common float type, so
   Float32 meteorology with a Float32 configuration remains Float32.
+- Scalar coordinates and the FAO-56 -40--50 °C public temperature domain are
+  checked before physical-property construction. Invalid observations return
+  `InvalidDomain` with unattempted component diagnostics rather than throwing.
+- Near-horizon direct-beam clipping is propagated through
+  `direct_solar_clipped`; it is not conflated with the below-horizon radiation
+  mismatch diagnostic.
 
 ## Remaining validation
 

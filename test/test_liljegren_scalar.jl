@@ -64,7 +64,21 @@ end
         )
         @test night.input_status === InputAccepted
         @test night.solar_geometry_mismatch
+        @test !night.direct_solar_clipped
         @test !ismissing(night.result.wbgt_c)
+
+        clipped = _diagnose_liljegren(
+            30.0,
+            20.0,
+            1.0,
+            600.0,
+            DateTime(2024, 9, 22, 5, 55),
+            0.0,
+            0.0;
+            direct_fraction = 0.7,
+        )
+        @test clipped.direct_solar_clipped
+        @test !clipped.solar_geometry_mismatch
 
         zero_wind = _diagnose_liljegren(
             30.0,
@@ -150,6 +164,21 @@ end
         )
         @test invalid_pressure.input_status === InvalidDomain
         @test invalid_fraction.input_status === InvalidDomain
+        invalid_longitude = _diagnose_liljegren(
+            30.0, 20.0, 1.0, 800.0, DateTime(2024, 6, 21, 12), 181.0, 0.0;
+            direct_fraction = 0.7,
+        )
+        invalid_latitude = _diagnose_liljegren(
+            30.0, 20.0, 1.0, 800.0, DateTime(2024, 6, 21, 12), 0.0, NaN;
+            direct_fraction = 0.7,
+        )
+        invalid_temperature = _diagnose_liljegren(
+            -274.0, -275.0, 1.0, 800.0, DateTime(2024, 6, 21, 12), 0.0, 0.0;
+            direct_fraction = 0.7,
+        )
+        @test invalid_longitude.input_status === InvalidDomain
+        @test invalid_latitude.input_status === InvalidDomain
+        @test invalid_temperature.input_status === InvalidDomain
         @test_throws ArgumentError LiljegrenConfig(globe_diameter_m = 0.0)
         @test_throws MethodError _diagnose_liljegren(30.0, 20.0, 1.0, 800.0, Date(2024, 6, 21), 0.0, 0.0; direct_fraction = 0.7)
 

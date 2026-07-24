@@ -178,6 +178,7 @@ function _solve_bracketed(
     end
 
     while !_sign_change(lower_residual, upper_residual)
+        lower_changed = false
         next_lower_k = _next_lower(
             expansion_policy,
             lower_k,
@@ -187,6 +188,7 @@ function _solve_bracketed(
             minimum_k,
         )
         if next_lower_k != lower_k
+            lower_changed = true
             lower_k = next_lower_k
             lower_residual = _call_residual(residual, lower_k)
             evaluations += 1
@@ -210,6 +212,9 @@ function _solve_bracketed(
             maximum_k,
         )
         if next_upper_k == upper_k
+            # A globe same-positive bracket moves only downward. It is
+            # unbracketed only after neither endpoint can move further.
+            lower_changed && continue
             return _solve_result(false, Unbracketed, missing, evaluations, iterations,
                 initial_lower_k, initial_upper_k, lower_k, upper_k, lower_residual, upper_residual)
         end

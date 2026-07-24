@@ -20,6 +20,9 @@ flags. Dew point above air temperature is reconciled within the configured
 tolerance, then clamped, swapped, or rejected according to `DewPointPolicy`.
 Solar forcing is zeroed below the computed horizon; positive supplied radiation
 below that horizon sets the diagnostic-only `solar_geometry_mismatch` flag.
+Positive direct radiation within one degree above the horizon instead sets
+`direct_solar_clipped`; diffuse forcing remains active, and this numerical
+protection is distinct from physical night-time zeroing.
 The configured minimum wind is applied later by component physics, never during
 public-boundary normalization.
 

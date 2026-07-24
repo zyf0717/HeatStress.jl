@@ -3,8 +3,8 @@
 ## Status
 
 - [x] Planned
-- [ ] In progress
-- [x] Complete
+- [x] In progress
+- [ ] Complete
 
 ## Tasks
 
@@ -20,5 +20,6 @@
 ## Evidence
 
 - Evidence: `julia --project=. -e 'using Pkg; Pkg.test()'` passed on 2026-07-24
-  (including 51 root-solver assertions).
-- Commit: `d2edb95` (`feat: implement root solver and scalar Liljegren model`)
+  (including 56 root-solver assertions) after correcting lower-only expansion
+  and total diagnostic evaluation accounting.
+- Commit: correction uncommitted

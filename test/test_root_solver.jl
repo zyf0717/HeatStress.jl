@@ -36,6 +36,19 @@ using HeatStress
         @test expanded.initial_upper_k == 2.0
         @test expanded.final_upper_k >= 20.0
 
+        lower_expanded = HeatStress._solve_bracketed(
+            x -> x + 20.0,
+            0.0,
+            2.0,
+            globe_policy,
+            -30.0,
+            30.0,
+            config,
+        )
+        @test lower_expanded.converged
+        @test lower_expanded.initial_lower_k == 0.0
+        @test lower_expanded.final_lower_k <= -20.0
+
         wet_expanded = HeatStress._solve_bracketed(
             x -> x - 15.0,
             0.0,
@@ -126,12 +139,32 @@ using HeatStress
         @test globe_diagnostic.reason === NoFailure
         @test globe_diagnostic.value_c ≈ 47.74173511564036 atol = 2e-6
         @test abs(globe_diagnostic.validation_residual_k) <= config.residual_tolerance_k
+        globe_location = HeatStress._solve_bracketed(
+            temperature_k -> HeatStress._globe_energy_residual_k4(temperature_k, globe),
+            globe.air_temperature_k - 2.0,
+            globe.air_temperature_k + 10.0,
+            HeatStress._GlobeBracketExpansion(),
+            globe.air_temperature_k - 200.0,
+            globe.air_temperature_k + 200.0,
+            config,
+        )
+        @test globe_diagnostic.evaluations == globe_location.evaluations + 1
 
         wet_bulb = _wet_bulb_balance_fixture()
         wet_bulb_diagnostic = HeatStress._solve_natural_wet_bulb_balance(wet_bulb, 294.0, config)
         @test wet_bulb_diagnostic.converged
         @test wet_bulb_diagnostic.reason === NoFailure
         @test abs(wet_bulb_diagnostic.validation_residual_k) <= config.residual_tolerance_k
+        wet_bulb_location = HeatStress._solve_bracketed(
+            temperature_k -> HeatStress._natural_wet_bulb_residual(temperature_k, wet_bulb),
+            293.0,
+            304.15,
+            HeatStress._WetBulbBracketExpansion(),
+            203.15,
+            403.15,
+            config,
+        )
+        @test wet_bulb_diagnostic.evaluations == wet_bulb_location.evaluations + 1
 
         unbracketed_globe = HeatStress.GlobeBalance(303.15, 1013.25, 1.0, 0.0, 1e14, 0.0508, 0.95)
         @test HeatStress._solve_globe_balance(unbracketed_globe, config).reason === Unbracketed

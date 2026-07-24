@@ -24,7 +24,9 @@ function _solver_diagnostics(
     solve::_BracketedSolveResult{T},
     validation_residual_k::Union{Missing,T},
     config::SolverConfig{T},
+    validation_evaluations::Int = 0,
 ) where {T<:AbstractFloat}
+    validation_evaluations >= 0 || throw(ArgumentError("validation_evaluations must be non-negative"))
     candidate_c = ismissing(solve.candidate_k) ? missing : solve.candidate_k - convert(T, KELVIN_OFFSET)
     accepted = solve.converged && !ismissing(solve.candidate_k) &&
                !ismissing(validation_residual_k) && isfinite(validation_residual_k) &&
@@ -38,7 +40,7 @@ function _solver_diagnostics(
         value_c,
         candidate_c,
         validation_residual_k,
-        solve.evaluations,
+        solve.evaluations + validation_evaluations,
         solve.iterations,
         solve.initial_lower_k,
         solve.initial_upper_k,

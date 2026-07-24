@@ -242,6 +242,7 @@ struct DiagnosticWBGTResult{T<:AbstractFloat}
     wind_speed_clamped::Bool
     solar_radiation_clamped::Bool
     solar_geometry_mismatch::Bool
+    direct_solar_clipped::Bool
     globe::SolverDiagnostics{T}
     natural_wet_bulb::SolverDiagnostics{T}
 
@@ -252,6 +253,7 @@ struct DiagnosticWBGTResult{T<:AbstractFloat}
         wind_speed_clamped::Bool,
         solar_radiation_clamped::Bool,
         solar_geometry_mismatch::Bool,
+        direct_solar_clipped::Bool,
         globe::SolverDiagnostics{T},
         natural_wet_bulb::SolverDiagnostics{T},
     ) where {T<:AbstractFloat}
@@ -262,6 +264,7 @@ struct DiagnosticWBGTResult{T<:AbstractFloat}
             wind_speed_clamped,
             solar_radiation_clamped,
             solar_geometry_mismatch,
+            direct_solar_clipped,
             globe,
             natural_wet_bulb,
         )
