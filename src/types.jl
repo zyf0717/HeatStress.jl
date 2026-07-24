@@ -291,3 +291,36 @@ function WBGTBatchResult(wbgt_c::V, natural_wet_bulb_c::V, globe_temperature_c::
         throw(ArgumentError("batch result vectors must have Union{Missing, T} floating-point elements"))
     return WBGTBatchResult{float_type,V}(wbgt_c, natural_wet_bulb_c, globe_temperature_c)
 end
+
+"""Structure-of-arrays component diagnostics for aligned Liljegren batch rows."""
+struct SolverDiagnosticsBatch{T<:AbstractFloat}
+    converged::Vector{Bool}
+    reason::Vector{FailureReason}
+    value_c::Vector{Union{Missing,T}}
+    candidate_c::Vector{Union{Missing,T}}
+    validation_residual_k::Vector{Union{Missing,T}}
+    evaluations::Vector{Int}
+    iterations::Vector{Int}
+    initial_lower_k::Vector{Union{Missing,T}}
+    initial_upper_k::Vector{Union{Missing,T}}
+    final_lower_k::Vector{Union{Missing,T}}
+    final_upper_k::Vector{Union{Missing,T}}
+    lower_location_residual::Vector{Union{Missing,T}}
+    upper_location_residual::Vector{Union{Missing,T}}
+end
+
+"""Structure-of-arrays diagnostic result for aligned Liljegren batch rows."""
+struct DiagnosticWBGTBatchResult{T<:AbstractFloat}
+    result::WBGTBatchResult{T,Vector{Union{Missing,T}}}
+    input_status::Vector{InputStatus}
+    dew_point_adjusted::Vector{Bool}
+    wind_speed_clamped::Vector{Bool}
+    solar_radiation_clamped::Vector{Bool}
+    solar_geometry_mismatch::Vector{Bool}
+    direct_solar_clipped::Vector{Bool}
+    globe::SolverDiagnosticsBatch{T}
+    natural_wet_bulb::SolverDiagnosticsBatch{T}
+    threaded::Bool
+    threads_available::Int
+    rows::Int
+end

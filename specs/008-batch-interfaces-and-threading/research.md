@@ -15,5 +15,8 @@ The authoritative detail and citations remain in `spec.md`; software implementat
 
 ## Open questions
 
-- Select preprocessing cache keys and ownership without mutable global state.
-- Set diagnostics-memory policy for high-throughput calls.
+- Solar reuse remains deferred: v0.1 uses the canonical scalar solar path per
+  row until profiling shows grouped-time preprocessing is material.
+- Diagnostic batches use package-owned structure-of-arrays vectors, avoiding
+  per-row diagnostic objects in the returned layout. Threaded loops write only
+  their own ordinal row and retain no shared counters.
