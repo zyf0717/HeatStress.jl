@@ -1,7 +1,6 @@
 @testset "public API types" begin
     @testset "policies" begin
         @test ClampDewPoint isa DewPointPolicy
-        @test TimestampSolarTime isa SolarTimeMode
         @test InputAccepted isa InputStatus
         @test NoFailure isa FailureReason
     end

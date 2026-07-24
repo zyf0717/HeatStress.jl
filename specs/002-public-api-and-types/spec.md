@@ -84,7 +84,7 @@ Support:
 
 - `ZonedDateTime`: convert the instant to UTC before solar calculations;
 - `DateTime`: interpret explicitly as UTC and document this;
-- `Date`: supported only if `DateNoonSolarTime` is retained by spec 004; do not silently interpret a date as a timestamp;
+- `Date`: is not accepted as a solar timestamp; callers must provide an explicit UTC instant;
 - `Missing`: propagate as an unattempted/missing-time result at the public boundary.
 
 Do not parse arbitrary strings in hot APIs. Provide an optional convenience method only after core completion, or require callers to parse with `TimeZones.jl`/`Dates`.
@@ -98,11 +98,6 @@ Use explicit enums or singleton values, not paired Booleans.
     ClampDewPoint
     SwapAirAndDewPoint
     RejectInvalidDewPoint
-end
-
-@enum SolarTimeMode::UInt8 begin
-    TimestampSolarTime
-    DateNoonSolarTime
 end
 
 @enum InputStatus::UInt8 begin
@@ -133,8 +128,6 @@ Policy design:
 | dewpoint exceeds air temperature above tolerance; clamp to saturation | `ClampDewPoint` (provisional default) |
 | dewpoint exceeds air temperature above tolerance; exchange the two values for legacy-data repair | `SwapAirAndDewPoint` |
 | dewpoint exceeds air temperature above tolerance; reject row | `RejectInvalidDewPoint` |
-| compute solar geometry from full instant | `TimestampSolarTime` |
-| compute a documented date-at-noon approximation | `DateNoonSolarTime` |
 
 The v0.1 default is `ClampDewPoint`. It preserves the supplied air temperature
 and makes a physically inconsistent dew point explicit through the diagnostic
@@ -154,7 +147,6 @@ struct LiljegrenConfig{T<:AbstractFloat}
     solver::SolverConfig{T}
     dew_point_policy::DewPointPolicy
     dew_point_tolerance_c::T
-    solar_time_mode::SolarTimeMode
     surface_albedo::T
     globe_diameter_m::T
     minimum_wind_speed_m_s::T
@@ -174,7 +166,6 @@ LiljegrenConfig(
     solver = SolverConfig(),
     dew_point_policy = ClampDewPoint,
     dew_point_tolerance_c = 1e-4,
-    solar_time_mode = TimestampSolarTime,
     surface_albedo = 0.45,
     globe_diameter_m = 0.0508,
     minimum_wind_speed_m_s = 0.13,
