@@ -9,7 +9,16 @@ using HeatStress
         values = HeatStress.saturation_vapour_pressure_hpa.(range(-40.0, 50.0; length = 20))
         @test all(isfinite, values)
         @test all(diff(values) .> 0)
-        @test HeatStress.saturation_vapour_pressure_hpa(BigFloat(25)) isa BigFloat
+        setprecision(256) do
+            temperature = BigFloat(25)
+            expected = BigFloat(6108 // 1000) * exp(
+                BigFloat(1727 // 100) * temperature /
+                (temperature + BigFloat(2373 // 10)),
+            )
+            actual = HeatStress.saturation_vapour_pressure_hpa(temperature)
+            @test actual isa BigFloat
+            @test actual == expected
+        end
         @test HeatStress.saturation_vapour_pressure_hpa(20f0) isa Float32
     end
 

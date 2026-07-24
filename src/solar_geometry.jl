@@ -1,9 +1,10 @@
 """
     solar_zenith(time, longitude_deg, latitude_deg) -> Float64
 
-Return the topocentric solar zenith angle in degrees for a UTC `DateTime` or
-`ZonedDateTime` instant. Longitudes are positive east of Greenwich and
-latitudes are positive north. A `DateTime` is interpreted as UTC.
+Return the geometric solar zenith angle from Spencer's daily approximation in
+degrees for a UTC `DateTime` or `ZonedDateTime` instant. Longitudes are
+positive east of Greenwich and latitudes are positive north. A `DateTime` is
+interpreted as UTC.
 
 The calculation uses the Spencer (1971) Fourier series for solar declination
 and equation of time. It returns the geometric angle without refraction or
@@ -114,7 +115,7 @@ end
 
 function _spencer_equation_of_time(gamma::Real)::Float64
     g = Float64(gamma)
-    return 0.000075 + 0.001868 * cos(g) - 0.032077 * sin(g) -
+    return 0.0000075 + 0.001868 * cos(g) - 0.032077 * sin(g) -
            0.014615 * cos(2g) - 0.040849 * sin(2g)
 end
 

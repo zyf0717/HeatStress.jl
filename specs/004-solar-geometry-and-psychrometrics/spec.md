@@ -23,7 +23,8 @@ Select a documented solar-position approximation suitable for hourly meteorologi
 - accepts a UTC instant, longitude and latitude;
 - handles leap years and day-of-year correctly;
 - provides solar zenith in a stated angular unit;
-- is continuous and stable near sunrise/sunset;
+- is stable near sunrise/sunset; the selected daily Spencer approximation is
+  piecewise-continuous at UTC day boundaries;
 - clamps inverse-trigonometric inputs against floating-point drift;
 - has a documented expected error appropriate for WBGT calculations;
 - can be decomposed into time-only and coordinate-dependent terms for batch reuse.
@@ -89,7 +90,7 @@ latitude (radians), Spencer's equations are:
 - 0.002697\cos3\gamma + 0.00148\sin3\gamma
 \]
 \[
-E = (720/\pi)[0.000075 + 0.001868\cos\gamma - 0.032077\sin\gamma
+E = (720/\pi)[0.0000075 + 0.001868\cos\gamma - 0.032077\sin\gamma
 - 0.014615\cos2\gamma - 0.040849\sin2\gamma]\quad\mathrm{min}
 \]
 \[
@@ -101,7 +102,10 @@ The factor `4 min/degree` converts east-positive longitude to local mean
 solar time. `acos` receives its argument clamped to [-1, 1]. `γ`, `δ`, `H`,
 and `z` are radians internally; `z` is converted to degrees at the public
 boundary. The source's 365-day approximation is intentionally retained on
-leap-year day 366.
+leap-year day 366. Declination and equation-of-time terms use integer UTC day
+of year, as documented by Spencer; consequently the kernel is
+piecewise-continuous, with a small step at UTC midnight rather than a false
+claim of global continuity.
 
 For psychrometrics, FAO-56 equation 11 is:
 

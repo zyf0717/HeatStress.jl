@@ -35,7 +35,6 @@ values for dry-air and water molar masses.
 | Surface | emissivity 0.999, default albedo 0.45 | Liljegren model convention; 0.45 is independently described as its assumed ground albedo. |
 | Pressure fallback | 1010 hPa | Package API fallback only; canonical Liljegren calculations take observed pressure explicitly. |
 | Minimum wind | 0.13 m/s | Canonical computational wind floor, configurable by package policy. |
-| Direct-fraction fallback | 0.8 | Reserved package approximation only when a spec-004 solar derivation is unavailable; not a canonical Liljegren default. |
 
 The current CODATA/NIST Stefan–Boltzmann value (5.670374419e-8 W m⁻² K⁻⁴)
 differs from the historical model value. The package retains `5.6696e-8` so

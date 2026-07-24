@@ -9,9 +9,10 @@ function saturation_vapour_pressure_hpa(air_temperature_c::Real)
     temperature = float(air_temperature_c)
     isfinite(temperature) && -40 <= temperature <= 50 ||
         throw(ArgumentError("air_temperature_c must be finite and in [-40, 50]"))
-    return oftype(temperature, 6.108) * exp(
-        oftype(temperature, 17.27) * temperature /
-        (temperature + oftype(temperature, 237.3)),
+    T = typeof(temperature)
+    return convert(T, 6108 // 1000) * exp(
+        convert(T, 1727 // 100) * temperature /
+        (temperature + convert(T, 2373 // 10)),
     )
 end
 

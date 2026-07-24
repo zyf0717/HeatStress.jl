@@ -41,9 +41,6 @@ const DEFAULT_PRESSURE_HPA = 1010.0
 const DEFAULT_SURFACE_ALBEDO = 0.45
 const DEFAULT_GLOBE_DIAMETER_M = 0.0508
 const DEFAULT_MINIMUM_WIND_SPEED_M_S = 0.13
-# Reserved package fallback; not a canonical Liljegren default.
-const FALLBACK_DIRECT_FRACTION = 0.8
-
 const GLOBE_EMISSIVITY = 0.95
 const GLOBE_ALBEDO = 0.05
 const SURFACE_EMISSIVITY = 0.999

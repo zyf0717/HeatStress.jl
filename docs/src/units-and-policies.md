@@ -12,9 +12,8 @@ zenith is radians internally and degrees only when a public API says so.
 Input preparation rejects non-finite scalar meteorology, invalid coordinates,
 non-positive pressure, and direct fractions outside `[0, 1]`. A batch boundary
 may represent a missing pressure as a row-level missing meteorology result.
-Public `direct_fraction = nothing` requests solar-model derivation; an explicit
-fraction overrides it. The package’s 0.8 fallback is not a canonical model
-default.
+`direct_fraction` is explicit: solar geometry does not determine the
+direct/diffuse split, and v0.1 has no package fallback.
 
 Negative wind and solar radiation are clamped to zero and reported by diagnostic
 flags. Dew point above air temperature is reconciled within the configured

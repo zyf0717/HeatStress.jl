@@ -49,7 +49,7 @@ liljegren_wbgt(
     longitude_deg,
     latitude_deg;
     pressure_hpa = 1010,
-    direct_fraction = nothing,
+    direct_fraction,
     config = LiljegrenConfig(),
 )
 ```
@@ -66,17 +66,17 @@ diagnose_liljegren(
     longitude_deg,
     latitude_deg;
     pressure_hpa = 1010,
-    direct_fraction = nothing,
+    direct_fraction,
     config = LiljegrenConfig(),
 )
 ```
 
 `liljegren_wbgt` returns `WBGTResult`; `diagnose_liljegren` returns `DiagnosticWBGTResult`. Do not use a `diagnostics=true` keyword that changes return shape.
 
-`direct_fraction = nothing` requests derivation by the selected spec-004 solar
-model from solar geometry and observed radiation. An explicit finite value in
-`[0, 1]` overrides that derivation. The package fallback approximation is not a
-public canonical default.
+`direct_fraction` is required until a separately sourced direct/diffuse
+radiation model is specified. It is a finite value in `[0, 1]`, interpreted as
+direct divided by total solar radiation. Solar geometry alone does not derive
+this quantity; no package fallback is a public canonical default.
 
 ## Time inputs
 

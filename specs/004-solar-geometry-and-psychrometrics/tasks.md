@@ -22,7 +22,7 @@
 
 - Evidence: `julia --project=. -e 'using Pkg; Pkg.test()'` and
   `HEATSTRESS_QUALITY=1 julia --project=. -e 'using Pkg; Pkg.test()'`
-  (pass: 184 tests; quality checks pass; 2026-07-24); solar fixtures
-  independently checked against the NOAA Solar Position Calculator and
-  recorded in `research.md`. `julia --project=docs docs/make.jl` also passes.
+  (pass: 184 tests; quality checks pass; 2026-07-24); 15 NREL-SPA fixtures
+  have a maximum absolute zenith error of 0.344 degrees and are recorded in
+  `research.md`. `julia --project=docs docs/make.jl` also passes.
 - Commit: pending

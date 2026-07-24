@@ -34,7 +34,6 @@ end
         @test LiljegrenConfig().globe_diameter_m == HeatStress.DEFAULT_GLOBE_DIAMETER_M
         @test LiljegrenConfig().minimum_wind_speed_m_s ==
               HeatStress.DEFAULT_MINIMUM_WIND_SPEED_M_S
-        @test HeatStress.FALLBACK_DIRECT_FRACTION == 0.8
         @test LiljegrenConfig(surface_albedo = 0.0).surface_albedo == 0.0
         @test LiljegrenConfig(surface_albedo = 1.0).surface_albedo == 1.0
         @test LiljegrenConfig(dew_point_tolerance_c = 0.0).dew_point_tolerance_c == 0.0
