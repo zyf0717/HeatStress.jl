@@ -20,4 +20,4 @@
 ## Evidence
 
 - Evidence: `julia --project=. -e 'using Pkg; Pkg.test()'` — 22 assertions passed on Julia 1.10.11.
-- Commit: pending (recorded in follow-up evidence commit)
+- Commit: `82b1963` (`feat: define native Julia API and result types`)
