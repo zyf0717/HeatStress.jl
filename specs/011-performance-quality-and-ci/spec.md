@@ -197,7 +197,9 @@ automatically a publishable claim.
 ## Acceptance criteria
 
 - no type instability in core scalar path;
-- no per-row heap container in preallocated batch;
+- no batch-wrapper or public-result container allocated per row in preallocated
+  batch; remaining shared scalar scientific-path allocations are profiled
+  separately;
 - threaded mode has serial-equivalence tests;
 - benchmark scripts are reproducible and save metadata;
 - the local reference is verified as HeatStressR v2.1.6 and its commit/dirty

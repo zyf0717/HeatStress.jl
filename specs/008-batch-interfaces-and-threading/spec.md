@@ -73,6 +73,10 @@ Direct fraction is required as a scalar or aligned numeric value in `[0, 1]`.
 It is not derived from spec-004 solar geometry, and there is no package
 fallback batch default.
 
+Numeric meteorology, pressure and direct-fraction vectors may use an all-
+`missing` element type; the promoted calculation type is then inferred from
+the remaining numeric inputs and configuration.
+
 Use internal ordinal scalar-or-vector accessors, not `repeat`/materialisation. The concrete methods must be restricted to supported scalar types rather than accepting arbitrary objects:
 
 ```julia
@@ -129,7 +133,8 @@ Rules:
 - each iteration writes only to its own output index;
 - configs and constants are immutable;
 - no shared counters or push operations;
-- aggregate warnings are based on per-row statuses collected after the loop;
+- a future aggregate-warning feature must derive any aggregate warning from
+  per-row statuses collected after the loop;
 - results must not depend on thread count or scheduling;
 - no nested threading detection beyond a documented simple policy in v0.1;
 - do not change global thread configuration;

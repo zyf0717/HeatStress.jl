@@ -23,9 +23,9 @@
 ## Evidence
 
 - Evidence: `HEATSTRESS_QUALITY=1 julia --threads=1 --project=. -e 'using
-  Pkg; Pkg.test()'` passed the full suite, Aqua and JET (166 batch assertions).
+  Pkg; Pkg.test()'` passed the full suite, Aqua and JET (184 batch assertions).
   `HEATSTRESS_EXPECT_MULTITHREADED=true julia --threads=4 --project=. -e
-  'using Pkg; Pkg.test()'` passed the complete suite with 167 batch assertions
+  'using Pkg; Pkg.test()'` passed the complete suite with 185 batch assertions
   and verifies actual multi-thread availability. `.github/workflows/ci.yml`
   now runs complete test jobs at one and four threads, plus a one-thread quality
   job. Coverage includes pre-mutation input/output/alias failure checks,
@@ -45,3 +45,6 @@
   shared isbits typed-row path, worker-local solar computation and the
   five-mode benchmark. `c6ff0cf` (`bench: reuse identical scalar and batch
   inputs`) makes every mode for a row count share the same input arrays.
+- Commit: `90ab054` (`fix: validate preallocated batch output length`) adds
+  atomic equal-short/equal-long/empty output rejection and all-missing
+  numeric-vector equivalence before restoring completion.

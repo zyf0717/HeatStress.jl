@@ -410,9 +410,18 @@ kind = "api_design"
 owner_spec = "008"
 status = "validated"
 provenance = "original_design"
-rationale = "Every input shape, element-type and output-storage condition is validated before the ordinal loop so invalid calls cannot partially mutate caller storage."
+rationale = "Every input shape, element-type and output-storage condition, including each output length against input rows, is validated before the ordinal loop so invalid calls cannot partially mutate caller storage."
 implementation = "src/liljegren/batch.jl; src/types.jl"
-validation = "test/test_liljegren_batch.jl pre-mutation input, output and alias rejection"
+validation = "test/test_liljegren_batch.jl pre-mutation input, output-length and alias rejection"
+
+[items.batch_all_missing_numeric_vectors]
+kind = "api_design"
+owner_spec = "008"
+status = "validated"
+provenance = "original_design"
+rationale = "All-missing meteorology, pressure and direct-fraction vectors are valid missing-value inputs; their floating calculation type is inferred from remaining numeric inputs and configuration."
+implementation = "src/liljegren/batch.jl"
+validation = "test/test_liljegren_batch.jl all-missing meteorology and pressure-vector equivalence"
 
 [items.batch_alias_restrictions]
 kind = "api_design"
