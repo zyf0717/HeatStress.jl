@@ -10,12 +10,33 @@ permissions:
 
 jobs:
   test:
-    name: Julia 1.10
+    name: Julia 1.10 / ${{ matrix.threads }} threads
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        threads: [1, 4]
+    env:
+      JULIA_NUM_THREADS: ${{ matrix.threads }}
+      HEATSTRESS_EXPECT_MULTITHREADED: ${{ matrix.threads == 4 && 'true' || 'false' }}
     steps:
       - uses: actions/checkout@v4
       - uses: julia-actions/setup-julia@v2
         with:
           version: '1.10'
       - name: Test
+        run: julia --project=. -e 'using Pkg; Pkg.instantiate(); Pkg.test()'
+
+  quality:
+    name: Julia 1.10 quality
+    runs-on: ubuntu-latest
+    env:
+      JULIA_NUM_THREADS: '1'
+      HEATSTRESS_QUALITY: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: julia-actions/setup-julia@v2
+        with:
+          version: '1.10'
+      - name: Quality
         run: julia --project=. -e 'using Pkg; Pkg.instantiate(); Pkg.test()'

@@ -224,10 +224,10 @@ radiation zeroed at or below the physical horizon.
 For batch results use structure-of-arrays types, not `Vector{DiagnosticWBGTResult}` in the main high-throughput path:
 
 ```julia
-struct WBGTBatchResult{T,V<:AbstractVector{Union{Missing,T}}}
-    wbgt_c::V
-    natural_wet_bulb_c::V
-    globe_temperature_c::V
+struct WBGTBatchResult{T,VW<:AbstractVector,VN<:AbstractVector,VG<:AbstractVector}
+    wbgt_c::VW
+    natural_wet_bulb_c::VN
+    globe_temperature_c::VG
 end
 ```
 

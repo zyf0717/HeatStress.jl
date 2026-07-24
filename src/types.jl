@@ -271,23 +271,104 @@ struct DiagnosticWBGTResult{T<:AbstractFloat}
     end
 end
 
-"""Aligned batch result; all three arrays contain °C values or `missing`."""
-struct WBGTBatchResult{T<:AbstractFloat,V<:AbstractVector{Union{Missing,T}}}
-    wbgt_c::V
-    natural_wet_bulb_c::V
-    globe_temperature_c::V
+"""Aligned batch result; each array contains °C values or `missing`."""
+struct WBGTBatchResult{T<:AbstractFloat,VW<:AbstractVector,VN<:AbstractVector,VG<:AbstractVector}
+    wbgt_c::VW
+    natural_wet_bulb_c::VN
+    globe_temperature_c::VG
+end
 
-    function WBGTBatchResult{T,V}(wbgt_c::V, natural_wet_bulb_c::V, globe_temperature_c::V) where {T<:AbstractFloat,V<:AbstractVector{Union{Missing,T}}}
-        axes(wbgt_c) == axes(natural_wet_bulb_c) == axes(globe_temperature_c) ||
-            throw(ArgumentError("batch result vectors must have identical axes"))
-        return new{T,V}(wbgt_c, natural_wet_bulb_c, globe_temperature_c)
+function _validate_batch_result_vectors(::Type{T}, outputs::AbstractVector...) where {T<:AbstractFloat}
+    isempty(outputs) && throw(ArgumentError("batch result requires output vectors"))
+    rows = length(first(outputs))
+    for output in outputs
+        length(output) == rows ||
+            throw(ArgumentError("batch result vectors must have identical lengths"))
+        Missing <: eltype(output) && T <: eltype(output) ||
+            throw(ArgumentError("batch result element type must accept Missing and $T"))
+    end
+    return nothing
+end
+
+function WBGTBatchResult{T}(
+    wbgt_c::VW,
+    natural_wet_bulb_c::VN,
+    globe_temperature_c::VG,
+) where {T<:AbstractFloat,VW<:AbstractVector,VN<:AbstractVector,VG<:AbstractVector}
+    _validate_batch_result_vectors(T, wbgt_c, natural_wet_bulb_c, globe_temperature_c)
+    return WBGTBatchResult{T,VW,VN,VG}(wbgt_c, natural_wet_bulb_c, globe_temperature_c)
+end
+
+function WBGTBatchResult(
+    wbgt_c::VW,
+    natural_wet_bulb_c::VN,
+    globe_temperature_c::VG,
+) where {VW<:AbstractVector,VN<:AbstractVector,VG<:AbstractVector}
+    element_types = (Base.nonmissingtype(eltype(wbgt_c)),
+                     Base.nonmissingtype(eltype(natural_wet_bulb_c)),
+                     Base.nonmissingtype(eltype(globe_temperature_c)))
+    all(isconcretetype, element_types) && all(type -> type <: AbstractFloat, element_types) ||
+        throw(ArgumentError("WBGTBatchResult{T} is required for non-floating or broad output element types"))
+    return WBGTBatchResult{promote_type(element_types...)}(wbgt_c, natural_wet_bulb_c, globe_temperature_c)
+end
+
+"""Structure-of-arrays component diagnostics for aligned Liljegren batch rows."""
+struct SolverDiagnosticsBatch{T<:AbstractFloat}
+    converged::Vector{Bool}
+    reason::Vector{FailureReason}
+    value_c::Vector{Union{Missing,T}}
+    candidate_c::Vector{Union{Missing,T}}
+    validation_residual_k::Vector{Union{Missing,T}}
+    evaluations::Vector{Int}
+    iterations::Vector{Int}
+    initial_lower_k::Vector{Union{Missing,T}}
+    initial_upper_k::Vector{Union{Missing,T}}
+    final_lower_k::Vector{Union{Missing,T}}
+    final_upper_k::Vector{Union{Missing,T}}
+    lower_location_residual::Vector{Union{Missing,T}}
+    upper_location_residual::Vector{Union{Missing,T}}
+
+    function SolverDiagnosticsBatch{T}(
+        converged::Vector{Bool},
+        reason::Vector{FailureReason},
+        value_c::Vector{Union{Missing,T}},
+        candidate_c::Vector{Union{Missing,T}},
+        validation_residual_k::Vector{Union{Missing,T}},
+        evaluations::Vector{Int},
+        iterations::Vector{Int},
+        initial_lower_k::Vector{Union{Missing,T}},
+        initial_upper_k::Vector{Union{Missing,T}},
+        final_lower_k::Vector{Union{Missing,T}},
+        final_upper_k::Vector{Union{Missing,T}},
+        lower_location_residual::Vector{Union{Missing,T}},
+        upper_location_residual::Vector{Union{Missing,T}},
+    ) where {T<:AbstractFloat}
+        rows = length(converged)
+        all(length(values) == rows for values in (
+            reason, value_c, candidate_c, validation_residual_k, evaluations, iterations,
+            initial_lower_k, initial_upper_k, final_lower_k, final_upper_k,
+            lower_location_residual, upper_location_residual,
+        )) || throw(ArgumentError("batch diagnostic vectors must have identical lengths"))
+        return new{T}(
+            converged, reason, value_c, candidate_c, validation_residual_k, evaluations,
+            iterations, initial_lower_k, initial_upper_k, final_lower_k, final_upper_k,
+            lower_location_residual, upper_location_residual,
+        )
     end
 end
 
-function WBGTBatchResult(wbgt_c::V, natural_wet_bulb_c::V, globe_temperature_c::V) where {V<:AbstractVector}
-    element_type = eltype(V)
-    float_type = Base.nonmissingtype(element_type)
-    float_type <: AbstractFloat && element_type === Union{Missing,float_type} ||
-        throw(ArgumentError("batch result vectors must have Union{Missing, T} floating-point elements"))
-    return WBGTBatchResult{float_type,V}(wbgt_c, natural_wet_bulb_c, globe_temperature_c)
+"""Structure-of-arrays diagnostic result for aligned Liljegren batch rows."""
+struct DiagnosticWBGTBatchResult{T<:AbstractFloat}
+    result::WBGTBatchResult{T}
+    input_status::Vector{InputStatus}
+    dew_point_adjusted::Vector{Bool}
+    wind_speed_clamped::Vector{Bool}
+    solar_radiation_clamped::Vector{Bool}
+    solar_geometry_mismatch::Vector{Bool}
+    direct_solar_clipped::Vector{Bool}
+    globe::SolverDiagnosticsBatch{T}
+    natural_wet_bulb::SolverDiagnosticsBatch{T}
+    threaded::Bool
+    threads_available::Int
+    rows::Int
 end

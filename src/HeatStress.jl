@@ -49,6 +49,11 @@ export DewPointPolicy,
     WBGTResult,
     SolverDiagnostics,
     DiagnosticWBGTResult,
-    WBGTBatchResult
+    WBGTBatchResult,
+    SolverDiagnosticsBatch,
+    DiagnosticWBGTBatchResult,
+    liljegren_wbgt_batch,
+    liljegren_wbgt!,
+    diagnose_liljegren_batch
 
 end

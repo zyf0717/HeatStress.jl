@@ -15,5 +15,26 @@ The authoritative detail and citations remain in `spec.md`; software implementat
 
 ## Open questions
 
-- Select preprocessing cache keys and ownership without mutable global state.
-- Set diagnostics-memory policy for high-throughput calls.
+- Solar reuse remains deferred: v0.1 uses the canonical scalar solar path per
+  row until profiling shows grouped-time preprocessing is material.
+- Diagnostic batches use package-owned structure-of-arrays vectors, avoiding
+  per-row diagnostic objects in the returned layout. Threaded loops write only
+  their own ordinal row and retain no shared counters.
+- The initial 10,000-row preallocated benchmark on two available threads was
+  host-specific evidence only (0.0455 s serial; 0.0235 s threaded median).
+  It establishes a baseline for future grouped-solar and scalar-core allocation
+  work, rather than a portable performance claim.
+- The same host was measured at 1–6 Julia threads for 10,000, 100,000 and
+  1,000,000 rows (three samples per size). At one million rows, median
+  throughput increased from 227k rows/s at one thread to 1.03M rows/s at six
+  threads (4.52×). The full table and invocation are retained in
+  `benchmark/README.md`; raw host-specific reports remain ignored under
+  `benchmark/results/`.
+- The comparable `batch_e2e.jl` harness drives public scalar-result, public
+  scalar/preallocated-output, preallocated serial, allocating serial and
+  preallocated threaded modes from identical generated inputs and verifies
+  equality before timing. On the local four-thread host, one million rows took
+  4.440 s, 4.348 s, 4.328 s, 4.363 s and 1.255 s respectively. Warm
+  preallocated serial calls scale as 528 bytes and 14 allocations per row plus
+  fixed wrapper overhead; they do not allocate replacement output arrays or a
+  public `WBGTResult` per row.

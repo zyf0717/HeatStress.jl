@@ -33,10 +33,10 @@ their remaining spec 010 fixtures are also outside the benchmark critical path.
 | 005 | [Physical kernels](./005-physical-kernels/) | In progress | 003 Constants, units and policies; 004 supplies solar/psychrometric inputs where composed |
 | 006 | [Root solving and diagnostics](./006-root-solving-and-diagnostics/) | In progress | 005 Physical kernels |
 | 007 | [Liljegren scalar model](./007-liljegren-scalar-model/) | Complete | 004 Solar geometry and psychrometrics; 005 Physical kernels; 006 Root solving and diagnostics |
-| 008 | [Batch interfaces and threading](./008-batch-interfaces-and-threading/) | Planned | 007 Liljegren scalar model |
+| 008 | [Batch interfaces and threading](./008-batch-interfaces-and-threading/) | Complete | 007 Liljegren scalar model |
 | 009 | [Other heat indices](./009-other-heat-indices/) | Planned | 003 Constants, units and policies; Bernard WBGT additionally requires 004 and 006; completion requires 010 validation coverage |
 | 010 | [Scientific fixtures and validation](./010-scientific-fixtures-and-validation/) | Planned | 001 Package scaffold; completion requires 004–009 implementations |
-| 011 | [Liljegren performance benchmarking](./011-performance-quality-and-ci/) | Planned | 007 Liljegren scalar model; 008 Batch interfaces and threading; independent Liljegren validation evidence from 010 |
+| 011 | [Liljegren performance benchmarking](./011-performance-quality-and-ci/) | In progress | 007 Liljegren scalar model; 008 Batch interfaces and threading; independent Liljegren validation evidence from 010 |
 | 012 | [Documentation and release readiness](./012-documentation-release-and-registration/) | Planned | 009 Other heat indices; all remaining 010 validation; 011 Liljegren performance benchmarking |
 | 013 | [Final scientific audit and release authorisation](./013-final-scientific-audit/) | Planned | 012 Documentation and release readiness; all prior units must meet their acceptance criteria |
 

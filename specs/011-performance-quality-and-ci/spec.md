@@ -111,15 +111,41 @@ hardware; do not imply that threads and processes have identical overhead.
 
 ## Optimisation order
 
-1. run `@code_warntype`/JET;
-2. remove type instability;
-3. remove per-row containers and closures;
-4. add/prefer `!` interfaces;
-5. precompute solar geometry if profiling supports it;
-6. reduce repeated invariant calculations in residuals;
-7. consider inlining small kernels;
-8. consider `@simd` only on simple independent loops after correctness;
-9. consider an advanced batch solver only if scalar-loop residual solving remains the dominant bottleneck.
+Start from the completed spec-008 worker-local fused baseline:
+
+```text
+solar geometry → meteorological preparation → component solves → output write
+```
+
+Use this order:
+
+1. profile the fused spec-008 path;
+2. inspect type stability and allocations;
+3. identify repeated batch invariants;
+4. compare the fused worker-local solar calculation with a parallel
+   prepared-zenith path only if solar geometry is material;
+5. test grouped solar reuse for repeated timestamp/location keys;
+6. reduce repeated row-local invariant calculations in residual evaluation;
+7. consider kernel inlining;
+8. consider SIMD only for simple preprocessing loops;
+9. consider advanced batch solving only if root solving remains dominant.
+
+The parallel prepared-zenith candidate is two worker-parallel phases: a
+parallel zenith pass, a barrier, then a parallel WBGT pass. Do not calculate
+the whole zenith array on the orchestration thread. For repeated
+`(time, longitude, latitude)` keys, profile grouping/deduplication and include
+key construction, grouping, parallel unique computation and scattering in the
+end-to-end timing. Possible designs include per-thread local caches,
+chunk-local preparation and parallel preprocessing; do not add a shared mutable
+global cache or lock contention to the row hot path.
+
+An optimisation must not improve isolated kernel timing while reducing
+end-to-end threaded scaling by consolidating material work onto the
+orchestration thread. For each retained preprocessing optimisation, measure
+one-thread and multi-thread end-to-end time, preprocessing and solver phases,
+total speedup, allocations and numerical equivalence. Reject or redesign it
+when serial O(n) preprocessing, degraded scaling, shared-cache contention,
+memory traffic or complexity outweighs measured reuse.
 
 Do not use `@fastmath` in the production scientific path. A separately named approximate mode is out of scope for v0.1.
 
@@ -129,7 +155,10 @@ After compilation:
 
 - direct scalar physical kernels: zero allocations;
 - scalar value-only Liljegren: target zero allocations for `DateTime`, or document a small fixed count;
-- preallocated batch: allocations should be constant or limited to optional precomputed zenith/status arrays, not proportional per-row objects;
+- preallocated batch: first establish the spec-008 baseline with no replacement
+  output arrays and no public result container per row. Further allocation
+  reductions require profile evidence; do not claim constant allocations until
+  measured on supported Julia versions;
 - allocating batch: allocations dominated by output arrays;
 - diagnostics: proportional to required diagnostic arrays only.
 
@@ -168,7 +197,9 @@ automatically a publishable claim.
 ## Acceptance criteria
 
 - no type instability in core scalar path;
-- no per-row heap container in preallocated batch;
+- no batch-wrapper or public-result container allocated per row in preallocated
+  batch; remaining shared scalar scientific-path allocations are profiled
+  separately;
 - threaded mode has serial-equivalence tests;
 - benchmark scripts are reproducible and save metadata;
 - the local reference is verified as HeatStressR v2.1.6 and its commit/dirty
