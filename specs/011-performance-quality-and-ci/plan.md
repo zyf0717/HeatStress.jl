@@ -1,20 +1,29 @@
-# Performance, quality and CI: implementation plan
+# Liljegren performance benchmarking: implementation plan
 
 ## Dependency gate
 
-008 Batch interfaces and threading; 009 Other heat indices; 010 Scientific fixtures and validation
+007 Liljegren scalar model; 008 Batch interfaces and threading; independent
+Liljegren validation evidence from 010. Secondary indices and release readiness
+are not prerequisites.
 
 ## Design
 
-Use profiling after scientific correctness to eliminate type/heap issues, add reproducible benchmarks and enforce portable quality gates.
+Establish fair Julia baselines and a black-box comparison against the verified
+local HeatStressR v2.1.6 checkout. Use correctness checks before timings and
+profiles before optimisation. Keep R adapters and raw cross-language results
+outside the distributed repository.
 
 ## Sequence
 
-1. Establish correct baselines and benchmark metadata.
-2. Inspect type stability and allocations.
-3. Optimize only proven bottlenecks.
-4. Add quality/CI gates and conservative regression tests.
-5. Publish methods rather than unstable timing thresholds.
+1. Finish independent correctness evidence for the benchmarked Liljegren paths.
+2. Create deterministic inputs and reproducible Julia baselines.
+3. Verify HeatStressR v2.1.6, record both revisions and implement the private
+   public-API adapter.
+4. Run correctness gates, then serial and matched-concurrency comparisons.
+5. Inspect type stability, allocations and profiles.
+6. Optimise only proven Julia bottlenecks and rerun the full comparison matrix.
+7. Record the local report and review findings before scheduling specs 009,
+   012 or 013.
 
 ## Completion rule
 

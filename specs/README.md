@@ -2,6 +2,19 @@
 
 This directory is the implementation plan for HeatStress.jl. Work proceeds through the dependency gates below; a unit is complete only when every acceptance criterion in its `spec.md` has evidence recorded in `tasks.md`. Exactly one status must be selected in each `tasks.md`, and this rollup must match it.
 
+## Current delivery focus
+
+The near-term milestone is a correctness-gated performance comparison of the
+Liljegren scalar and batch paths against the local HeatStressR v2.1.6 checkout.
+Complete only the implementation and independent-validation work needed to
+reach spec 011, then use measured profiles and comparisons to choose the next
+optimisation work.
+
+Documentation polish, registration readiness, final audit and publication in
+specs 012–013 are intentionally deferred. They remain required for a release,
+but do not block the benchmark milestone. Secondary indices in spec 009 and
+their remaining spec 010 fixtures are also outside the benchmark critical path.
+
 ## Status legend
 
 - `Planned` — requirements are captured; implementation has not met its acceptance criteria.
@@ -23,11 +36,11 @@ This directory is the implementation plan for HeatStress.jl. Work proceeds throu
 | 008 | [Batch interfaces and threading](./008-batch-interfaces-and-threading/) | Planned | 007 Liljegren scalar model |
 | 009 | [Other heat indices](./009-other-heat-indices/) | Planned | 003 Constants, units and policies; Bernard WBGT additionally requires 004 and 006; completion requires 010 validation coverage |
 | 010 | [Scientific fixtures and validation](./010-scientific-fixtures-and-validation/) | Planned | 001 Package scaffold; completion requires 004–009 implementations |
-| 011 | [Performance, quality and CI](./011-performance-quality-and-ci/) | Planned | 008 Batch interfaces and threading; 009 Other heat indices; 010 Scientific fixtures and validation |
-| 012 | [Documentation and release readiness](./012-documentation-release-and-registration/) | Planned | 011 Performance, quality and CI |
+| 011 | [Liljegren performance benchmarking](./011-performance-quality-and-ci/) | Planned | 007 Liljegren scalar model; 008 Batch interfaces and threading; independent Liljegren validation evidence from 010 |
+| 012 | [Documentation and release readiness](./012-documentation-release-and-registration/) | Planned | 009 Other heat indices; all remaining 010 validation; 011 Liljegren performance benchmarking |
 | 013 | [Final scientific audit and release authorisation](./013-final-scientific-audit/) | Planned | 012 Documentation and release readiness; all prior units must meet their acceptance criteria |
 
-The main Liljegren chain is `000 → 001 → 002 → 003 → 004/005 → 006 → 007 → 008`. Unit `009` may start after `003`, except its Bernard solver work is gated by `004` and `006`. Unit `010` may establish its schema after `001` and grows alongside `004`–`009`; units `009` and `010` close together once every selected index has validation coverage. Units `008`, `009` and `010` converge at `011 → 012 → 013`.
+The benchmark critical path is `000 → 001 → 002 → 003 → 004/005 → 006 → 007 → 008`, plus the Liljegren validation slice of `010`, then `011`. Unit `009` may proceed independently after `003`, except its Bernard solver work is gated by `004` and `006`. Full completion of `009` and `010` is deferred until the release-readiness path resumes at `012 → 013`.
 
 Release tagging, archival and General registration are post-audit actions. Unit `012` establishes readiness; unit `013` audits one exact candidate source commit. The release tag may point to a subsequent audit-record commit only when its diff contains no source, fixture or scientific-contract change.
 
@@ -56,9 +69,13 @@ Do not introduce new top-level specification documents; add material to the rele
 | 5 | 006 | root solver and diagnostics |
 | 6 | 007 | scalar Liljegren model |
 | 7 | 008 | batch, preallocation and threading |
-| 8 | 009 | selected secondary indices |
-| 9 | 010 | independent fixtures and scientific validation suite |
-| 10 | 011 | profiling, optimisation and quality gates |
-| 11 | 012–013 | documentation/readiness, scientific audit and release authorisation |
+| 8 | 010 (Liljegren slice) | independent fixtures and validation for the scalar, serial batch and threaded Liljegren paths |
+| 9 | 011 | reproducible Julia baselines, correctness-gated HeatStressR v2.1.6 comparison, profiling and measured optimisation |
+| 10 | 009 and remaining 010 | selected secondary indices and their independent validation |
+| 11 | 012–013 | deferred documentation/readiness, scientific audit and release authorisation |
 
-Fixture schema work from `010` should begin before PR 9 where needed. Each PR must identify the acceptance criteria it closes, include relevant tests, update specification evidence, report commands actually run and avoid exporting incomplete APIs.
+Fixture schema work from `010` should begin earlier where needed. Stop after the
+spec 011 benchmark report to review bottlenecks and reprioritise optimisation
+before starting publication polish. Each PR must identify the acceptance
+criteria it closes, include relevant tests, update specification evidence,
+report commands actually run and avoid exporting incomplete APIs.

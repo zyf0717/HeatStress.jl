@@ -1,10 +1,14 @@
-# Performance, quality and CI: research
+# Liljegren performance benchmarking: research
 
 ## Required sources
 
 - Julia performance and threading documentation.
-- BenchmarkTools, Aqua and JET documentation.
-- Correctness precondition from 010.
+- BenchmarkTools and JET documentation.
+- R timing and parallel-runtime documentation needed to define equivalent timed
+  boundaries.
+- Correctness evidence from the Liljegren slice of 010.
+- HeatStressR v2.1.6 public documentation only for API invocation; its source
+  and benchmark implementation are not design inputs.
 
 The authoritative detail and citations remain in `spec.md`; software implementations are not scientific authorities.
 
@@ -18,3 +22,6 @@ The authoritative detail and citations remain in `spec.md`; software implementat
 
 - Set conservative cross-version allocation thresholds.
 - Decide profiling evidence required for solar preprocessing or advanced solver work.
+- Select absolute and relative cross-implementation tolerances after independent
+  fixture tolerances are established.
+- Decide which matched concurrency levels are meaningful on the benchmark host.

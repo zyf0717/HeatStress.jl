@@ -4,6 +4,14 @@
 
 Prepare a scientifically transparent MIT-licensed Julia package for final audit. This unit establishes release and General-registration readiness; it does not publish the package.
 
+## Scheduling
+
+This unit is intentionally deferred until the HeatStressR v2.1.6 benchmark
+milestone in spec 011 has been completed and reviewed, and specs 009–010 are
+complete. Do not delay that benchmark for README styling, documentation
+expansion, badges, registration setup, archival configuration or release-note
+polish.
+
 ## README structure
 
 1. package status and scope;
@@ -44,7 +52,10 @@ Bracketing, tolerances, failure reasons, missingness and diagnostic interpretati
 
 ### `performance.md`
 
-Benchmark methodology and results. Public comparisons to other packages must use reproducible public scripts and fair settings.
+Benchmark methodology and results. Public comparisons to other packages must
+use reproducible public scripts and fair settings. The private HeatStressR
+v2.1.6 milestone report from spec 011 may guide this page, but is not itself a
+publishable claim.
 
 ### `provenance.md`
 
@@ -56,6 +67,13 @@ Include:
 - statement that no HeatStressR source, comments, tests or fixtures are part of the MIT implementation;
 - provenance table for every formula family;
 - explanation of independently re-expressed optimisation ideas.
+
+## Release-wide quality tooling
+
+After the benchmark milestone, complete Aqua checks, formatting enforcement,
+coverage configuration, documentation CI, the supported-platform test matrix
+and any optional nightly Julia job. Keep benchmark CI to output-validating smoke
+tests; do not enforce wall-clock thresholds on shared runners.
 
 ## Docstring examples
 

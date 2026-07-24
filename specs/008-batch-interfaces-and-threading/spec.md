@@ -187,9 +187,14 @@ Do not require a speedup from threading on tiny arrays.
 
 For a representative 876,000-row Float64 fixture on a multicore developer machine:
 
-- serial Julia batch should be benchmarked against its scalar kernel; optional private comparisons to HeatStressR may be recorded separately;
+- serial Julia batch should be benchmarked against its scalar kernel;
 - threaded mode should not be materially slower than serial at sufficiently large row counts;
 - outputs must remain equal before performance claims are accepted.
+
+The cross-implementation benchmark against HeatStressR v2.1.6 is required by
+spec 011, not by this unit. Spec 008 closes on correctness and usable batch
+interfaces so that comparison work can begin without waiting for secondary
+indices or release polish.
 
 Performance goals are directional, not a registration blocker:
 

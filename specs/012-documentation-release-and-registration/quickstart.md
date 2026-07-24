@@ -10,5 +10,6 @@
 ## Validation
 
 - Build docs with examples.
+- Run Aqua, formatting, coverage and supported-platform CI checks.
 - Run registration-readiness checklist from a clean depot.
 - Review all public claims against available evidence.
