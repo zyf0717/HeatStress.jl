@@ -61,7 +61,10 @@ using Dates
 using TimeZones
 
 include("constants.jl")
-include("types.jl")
+include("types/statuses.jl")
+include("types/configuration.jl")
+include("types/results.jl")
+include("types/diagnostics.jl")
 include("policies.jl")
 include("validation.jl")
 include("psychrometrics.jl")
@@ -72,7 +75,11 @@ include("liljegren/root_solver.jl")
 include("liljegren/diagnostics.jl")
 include("liljegren/globe_temperature.jl")
 include("liljegren/natural_wet_bulb.jl")
-include("liljegren/scalar.jl")
+include("liljegren/scalar_types.jl")
+include("liljegren/balance_construction.jl")
+include("liljegren/result_materialisation.jl")
+include("liljegren/row_execution.jl")
+include("liljegren/api.jl")
 include("liljegren/batch.jl")
 include("indices/stull.jl")
 include("indices/bernard.jl")
@@ -88,7 +95,7 @@ include("indices/heat_index.jl")
 end
 ```
 
-Empty placeholder files may be created, but no placeholder function may return fabricated numerical results.
+Source files must contain implementations; do not preserve empty placeholders.
 
 ## Coding conventions
 

@@ -1,9 +1,11 @@
 # HeatStress.jl
 
-HeatStress.jl is a pre-release Julia package for independently implementing
-heat-stress models from published literature. The package scaffold is in
-place; scientific calculation APIs will be added only with their documented
-provenance, validation evidence, and completed specifications.
+HeatStress.jl is a pre-release Julia package that independently implements
+heat-stress models from published literature. The Liljegren outdoor WBGT model
+is available for scalar and aligned batch inputs, including optional
+row-level diagnostics and threaded batch execution. Other index
+implementations remain internal while their formula-selection specifications
+are incomplete.
 
 ## Development
 
@@ -14,5 +16,6 @@ the test suite:
 julia --project=. -e 'using Pkg; Pkg.instantiate(); Pkg.test()'
 ```
 
-See [the specifications](specs/README.md) for the implementation sequence and
+See [the specifications](specs/README.md) for implementation status,
+[the documentation](docs/src/index.md) for use and architecture, and
 [scientific provenance](docs/src/provenance.md) for source policy.

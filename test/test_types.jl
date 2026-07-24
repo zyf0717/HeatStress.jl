@@ -1,4 +1,18 @@
 @testset "public API types" begin
+    @testset "completed Liljegren exports" begin
+        exported_names = Set(names(HeatStress))
+        expected_names = (
+            :globe_temperature,
+            :natural_wet_bulb_temperature,
+            :liljegren_wbgt,
+            :diagnose_liljegren,
+            :liljegren_wbgt_batch,
+            :liljegren_wbgt!,
+            :diagnose_liljegren_batch,
+        )
+        @test all(name -> name in exported_names, expected_names)
+    end
+
     @testset "policies" begin
         @test ClampDewPoint isa DewPointPolicy
         @test InputAccepted isa InputStatus

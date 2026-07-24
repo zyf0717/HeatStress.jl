@@ -10,6 +10,10 @@ Complete only the implementation and independent-validation work needed to
 reach spec 011, then use measured profiles and comparisons to choose the next
 optimisation work.
 
+The completed mechanical readability refactor in unit 014 did not alter the
+scientific or performance critical path; it preserves the completed
+scalar/batch contracts exactly.
+
 Documentation polish, registration readiness, final audit and publication in
 specs 012–013 are intentionally deferred. They remain required for a release,
 but do not block the benchmark milestone. Secondary indices in spec 009 and
@@ -39,6 +43,7 @@ their remaining spec 010 fixtures are also outside the benchmark critical path.
 | 011 | [Liljegren performance benchmarking](./011-performance-quality-and-ci/) | In progress | 007 Liljegren scalar model; 008 Batch interfaces and threading; independent Liljegren validation evidence from 010 |
 | 012 | [Documentation and release readiness](./012-documentation-release-and-registration/) | Planned | 009 Other heat indices; all remaining 010 validation; 011 Liljegren performance benchmarking |
 | 013 | [Final scientific audit and release authorisation](./013-final-scientific-audit/) | Planned | 012 Documentation and release readiness; all prior units must meet their acceptance criteria |
+| 014 | [Readability refactor](./014-readability-refactor/) | Complete | Preserves completed 007–008 behaviour; independent of the benchmark milestone |
 
 The benchmark critical path is `000 → 001 → 002 → 003 → 004/005 → 006 → 007 → 008`, plus the Liljegren validation slice of `010`, then `011`. Unit `009` may proceed independently after `003`, except its Bernard solver work is gated by `004` and `006`. Full completion of `009` and `010` is deferred until the release-readiness path resumes at `012 → 013`.
 

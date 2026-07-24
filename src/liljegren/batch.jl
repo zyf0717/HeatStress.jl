@@ -274,11 +274,19 @@ function _diagnostic_arrays(::Type{T}, rows::Int) where {T<:AbstractFloat}
 end
 
 function _store_component!(out::SolverDiagnosticsBatch, row::Int, value::SolverDiagnostics)
-    for field in fieldnames(SolverDiagnosticsBatch)
-        field === :converged && (out.converged[row] = value.converged; continue)
-        field === :reason && (out.reason[row] = value.reason; continue)
-        getproperty(out, field)[row] = getproperty(value, field)
-    end
+    @inbounds out.converged[row] = value.converged
+    @inbounds out.reason[row] = value.reason
+    @inbounds out.value_c[row] = value.value_c
+    @inbounds out.candidate_c[row] = value.candidate_c
+    @inbounds out.validation_residual_k[row] = value.validation_residual_k
+    @inbounds out.evaluations[row] = value.evaluations
+    @inbounds out.iterations[row] = value.iterations
+    @inbounds out.initial_lower_k[row] = value.initial_lower_k
+    @inbounds out.initial_upper_k[row] = value.initial_upper_k
+    @inbounds out.final_lower_k[row] = value.final_lower_k
+    @inbounds out.final_upper_k[row] = value.final_upper_k
+    @inbounds out.lower_location_residual[row] = value.lower_location_residual
+    @inbounds out.upper_location_residual[row] = value.upper_location_residual
     return nothing
 end
 
