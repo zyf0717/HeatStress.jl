@@ -376,7 +376,7 @@ status = "validated"
 provenance = "original_design"
 rationale = "Ordinal alignment permits supported AbstractVectors with different first indices while preserving each caller's row order without materializing broadcast copies."
 implementation = "src/liljegren/batch.jl"
-validation = "test/test_liljegren_batch.jl view input and serial scalar-row equivalence"
+validation = "test/test_liljegren_batch.jl offset-indexed primary, secondary and output vectors"
 
 [items.batch_secondary_scalar_expansion]
 kind = "api_design"
@@ -394,7 +394,7 @@ status = "validated"
 provenance = "original_design"
 rationale = "Each threaded ordinal iteration owns exactly one output row and reads immutable configuration, preserving serial values without shared counters or scheduling-dependent state."
 implementation = "src/liljegren/batch.jl"
-validation = "test/test_liljegren_batch.jl two-thread value and diagnostic equivalence"
+validation = "test/test_liljegren_batch.jl complete diagnostic equivalence; .github/workflows/ci.yml 4-thread job"
 
 [items.batch_diagnostic_structure_of_arrays]
 kind = "api_design"
@@ -403,4 +403,40 @@ status = "validated"
 provenance = "original_design"
 rationale = "Row-aligned structure-of-arrays diagnostics avoid returning a heap of per-row diagnostic objects while retaining every scalar diagnostic field."
 implementation = "src/types.jl; src/liljegren/batch.jl"
-validation = "test/test_liljegren_batch.jl input-status and component-evaluation row alignment"
+validation = "test/test_liljegren_batch.jl complete serial/threaded component-field equivalence"
+
+[items.batch_pre_mutation_validation]
+kind = "api_design"
+owner_spec = "008"
+status = "validated"
+provenance = "original_design"
+rationale = "Every input shape, element-type and output-storage condition is validated before the ordinal loop so invalid calls cannot partially mutate caller storage."
+implementation = "src/liljegren/batch.jl; src/types.jl"
+validation = "test/test_liljegren_batch.jl pre-mutation input, output and alias rejection"
+
+[items.batch_alias_restrictions]
+kind = "api_design"
+owner_spec = "008"
+status = "validated"
+provenance = "original_design"
+rationale = "Overlapping output or input storage can corrupt serial results and races under threading, so Base.mightalias rejects it before mutation."
+implementation = "src/liljegren/batch.jl"
+validation = "test/test_liljegren_batch.jl output-output, output-input and overlapping-view cases"
+
+[items.batch_value_warning_policy]
+kind = "api_design"
+owner_spec = "008"
+status = "validated"
+provenance = "original_design"
+rationale = "Value-only v0.1 retains missing failures silently and avoids allocating row diagnostics solely to emit an aggregate warning; diagnostic batches provide reasons."
+implementation = "src/liljegren/batch.jl; specs/008-batch-interfaces-and-threading/spec.md"
+validation = "test/test_liljegren_batch.jl missingness equivalence cases"
+
+[items.batch_allocation_contract]
+kind = "api_design"
+owner_spec = "008"
+status = "validated"
+provenance = "original_design"
+rationale = "The preallocated API avoids replacement output arrays but retains measured per-row allocations from the canonical scalar value path; fixed-allocation claims are not made."
+implementation = "src/liljegren/batch.jl; benchmark/batch_e2e.jl"
+validation = "benchmark/batch_e2e.jl comparable modes and allocation measurements"

@@ -64,6 +64,11 @@ Allow scalar or aligned arrays for:
 - pressure;
 - direct fraction.
 
+Longitude and latitude must be non-missing `Real` values. Coordinate vectors
+must have a concrete non-missing real element type and may not permit
+`Missing`; malformed or missing coordinates are rejected before any
+preallocated output is written.
+
 Direct fraction is required as a scalar or aligned numeric value in `[0, 1]`.
 It is not derived from spec-004 solar geometry, and there is no package
 fallback batch default.
@@ -85,7 +90,7 @@ Before mutating output arrays, validate every aligned input length, every output
 
 Use `Vector{Union{Missing,T}}` for public allocated results in v0.1. Consider alternative masks only after profiling demonstrates a material bottleneck.
 
-Preallocated output element types must accept `missing` and promoted `T`; otherwise throw a clear `ArgumentError` before mutation.
+Preallocated output element types must accept `missing` and promoted `T`; otherwise throw a clear `ArgumentError` before mutation. Their axes need not match: every output is written in ordinal row order. Reject output-output and output-input aliasing before mutation.
 
 ## Serial loop
 
@@ -158,7 +163,11 @@ Do not claim a fixed number of threads was used unless explicitly measured.
 
 ## Aggregate warning
 
-Value-only batch call may emit one warning like:
+Value-only v0.1 batch calls emit no aggregate warnings. Failed or rejected rows
+remain `missing`; callers requiring reasons use `diagnose_liljegren_batch`.
+Aggregate warnings are deferred until a lightweight status path is justified
+without constructing diagnostics. A future warning policy may emit one warning
+like:
 
 ```text
 Liljegren solving failed for X of Y attempted rows; valid component
@@ -181,7 +190,8 @@ Do not warn for missing/unattempted rows. Do not emit one warning per row or per
 - output order preservation;
 - preallocated versus allocating API;
 - invalid output lengths/types cause no partial mutation;
-- aggregate warning count;
+- no value-only aggregate warning in v0.1; any future warning feature requires
+  zero/one/multiple-failure aggregate-warning tests;
 - diagnostic row alignment;
 - test under `JULIA_NUM_THREADS=1` and multi-threaded CI job.
 
@@ -204,7 +214,9 @@ Performance goals are directional, not a registration blocker:
 
 - substantial improvement over repeated public scalar calls and acceptable scaling on large workloads;
 - no PSOCK serialisation or R worker startup costs;
-- allocations scale mainly with output and diagnostics arrays, not per-row temporary containers.
+- preallocated calls allocate no replacement result arrays; total allocations
+  from the shared scalar value path are measured and documented before further
+  optimization rather than assumed to be fixed.
 
 ## Forbidden shortcuts
 

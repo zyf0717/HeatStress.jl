@@ -1,5 +1,5 @@
-# Reproducible Liljegren batch throughput benchmark.  Inputs, compilation,
-# result validation and report writing are deliberately outside timed regions.
+# Reproducible Liljegren batch throughput benchmark. Inputs, compilation,
+# equality validation and report writing are outside timed regions.
 using BenchmarkTools
 using Dates
 using HeatStress
@@ -26,26 +26,67 @@ function batch_inputs(rows::Integer)
     return (air, dew, wind, radiation, time)
 end
 
+function _outputs(rows::Int)
+    values() = Vector{Union{Missing,Float64}}(undef, rows)
+    return values(), values(), values()
+end
+
+function _scalar_row_loop!(wbgt, wet, globe, air, dew, wind, radiation, time)
+    for row in eachindex(air)
+        result = HeatStress.liljegren_wbgt(
+            air[row], dew[row], wind[row], radiation[row], time[row], -74.0060, 40.7128;
+            direct_fraction = 0.7,
+        )
+        wbgt[row] = result.wbgt_c
+        wet[row] = result.natural_wet_bulb_c
+        globe[row] = result.globe_temperature_c
+    end
+    return WBGTBatchResult{Float64}(wbgt, wet, globe)
+end
+
 function _validate(result::WBGTBatchResult)
     all(value -> !ismissing(value), result.wbgt_c) || error("benchmark produced missing WBGT")
     return nothing
 end
 
-function _measure(rows::Int, samples::Int, threaded::Bool)
+function _assert_equal(actual::WBGTBatchResult, expected::WBGTBatchResult)
+    isequal(actual.wbgt_c, expected.wbgt_c) || error("benchmark WBGT result mismatch")
+    isequal(actual.natural_wet_bulb_c, expected.natural_wet_bulb_c) || error("benchmark wet-bulb result mismatch")
+    isequal(actual.globe_temperature_c, expected.globe_temperature_c) || error("benchmark globe result mismatch")
+    return nothing
+end
+
+function _measure(rows::Int, samples::Int, mode::Symbol)
     air, dew, wind, radiation, time = batch_inputs(rows)
-    wbgt = Vector{Union{Missing,Float64}}(undef, rows)
-    wet = similar(wbgt)
-    globe = similar(wbgt)
-    call!() = liljegren_wbgt!(wbgt, wet, globe, air, dew, wind, radiation, time, -74.0060, 40.7128; direct_fraction = 0.7, threaded)
-    _validate(call!())
-    trial = @benchmark $call!() samples = samples evals = 1
-    _validate(call!())
+    reference_outputs = _outputs(rows)
+    reference = _scalar_row_loop!(reference_outputs..., air, dew, wind, radiation, time)
+    _validate(reference)
+
+    call = if mode === :scalar_row_loop
+        outputs = _outputs(rows)
+        () -> _scalar_row_loop!(outputs..., air, dew, wind, radiation, time)
+    elseif mode === :preallocated_batch_serial || mode === :preallocated_batch_threaded
+        outputs = _outputs(rows)
+        threaded = mode === :preallocated_batch_threaded
+        () -> HeatStress.liljegren_wbgt!(outputs..., air, dew, wind, radiation, time, -74.0060, 40.7128; direct_fraction = 0.7, threaded)
+    elseif mode === :allocating_batch
+        () -> HeatStress.liljegren_wbgt_batch(air, dew, wind, radiation, time, -74.0060, 40.7128; direct_fraction = 0.7)
+    else
+        throw(ArgumentError("unknown benchmark mode: $mode"))
+    end
+
+    _assert_equal(call(), reference) # compile and validate before timing
+    trial = @benchmark $call() samples = samples evals = 1
+    result = call()
+    _validate(result)
+    _assert_equal(result, reference)
     minimum_estimate, median_estimate = BenchmarkTools.minimum(trial), BenchmarkTools.median(trial)
     return Dict(
+        "mode" => string(mode),
         "rows" => rows,
-        "threaded" => threaded,
         "minimum_seconds" => minimum_estimate.time / 1e9,
         "median_seconds" => median_estimate.time / 1e9,
+        "median_rows_per_second" => rows / (median_estimate.time / 1e9),
         "minimum_memory_bytes" => minimum_estimate.memory,
         "median_memory_bytes" => median_estimate.memory,
         "minimum_allocations" => minimum_estimate.allocs,
@@ -82,11 +123,12 @@ end
 
 function main(args::Vector{String} = ARGS)
     samples, rows, output_path = _parse_arguments(args)
-    threaded_modes = Threads.nthreads() > 1 ? (false, true) : (false,)
-    measurements = [_measure(row_count, samples, threaded) for row_count in rows for threaded in threaded_modes]
+    modes = Symbol[:scalar_row_loop, :preallocated_batch_serial, :allocating_batch]
+    Threads.nthreads() > 1 && push!(modes, :preallocated_batch_threaded)
+    measurements = [_measure(row_count, samples, mode) for row_count in rows for mode in modes]
     report = Dict(
         "metadata" => Dict(
-            "benchmark" => "preallocated public Liljegren batch end-to-end throughput",
+            "benchmark" => "comparable public scalar and Liljegren batch end-to-end throughput",
             "julia_version" => string(VERSION),
             "threads_available" => Threads.nthreads(),
             "cpu" => Sys.CPU_NAME,

@@ -20,9 +20,13 @@ raw timing samples. This is the scalar fixed-station slice of spec 011, not a
 cross-language or batch benchmark; it neither publishes HeatStressR ratios nor
 replaces the independent scientific validation gate.
 
-`batch_e2e.jl` measures the preallocated batch API for the representative
-876,000-row workload from spec 008.  It measures serial mode and, when Julia
-has more than one thread, threaded mode.  It is likewise local evidence only:
+`batch_e2e.jl` uses one generated structure-of-arrays input fixture for all
+four comparable modes: an explicit public scalar row loop, preallocated serial
+batch, allocating batch, and (when Julia has multiple threads) preallocated
+threaded batch. It validates all component values outside the timed region. It
+reports each mode's timing, throughput, bytes and allocations, together with
+the host, Julia/BenchmarkTools versions and repository state. It is likewise
+local evidence only:
 
 ```sh
 julia --project=benchmark benchmark/batch_e2e.jl
@@ -45,7 +49,33 @@ performance claims or a Julia-versus-R comparison.
 | 5 | 10.2 ms | 102.9 ms | 1.102 s | 907k rows/s | 4.00× |
 | 6 | 9.4 ms | 90.2 ms | 974 ms | 1.03M rows/s | 4.52× |
 
-The same revision's public scalar benchmark was 4.50 s for 1,000,000 rows
-(222k rows/s), consistent with the one-thread batch result. The serial batch
-path therefore remains computationally equivalent to the scalar loop while
-threaded row parallelism provides the observed gain.
+This table is batch-only scaling evidence. Use `batch_e2e.jl`, rather than the
+separate scalar harness, for direct scalar-versus-batch comparisons because it
+uses identical generated inputs and validates equality before timing.
+
+## Comparable local evidence (2026-07-24)
+
+On the same `znver3` host with Julia 1.10.11, BenchmarkTools 1.8.0 and four
+available Julia threads, the redesigned harness measured all modes against the
+same generated inputs (three samples per size):
+
+| Rows | Scalar row loop | Preallocated batch, serial | Allocating batch | Preallocated batch, 4 threads |
+| ---: | ---: | ---: | ---: | ---: |
+| 10,000 | 43.9 ms | 43.4 ms | 44.3 ms | 12.3 ms |
+| 100,000 | 444.5 ms | 440.4 ms | 444.1 ms | 123.9 ms |
+| 1,000,000 | 4.457 s | 4.471 s | 4.515 s | 1.312 s |
+
+At one million rows the corresponding throughput was 224k, 224k, 222k and
+762k rows/s. The serial batch wrapper is therefore within measurement noise of
+the explicit public scalar loop; its purpose is aligned-array and preallocation
+semantics, not a second vector solver. Four-thread execution was 3.40× faster
+than the scalar-row control on this host.
+
+Warm preallocated serial calls measured 5,440,288 bytes / 150,011 allocations
+at 10,000 rows, 54,400,288 bytes / 1,500,011 allocations at 100,000 rows, and
+544,000,288 bytes / 15,000,011 allocations at 1,000,000 rows. This is 544
+bytes and 15 allocations per row plus small fixed wrapper overhead. The
+allocations come from the canonical scalar value path, not replacement batch
+result arrays; preallocated output arrays are allocated outside the timed
+region. These measurements define the current contract and identify scalar
+materialization as the only justified future allocation optimization target.

@@ -60,6 +60,11 @@ WBGTResult
 SolverDiagnostics
 DiagnosticWBGTResult
 WBGTBatchResult
+SolverDiagnosticsBatch
+DiagnosticWBGTBatchResult
+HeatStress.liljegren_wbgt_batch
+HeatStress.liljegren_wbgt!
+HeatStress.diagnose_liljegren_batch
 ```
 
 ## Solar and psychrometric kernels

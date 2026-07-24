@@ -30,3 +30,10 @@ The authoritative detail and citations remain in `spec.md`; software implementat
   threads (4.52×). The full table and invocation are retained in
   `benchmark/README.md`; raw host-specific reports remain ignored under
   `benchmark/results/`.
+- The comparable `batch_e2e.jl` harness now drives scalar-row, preallocated
+  serial, allocating, and preallocated threaded modes from identical generated
+  inputs and verifies equality before timing. On the local four-thread host,
+  one million rows took 4.457 s, 4.471 s, 4.515 s and 1.312 s respectively.
+  Warm preallocated serial calls scale as 544 bytes and 15 allocations per row
+  plus fixed wrapper overhead, inherited from the canonical scalar value path;
+  they do not allocate replacement output arrays.
