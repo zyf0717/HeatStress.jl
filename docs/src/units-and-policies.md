@@ -23,6 +23,28 @@ below that horizon sets the diagnostic-only `solar_geometry_mismatch` flag.
 The configured minimum wind is applied later by component physics, never during
 public-boundary normalization.
 
+## Scalar Liljegren model
+
+`diagnose_liljegren` is the canonical scalar calculation; `liljegren_wbgt`,
+`globe_temperature`, and `natural_wet_bulb_temperature` discard parts of that
+same diagnostic result. `direct_fraction` is required. Complete WBGT is only
+returned when both component roots pass their independent Kelvin-scale
+residual validation; a diagnostic preserves either valid component when the
+other fails.
+
+`surface_albedo` affects reflected shortwave forcing for both instruments.
+`globe_diameter_m` affects globe convection. `minimum_wind_speed_m_s` is the
+model wind floor used by both component balances, including a measured zero
+wind. Solver location and residual tolerances are independent: changing the
+latter cannot accept an unbracketed or non-finite location attempt.
+
+```@docs
+HeatStress.diagnose_liljegren
+HeatStress.liljegren_wbgt
+HeatStress.globe_temperature
+HeatStress.natural_wet_bulb_temperature
+```
+
 ## Public types
 
 ```@docs
