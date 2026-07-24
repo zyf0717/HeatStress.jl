@@ -2,7 +2,10 @@
 
 ## Purpose
 
-Create reproducible offline validation that is independent of HeatStressR and any other executable implementation.
+Create reproducible offline validation that is independent of HeatStressR and
+any other executable implementation. Validation is release-scoped: v0.1.0
+requires evidence for the Liljegren/core surface only, while future APIs add
+their own fixture requirements when introduced.
 
 ## Validation sources
 
@@ -79,9 +82,41 @@ Columns include all inputs, WBGT, Tg, Tnwb, authority level, source identifier, 
 
 Construct and document invalid-input, unbracketed, non-finite and residual-rejection cases. Do not remove failed rows from fixtures.
 
-### `simple_indices.csv`
+### `simple_indices.csv` (post-v0.1)
 
-Include all selected secondary indices, exact branch boundaries and source identifiers.
+When secondary indices are selected and released, include their exact branch
+boundaries and source identifiers. This fixture family is not required for the
+Liljegren-only v0.1.0 release.
+
+## Release-scoped validation
+
+### Required before v0.1.0
+
+The v0.1 validation slice covers every released formula and API:
+
+- independent Liljegren scalar/component fixtures and provenance;
+- scalar, allocating batch, preallocated batch and threaded equivalence;
+- exact status, missingness, input-policy and diagnostic checks;
+- residual-tolerance verification and component-retention behaviour;
+- Float32/Float64 coverage, with BigFloat comparisons where the fixture
+  authority uses high precision;
+- fixed, grouped and unique-coordinate validation where the batch contract
+  supports those modes;
+- source records for solar geometry, psychrometrics, physical kernels and all
+  released Liljegren formula families.
+
+Existing independent Liljegren fixtures and regression tests are stable input
+to this work. Close only any evidence, coverage or provenance gap found in the
+declared release surface.
+
+### Deferred after v0.1.0
+
+- fixtures and validation harness extensions for secondary indices;
+- validation for future formula variants or APIs not in the release scope;
+- any fixture family whose formula-selection gate remains unresolved.
+
+Do not require validation for unimplemented or unreleased APIs before General
+registration.
 
 ## Independent validation tests
 
@@ -155,7 +190,8 @@ Fixture changes require:
 - fixture generation is deterministic;
 - expected values are traceable to literature, analytic identities or high-precision calculation;
 - fixtures include failures and domain boundaries;
-- every exported function has independent scientific coverage;
+- every function in the declared release surface has independent scientific
+  coverage;
 - CI failures identify the worst row and source identifier.
 
 ## Suggested commit

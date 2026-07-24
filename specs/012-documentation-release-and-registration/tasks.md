@@ -8,17 +8,22 @@
 
 ## Tasks
 
-- [ ] Create README and documented usage examples.
-- [ ] Create API, input, numerical behavior, performance and provenance pages.
-- [ ] Add/verify MIT, citation and contribution material.
-- [ ] Check project compat/license metadata.
-- [ ] Configure Aqua, formatting, coverage, documentation and supported-platform
-  CI quality gates.
-- [ ] Run clean-depot and docs builds.
-- [ ] Recheck package-name availability before registration.
-- [ ] Freeze the candidate tree and define how its post-commit SHA is passed to spec 013 without publication.
+- [ ] Make README scope, installation, scalar/batch examples, units, timestamp
+  semantics, diagnostics, provenance and limitations accurate for v0.1.0.
+- [ ] Complete API, inputs, numerical-behaviour, performance and provenance
+  documentation for the released Liljegren surface.
+- [ ] Add/verify MIT, citation and contribution material; audit exports,
+  docstrings, licences and `[compat]`.
+- [ ] Configure and run documentation, Aqua, JET, clean-depot and
+  Linux/macOS/Windows (including threaded) quality gates.
+- [ ] Confirm host-specific benchmark documentation and scoped scientific
+  validation evidence; make no unsupported cross-language performance claim.
+- [ ] Recheck package-name availability and validate Registrator, TagBot,
+  CompatHelper and archival workflow without publication.
+- [ ] Freeze the candidate tree and define how its post-commit SHA is passed to
+  spec 013.
 - [ ] Run the acceptance checks in `quickstart.md`.
-- [ ] Record test, benchmark or validation evidence and commit SHA below.
+- [ ] Record release-readiness evidence and commit SHA below.
 
 ## Evidence
 

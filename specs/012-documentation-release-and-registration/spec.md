@@ -2,135 +2,98 @@
 
 ## Purpose
 
-Prepare a scientifically transparent MIT-licensed Julia package for final audit. This unit establishes release and General-registration readiness; it does not publish the package.
+Prepare a focused, scientifically transparent MIT-licensed Liljegren-first
+`v0.1.0` for final audit and Julia General registration. This unit establishes
+readiness; it does not tag, publish or register the package.
 
 ## Scheduling
 
-This unit is intentionally deferred until the HeatStressR v2.1.6 benchmark
-milestone in spec 011 has been completed and reviewed, and specs 009–010 are
-complete. Do not delay that benchmark for README styling, documentation
-expansion, badges, registration setup, archival configuration or release-note
-polish.
+This is the immediate delivery milestone after the remaining Liljegren/core
+validation slice of 010 and publication gate of 011. It depends on the
+completed core implementation through 008 and the completed readability
+refactor 014. It does **not** depend on spec 009, secondary-index fixtures, a
+complete HeatStressR comparison, or deeper optimisation.
 
-## README structure
+The release is deliberately focused: solar geometry and model-required
+psychrometric helpers; Liljegren globe, natural wet-bulb and WBGT calculations;
+diagnostic APIs; and serial, preallocated and threaded batch APIs. Stull,
+Bernard, humidex, heat index and other secondary indices are post-v0.1 work.
 
-1. package status and scope;
-2. installation;
-3. minimal scalar example;
-4. batch/threading example;
-5. returned result fields;
-6. supported indices and exact formulations;
-7. units and timestamp contract;
-8. scientific provenance and implementation-independence statement;
-9. validation statement and limitations;
-10. MIT licence and citation;
-11. documentation/build/test badges.
+## README and documentation
 
-Do not claim equivalence to all Liljegren implementations. State that agreement requires matching pressure, wind treatment, timestamp convention, solar method, radiation partitioning, instrument parameters and numerical policies.
+The README must cover package status/scope, installation, minimal scalar and
+batch/threading examples, returned result/diagnostic fields, units/timestamp
+semantics, provenance, validation, numerical failures, limitations, MIT
+licence and citation. Do not claim equivalence to all Liljegren implementations:
+pressure, wind treatment, timestamp convention, solar method, radiation
+partitioning, instrument parameters and numerical policies must match. Do not
+claim a HeatStressR speed ratio without a reproducible, correctness-gated
+committed report.
 
-## Documentation pages
+The documentation must provide:
 
-### `index.md`
+- `index.md`: focused scope and quick start;
+- `api.md`: released public signatures and result types;
+- `liljegren.md`: conceptual equations, source citations, component solving,
+  WBGT composition and configurable physical parameters;
+- `inputs.md`: units, timestamp semantics, policies and radiation inputs;
+- `numerical-behaviour.md`: bracketing, tolerances, failures, missingness and
+  diagnostics;
+- `performance.md`: host-specific Julia baseline, explicitly not a universal
+  guarantee or cross-language ratio;
+- `provenance.md`: independent-literature implementation statement, primary
+  sources and honest advisory HeatStressR familiarity disclosure.
 
-Overview and quick start.
+Examples must be executable and small, including scalar, zoned-time and batch
+calls. Plain `DateTime` is documented as UTC.
 
-### `api.md`
+## Release-wide quality and registration readiness
 
-Public signatures and result types.
+Complete Aqua, JET, documentation CI and supported Linux/macOS/Windows test
+coverage for the release surface. Keep benchmark CI to output-validating smoke
+tests; do not enforce wall-clock thresholds on shared runners. Run clean-depot
+installation/testing, audit exports and `[compat]`, and recheck package-name
+availability.
 
-### `liljegren.md`
-
-Equations at a conceptual level, source citations, component solving, WBGT composition and configurable physical parameters.
-
-### `inputs.md`
-
-Units, scalar/aligned inputs, timestamp semantics, dewpoint policies, radiation and direct fraction.
-
-### `numerical-behaviour.md`
-
-Bracketing, tolerances, failure reasons, missingness and diagnostic interpretation.
-
-### `performance.md`
-
-Benchmark methodology and results. Public comparisons to other packages must
-use reproducible public scripts and fair settings. The private HeatStressR
-v2.1.6 milestone report from spec 011 may guide this page, but is not itself a
-publishable claim.
-
-### `provenance.md`
-
-Include:
-
-- the primary Liljegren paper and supporting sources;
-- statement that the Julia source was newly written from literature;
-- disclosure that the maintainer previously worked on HeatStressR and may use it privately as advisory comparison;
-- statement that no HeatStressR source, comments, tests or fixtures are part of the MIT implementation;
-- provenance table for every formula family;
-- explanation of independently re-expressed optimisation ideas.
-
-## Release-wide quality tooling
-
-After the benchmark milestone, complete Aqua checks, formatting enforcement,
-coverage configuration, documentation CI, the supported-platform test matrix
-and any optional nightly Julia job. Keep benchmark CI to output-validating smoke
-tests; do not enforce wall-clock thresholds on shared runners.
-
-## Docstring examples
-
-Examples must be executable and small. Include scalar, zoned-time and batch examples. Explain that plain `DateTime` is interpreted as UTC if that remains the selected contract.
-
-## Optional R-user correspondence table
-
-A non-normative documentation table may help users find conceptually corresponding functions. Label it **“R-user correspondence,” not “migration mapping.”** It must not claim identical policies or results and must not expose dotted aliases in the Julia API.
-
-## MIT and contribution files
-
-- use the standard MIT licence text without added restrictions;
-- identify the copyright holder/year;
-- do not require copyright assignment;
-- state in `CONTRIBUTING.md` that submitted contributions are MIT-licensed and must have lawful provenance;
-- optionally use Developer Certificate of Origin sign-off;
-- add no third-party source unless its licence is recorded and compatible.
+Use standard MIT licence text, identify holder/year, include citation and
+contribution provenance guidance, and add no third-party source without a
+recorded compatible licence. Validate Registrator, TagBot, CompatHelper and the
+intended archival workflow without publishing.
 
 ## Release-readiness checklist
 
-1. specs 000–011 are complete and this unit’s criteria are ready to close;
-2. set the candidate version to `0.1.0`;
-3. confirm MIT licence, citation and provenance;
-4. run tests on all supported platforms;
-5. build docs with no warnings;
-6. run Aqua/JET;
-7. run final scientific validation and save summary;
-8. generate benchmark report;
-9. review exports and source citations;
-10. verify package-name conflict again;
-11. configure and validate the intended TagBot, CompatHelper, archival and Registrator workflow without triggering publication;
-12. freeze the candidate tree and define the handoff that will pass its post-commit SHA to the final scientific audit.
+1. complete the declared v0.1 release scope: core 000–008 evidence, the
+   Liljegren/core slice of 010, publication gate of 011 and 014;
+2. set candidate version to `0.1.0`;
+3. make README, examples, API documentation, units/timestamp semantics,
+   numerical-failure explanation, provenance and limitations accurate;
+4. audit MIT/citation/contribution material, licences, exports and `[compat]`;
+5. run clean-depot installation/test and Linux/macOS/Windows CI, including
+   threaded coverage, Aqua, JET and warning-free docs;
+6. record scoped scientific validation and host-specific benchmark evidence;
+7. recheck package-name conflict and validate Registrator, TagBot, CompatHelper
+   and archival setup without publication;
+8. freeze the candidate tree and define the handoff that passes its post-commit
+   SHA to spec 013.
 
-Tagging, GitHub release creation, archival and registration are post-audit actions governed by spec 013. They are not acceptance criteria for this unit.
-
-## Registration readiness
-
-Confirm:
-
-- the package name is not confusingly close to an existing registered package;
-- README/docs clearly identify the scientific formulation and provenance;
-- `Project.toml` has compatible lower bounds for every non-stdlib dependency and the repository contains the standard MIT `LICENSE`;
-- `[compat]` entries exist for all non-stdlib dependencies;
-- tests do not download mutable remote data;
-- package loads and tests from a clean depot;
-- no GPL or custom-licensed source was accidentally committed;
-- generated fixtures contain provenance metadata.
+Do not require spec 009, its fixture families, or Tier 2 of spec 011. Tagging,
+GitHub release creation, archival and General registration are post-audit
+actions governed by spec 013.
 
 ## Acceptance criteria
 
-- primary examples contain no R dependency;
-- all exports have docstrings and scientific citations where applicable;
+- all declared v0.1 APIs have executable examples, docstrings and appropriate
+  scientific citations;
 - docs explain numerical failure rather than hiding it;
-- provenance accurately describes prior HeatStressR familiarity without presenting HeatStressR as the source;
-- release notes describe an independent MIT implementation, not a port;
-- no tag, archive, registry submission or other public release action has occurred before spec 013 authorises the candidate commit.
+- provenance accurately describes prior HeatStressR familiarity without
+  presenting HeatStressR as the source;
+- release material describes an independent MIT Liljegren-first implementation,
+  not a port or all-index package;
+- quality, clean-depot, platform, compatibility, export and registration
+  readiness checks pass for the focused release surface;
+- no tag, archive, registry submission or other public release action occurs
+  before spec 013 authorises the candidate commit.
 
 ## Suggested commit
 
-`docs: prepare independent MIT implementation for audit`
+`docs: prepare Liljegren-first v0.1.0 for audit`

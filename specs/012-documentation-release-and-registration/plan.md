@@ -2,24 +2,30 @@
 
 ## Dependency gate
 
-009 Other heat indices; complete 010 Scientific fixtures and validation; 011
-Liljegren performance benchmarking
+Completed v0.1 core evidence through 008; the Liljegren/core validation slice
+of 010; the publication gate of 011; and 014 readability refactor. Spec 009,
+remaining 010 fixtures and Tier 2 of 011 are post-v0.1 work.
 
 ## Design
 
-Prepare a transparent MIT Julia package with executable documentation, provenance disclosure and General-registration readiness.
-This work resumes only after the spec 011 benchmark findings have been reviewed.
+Prepare executable documentation, provenance disclosure, release-wide quality
+evidence and General-registration readiness for the declared Liljegren-first
+surface. Do not broaden the release to secondary indices merely because their
+source files exist.
 
 ## Sequence
 
-1. Write docs from stable contracts and results.
-2. Add citation, license and contribution metadata.
-3. Add release-wide Aqua, formatting, coverage, documentation and platform-CI
-   quality gates.
-4. Build docs without warnings.
-5. Run the release-readiness checklist.
-6. Freeze the candidate tree for spec 013; after committing it, pass that commit SHA in the audit invocation/evidence. Do not tag, publish or register it here.
+1. Make README/docs accurate for scope, examples, units, timestamps, numerical
+   failure and limitations.
+2. Audit public exports, docstrings, provenance, licence, citation and
+   `[compat]` metadata.
+3. Configure/review Aqua, JET, documentation and supported-platform CI, then
+   run clean-depot installation/testing.
+4. Recheck package name and validate Registrator, TagBot, CompatHelper and
+   archival configuration without publishing.
+5. Freeze the candidate tree and hand its post-commit SHA to focused spec 013.
 
 ## Completion rule
 
-Do not mark this unit complete until every acceptance criterion in `spec.md` passes and the concrete evidence is recorded in `tasks.md`.
+Do not mark this unit complete until every focused v0.1 acceptance criterion
+passes and concrete evidence is recorded in `tasks.md`.

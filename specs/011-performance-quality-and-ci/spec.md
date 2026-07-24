@@ -2,216 +2,132 @@
 
 ## Purpose
 
-Reach a reproducible, correctness-gated performance comparison between
-HeatStress.jl and the local HeatStressR v2.1.6 checkout, then optimise only
-measured Julia bottlenecks. Publication polish and release-wide quality work are
-deferred to spec 012.
+Maintain reproducible performance evidence for released Liljegren paths. The
+initial `v0.1.0` gate establishes that the existing implementation is usable,
+stable and non-regressing; a complete HeatStressR comparison and further
+optimisation are post-publication work.
 
-## Benchmark milestone
+## Tier 1: v0.1.0 publication gate
 
-The reference checkout is the sibling `../HeatStressR` repository (currently
-`~/repos/HeatStressR`). Allow an explicit path override for portability. Before
-every comparison run, verify that its `DESCRIPTION` declares version `2.1.6`.
-Record its Git commit and dirty state; do not silently benchmark another version
-or a modified tree.
+The release gate requires:
 
-Use HeatStressR only through its exported public API as a black box. Do not copy
-or translate its source, benchmark scripts, fixtures, comments or structure.
-Repository tests and package execution must remain independent of R. Any
-cross-language adapter and raw comparison output belong under an ignored
-`local-comparison/` workspace.
+- reproducible Julia scalar and batch benchmark harnesses with deterministic
+  inputs and correctness checks outside timed regions;
+- no material regression from the recorded readable/fused baseline after the
+  readability refactor;
+- usable threaded scaling on the recorded host;
+- JET and allocation review for released scalar and batch hot paths;
+- a small Julia-only benchmark smoke test that validates outputs without a
+  wall-clock threshold;
+- public documentation that labels results as host-specific local evidence.
 
-The milestone covers:
+The existing identical-input baseline is adequate initial evidence: on the
+recorded `znver3` host with Julia 1.10.11 and four threads, one million
+preallocated serial batch rows had a 4.328 s median and four-thread batch had a
+1.255 s median (3.45× serial speedup). These measurements establish a useful
+publication baseline, not a universal promise or a public cross-language
+comparison.
 
-1. scalar Liljegren value calculation;
-2. serial allocating and preallocated Julia batch paths;
-3. threaded Julia batch at available thread counts;
-4. the corresponding public HeatStressR v2.1.6 scalar, batch and parallel paths;
-5. fixed-station, grouped-location and unique-triplet workloads.
+Current maintainer observation indicates the Julia implementation may be about
+twice as fast as optimised HeatStressR v2.1.6. It is advisory only: do not make
+that ratio a README, documentation or release claim until a reproducible,
+correctness-gated report supporting the exact workload and ratio is committed.
 
-Secondary indices, documentation styling, package registration and release
-automation do not block this milestone.
+Do not delay v0.1.0 for optimisation unless profiling or review finds a
+correctness, stability or usability blocker.
+
+## Tier 2: post-publication comparison and optimisation
+
+After v0.1.0, retain the following work as optional, profile-led tasks:
+
+1. verify the local HeatStressR v2.1.6 checkout and record both revisions;
+2. create an ignored public-API black-box adapter and correctness-gated scalar,
+   serial batch and matched-concurrency comparison matrix;
+3. cover fixed-station, grouped-location and unique-triplet workloads at the
+   selected row sizes;
+4. profile released hot paths before considering prepared-zenith passes,
+   grouped-key reuse, allocation reduction, solver changes, inlining or SIMD;
+5. retain an optimisation only when it improves complete end-to-end timing
+   without degrading numerical equivalence or threaded scaling.
+
+Use HeatStressR only through its exported public API as a black box. Do not
+copy or translate its source, benchmark scripts, fixtures, comments or
+structure. Adapters and raw comparison output remain in ignored
+`local-comparison/` workspace. Agreement with another implementation is
+advisory and never overrides the scientific hierarchy in spec 000.
 
 ## Benchmark contract
 
-Use `BenchmarkTools.jl` for Julia and a documented monotonic elapsed timer for
-R. Separate setup from timed code. Precompile before measurement. Do not include
-fixture generation, exchange-file loading or compilation in core timings.
+Use `BenchmarkTools.jl` for Julia. Separate input construction, compilation,
+output validation and report writing from timed regions. Record Julia version,
+threads, hardware, BenchmarkTools version, repository revision/dirty state,
+row count, mode, minimum/median time and allocations.
 
-Benchmark groups:
+The Tier 1 harnesses cover public scalar results, public scalar writes to
+preallocated outputs, preallocated serial batch, allocating serial batch and,
+when threads are available, preallocated threaded batch. Each mode must use
+identical inputs and check WBGT/component equality before timing.
 
-1. solar geometry scalar;
-2. solar geometry fixed/grouped/unique batch;
-3. component scalar solves;
-4. Liljegren scalar repeated loop;
-5. allocating serial batch;
-6. preallocated serial batch;
-7. preallocated threaded batch;
-8. value-only versus diagnostic APIs;
-9. HeatStressR v2.1.6 public scalar, batch and parallel calls.
+Do not enforce wall-clock thresholds in shared CI. A benchmark smoke test
+checks output equivalence only.
 
-Row sizes:
+Tier 2 cross-language runs additionally require identical deterministic
+datasets, declared output tolerances, warmed implementations, matching row
+counts, recorded R/Julia runtime details and correctness comparison before any
+speed ratio is reported. Include worker startup/orchestration performed within
+the public call, while excluding process startup, package loading, compilation,
+input parsing and formatting.
 
-- 1;
-- 100;
-- 1,000;
-- 10,000;
-- 100,000;
-- 1,000,000.
+## Optimisation policy
 
-Coordinate modes:
-
-- fixed station;
-- grouped locations with repeated timestamps;
-- unique `(time, lon, lat)` triplets.
-
-## Comparison protocol
-
-Julia baselines must include:
-
-- repeated calls to the public scalar Julia API;
-- a tight loop over the internal scalar kernel;
-- allocating serial batch;
-- preallocated serial batch;
-- threaded batch at multiple thread counts;
-- solar preprocessing on and off where applicable.
-
-Generate one deterministic, implementation-independent dataset for both
-languages. Use identical row order, meteorology, coordinates, timestamps,
-pressure, direct fraction and physical controls. The exchange-file generation,
-loading and conversion steps are setup and must not be included in timed
-regions.
-
-Before timing:
-
-- load and warm each implementation;
-- confirm the HeatStressR version and record both repository revisions;
-- compare WBGT, natural wet-bulb and globe outputs using declared absolute and
-  relative tolerances;
-- compare missing/failed row sets, while allowing documented differences in
-  diagnostic vocabulary;
-- investigate and record any material mismatch against the scientific sources
-  or independent fixtures.
-
-Do not report a speed ratio for a workload whose outputs have not passed this
-gate. Agreement with HeatStressR is advisory and must not override the
-conformance hierarchy in spec 000.
-
-The primary end-to-end timing starts immediately before the public computation
-call and ends when its result is materialised. Exclude Julia/R process startup,
-package loading, Julia compilation, input parsing and result formatting. Include
-any worker startup or orchestration performed inside the timed public call.
-Use the same warm-up policy and sample count, report minimum and median elapsed
-time, and do not compare unequal row counts.
-
-Measure serial execution in both languages. Measure parallel execution at
-matched concurrency levels supported by the machine, including 1 and at least
-one multi-core setting. Record Julia threads, HeatStressR workers and physical
-hardware; do not imply that threads and processes have identical overhead.
-
-## Optimisation order
-
-Start from the completed spec-008 worker-local fused baseline:
+The released baseline preserves worker-local fused execution:
 
 ```text
 solar geometry → meteorological preparation → component solves → output write
 ```
 
-Use this order:
+Prepared-zenith experiments, grouped repeated-key reuse, residual-overhead
+reduction, inlining, SIMD and advanced batch solving are Tier 2 only. Measure
+one-thread and multi-thread end-to-end time, allocations, numerical
+equivalence and scaling before retaining any of them. Do not use `@fastmath` in
+the production scientific path.
 
-1. profile the fused spec-008 path;
-2. inspect type stability and allocations;
-3. identify repeated batch invariants;
-4. compare the fused worker-local solar calculation with a parallel
-   prepared-zenith path only if solar geometry is material;
-5. test grouped solar reuse for repeated timestamp/location keys;
-6. reduce repeated row-local invariant calculations in residual evaluation;
-7. consider kernel inlining;
-8. consider SIMD only for simple preprocessing loops;
-9. consider advanced batch solving only if root solving remains dominant.
+## Allocation and quality policy
 
-The parallel prepared-zenith candidate is two worker-parallel phases: a
-parallel zenith pass, a barrier, then a parallel WBGT pass. Do not calculate
-the whole zenith array on the orchestration thread. For repeated
-`(time, longitude, latitude)` keys, profile grouping/deduplication and include
-key construction, grouping, parallel unique computation and scattering in the
-end-to-end timing. Possible designs include per-thread local caches,
-chunk-local preparation and parallel preprocessing; do not add a shared mutable
-global cache or lock contention to the row hot path.
+Review direct scalar physical kernels, scalar value calls and preallocated
+batch calls after compilation. Preallocated batch must not allocate replacement
+output arrays or public result containers per row; remaining scientific-path
+allocations are measured rather than assumed fixed. Keep allocation regression
+checks conservative across Julia versions.
 
-An optimisation must not improve isolated kernel timing while reducing
-end-to-end threaded scaling by consolidating material work onto the
-orchestration thread. For each retained preprocessing optimisation, measure
-one-thread and multi-thread end-to-end time, preprocessing and solver phases,
-total speedup, allocations and numerical equivalence. Reject or redesign it
-when serial O(n) preprocessing, degraded scaling, shared-cache contention,
-memory traffic or complexity outweighs measured reuse.
-
-Do not use `@fastmath` in the production scientific path. A separately named approximate mode is out of scope for v0.1.
-
-## Allocation targets
-
-After compilation:
-
-- direct scalar physical kernels: zero allocations;
-- scalar value-only Liljegren: target zero allocations for `DateTime`, or document a small fixed count;
-- preallocated batch: first establish the spec-008 baseline with no replacement
-  output arrays and no public result container per row. Further allocation
-  reductions require profile evidence; do not claim constant allocations until
-  measured on supported Julia versions;
-- allocating batch: allocations dominated by output arrays;
-- diagnostics: proportional to required diagnostic arrays only.
-
-Add allocation regression tests with conservative thresholds on one supported Julia version. Avoid brittle exact byte counts across versions.
-
-## Benchmark-readiness checks
-
-Analyse representative public calls with JET and `@code_warntype`. Treat
-definite runtime dispatch or errors in hot paths as failures. Add conservative
-allocation regression tests and a small Julia-only benchmark smoke path that
-validates outputs without enforcing timings.
-
-Do not enforce wall-clock benchmark thresholds in shared GitHub-hosted CI.
-Cross-language comparison must not run in ordinary CI.
-
-## Performance reporting
-
-The local comparison report must record:
-
-- hardware/OS/Julia version;
-- R version and the commits/dirty states of both packages;
-- BenchmarkTools version and timing method used for R;
-- Julia thread count and HeatStressR worker count;
-- input size and coordinate mode;
-- diagnostic mode;
-- minimum/median time and allocations;
-- correctness tolerance used in comparisons.
-
-Also record raw per-sample timings or a machine-readable summary sufficient to
-recalculate reported statistics. A concise milestone summary may be added to
-`tasks.md`; raw output and private adapters stay in `local-comparison/`.
-
-Public performance documentation is deferred to spec 012. A local result is not
-automatically a publishable claim.
+Analyse representative released public calls with JET and `@code_warntype`.
+Definite runtime dispatch or errors in hot paths are release blockers. Retain
+the Julia-only smoke path and do not run cross-language comparison in ordinary
+CI.
 
 ## Acceptance criteria
 
-- no type instability in core scalar path;
-- no batch-wrapper or public-result container allocated per row in preallocated
-  batch; remaining shared scalar scientific-path allocations are profiled
-  separately;
-- threaded mode has serial-equivalence tests;
-- benchmark scripts are reproducible and save metadata;
-- the local reference is verified as HeatStressR v2.1.6 and its commit/dirty
-  state is recorded;
-- correctness-gated scalar, serial batch and parallel comparisons complete for
-  fixed, grouped and unique coordinate modes;
-- a local report records timing boundaries, runtime/hardware metadata,
-  tolerances and unresolved discrepancies;
-- optimisation decisions cite profiles or benchmark evidence;
-- no unsubstantiated performance claims in README;
+### v0.1.0 publication gate
+
+- reproducible Julia scalar and batch harnesses exist and record metadata;
+- readability-refactor results are numerically equivalent to the baseline and
+  have no material benchmark regression;
+- serial/preallocated/threaded paths preserve documented output equivalence;
+- JET and allocation review cover released hot paths;
+- the small smoke benchmark validates outputs;
+- performance documentation is honest about host-specific evidence and makes
+  no unsupported HeatStressR ratio claim;
 - package remains correct with bounds checks enabled.
 
-## Suggested commit
+### Post-v0.1 completion
 
-`perf: benchmark Liljegren against HeatStressR 2.1.6`
+- correctness-gated HeatStressR scalar, serial batch and parallel comparisons
+  cover the selected fixed, grouped and unique workloads;
+- deeper profiling and optimisation decisions cite measured evidence;
+- any public cross-language claim has a reproducible committed report;
+- no retained optimisation harms numerical correctness or threaded scaling.
+
+## Suggested commits
+
+- `bench: establish Liljegren v0.1 publication baseline`
+- `perf: profile and optimise post-v0.1 Liljegren paths`

@@ -2,7 +2,7 @@
 
 ## Required sources
 
-- All sources and evidence recorded in 000–012.
+- Sources and evidence for the declared v0.1 Liljegren-first release surface.
 - Liljegren et al. (2008) as primary scientific authority.
 
 The authoritative detail and citations remain in `spec.md`; software implementations are not scientific authorities.
@@ -15,5 +15,6 @@ The authoritative detail and citations remain in `spec.md`; software implementat
 
 ## Open questions
 
-- Resolve every untraceable fixture, discrepancy or licensing issue before sign-off.
+- Resolve every untraceable released fixture, discrepancy or licensing issue
+  before sign-off.
 - Document accepted deviations with scientific justification.

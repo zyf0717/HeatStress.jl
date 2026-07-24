@@ -6,15 +6,27 @@
 - [ ] In progress
 - [ ] Complete
 
-## Tasks
+## v0.1 release slice
 
-- [ ] Create fixture metadata and source identifiers.
-- [ ] Implement deterministic generation without external runtime dependencies.
-- [ ] Add solar, psychrometric, physical, component, reference, failure and simple-index fixtures.
-- [ ] Implement mismatch reporting with row/source context.
-- [ ] Document regeneration review requirements.
-- [ ] Run the acceptance checks in `quickstart.md`.
-- [ ] Record test, benchmark or validation evidence and commit SHA below.
+- [ ] Audit existing independent Liljegren scalar/component/reference/failure
+  fixtures and their source identifiers.
+- [ ] Verify scalar, allocating/preallocated/threaded batch, exact
+  status/missingness and diagnostic coverage.
+- [ ] Verify residual acceptance, Float32/Float64 and applicable fixed/grouped/
+  unique-coordinate coverage.
+- [ ] Confirm provenance for every solar, psychrometric, physical and
+  Liljegren formula released in v0.1.0.
+- [ ] Run the release-slice acceptance checks in `quickstart.md` and record
+  evidence.
+
+## Post-v0.1 validation
+
+- [ ] Add secondary-index fixtures only after their formula-selection gate and
+  release scope are approved.
+- [ ] Extend deterministic generation and mismatch reporting for each future
+  fixture family.
+- [ ] Record full-unit completion evidence and commit SHA after all selected
+  secondary indices are released.
 
 ## Evidence
 
