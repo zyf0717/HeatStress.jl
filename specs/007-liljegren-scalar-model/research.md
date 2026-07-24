@@ -29,8 +29,10 @@ The authoritative detail and citations remain in `spec.md`; software implementat
 - A near-horizon high-radiation fixture demonstrates independent component
   retention: the globe search can be `Unbracketed` within its guardrail while
   the natural wet bulb remains valid.
-- The public default pressure is converted to the call's common float type, so
-  Float32 meteorology with a Float32 configuration remains Float32.
+- The scalar common float type is determined from meteorology, pressure,
+  coordinates, direct fraction and configuration before any validation return.
+  The documented Float64 pressure default therefore produces Float64 results;
+  callers that require Float32 pass `pressure_hpa = 1010f0` explicitly.
 - Scalar coordinates and the FAO-56 -40--50 °C public temperature domain are
   checked before physical-property construction. Invalid observations return
   `InvalidDomain` with unattempted component diagnostics rather than throwing.
@@ -42,13 +44,16 @@ The authoritative detail and citations remain in `spec.md`; software implementat
 
 - `test/fixtures/liljegren_scalar_reference.toml` records independent 256-bit
   calculations of the documented equations for daytime, supplied-radiation
-  night-time, and saturated-air cases. Its generator is standalone and does
-  not import HeatStress or call package kernels; component and WBGT values use
-  the scalar tolerance in `spec.md`.
+  night-time, saturated-air and sub-minute timestamp cases. Its standalone
+  generator constructs every BigFloat constant under a 256-bit local precision
+  scope, uses seconds and milliseconds in solar time, and records generator,
+  source and schema metadata. Fresh-process regeneration is tested at two
+  ambient BigFloat precisions.
 - The scalar test suite checks each documented scalar call with `@inferred`.
-  The value-only Float64 path currently allocates 1,904 bytes after
-  warm-up on the recorded host; the test enforces a conservative 4 KiB ceiling
-  pending a dedicated zero-allocation redesign.
+  The common physical preparation and component outcomes are materialized as
+  either `WBGTResult` or `DiagnosticWBGTResult`; no diagnostic structs are
+  built on the value-only path. A warmed direct Float64 value call allocates
+  64 bytes on the recorded host; the regression ceiling is 1 KiB.
 - Spec 010 still owns the broader independently sourced scientific fixture set
   and source-identifier metadata. These local fixtures establish an immediate
   independent scalar regression gate but do not replace that acceptance work.

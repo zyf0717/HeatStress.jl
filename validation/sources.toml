@@ -213,3 +213,158 @@ provenance = "original_design"
 rationale = "Direct horizontal-to-normal geometry is singular at the horizon while the API does not provide direct-normal irradiance; 1 degree bounds both shared direct terms while retaining diffuse forcing and distinguishing physical night zeroing."
 implementation = "src/constants.jl; src/liljegren/residuals.jl"
 validation = "test/test_physical_kernels.jl direct-forcing threshold and horizon boundaries"
+
+[items.bracketed_bisection]
+kind = "numerical_policy"
+owner_spec = "006"
+status = "validated"
+provenance = "original_design"
+rationale = "A safeguarded signed bisection gives deterministic bracket-preserving root location for both component residuals."
+implementation = "src/liljegren/root_solver.jl"
+validation = "test/test_root_solver.jl convergence, unbracketed, non-finite and iteration-limit cases"
+
+[items.globe_initial_bracket]
+kind = "numerical_policy"
+owner_spec = "006"
+status = "validated"
+provenance = "original_design"
+rationale = "The initial [air - 2 K, air + 10 K] interval is a narrow ordinary-condition bracket before directional expansion."
+units = "K"
+implementation = "src/liljegren/globe_temperature.jl"
+validation = "test/test_root_solver.jl globe component adapter fixture"
+
+[items.globe_directional_width_expansion]
+kind = "numerical_policy"
+owner_spec = "006"
+status = "validated"
+provenance = "original_design"
+rationale = "For a same-positive globe residual only the lower endpoint moves; for same-negative only the upper endpoint moves, each by the current bracket width."
+units = "K"
+implementation = "src/liljegren/root_solver.jl"
+validation = "test/test_root_solver.jl multiple lower-only and upper-only expansion regressions"
+
+[items.globe_search_guardrail]
+kind = "numerical_policy"
+owner_spec = "006"
+status = "validated"
+provenance = "original_design"
+rationale = "The ±200 K bound prevents unbounded exploration while allowing physically extreme diagnostic cases to report Unbracketed."
+units = "K relative to air temperature"
+implementation = "src/liljegren/globe_temperature.jl"
+validation = "test/test_root_solver.jl unbracketed globe fixture"
+
+[items.wet_bulb_initial_bracket]
+kind = "numerical_policy"
+owner_spec = "006"
+status = "validated"
+provenance = "original_design"
+rationale = "The initial interval starts near dew point and air temperature to prioritize the physically relevant wet-bulb root."
+units = "K"
+implementation = "src/liljegren/natural_wet_bulb.jl"
+validation = "test/test_root_solver.jl wet-bulb component adapter fixture"
+
+[items.wet_bulb_two_sided_expansion]
+kind = "numerical_policy"
+owner_spec = "006"
+status = "validated"
+provenance = "original_design"
+rationale = "Both wet-bulb endpoints expand by at most 10 K per cycle so a non-monotone residual is not assumed directional."
+units = "K per expansion cycle"
+implementation = "src/liljegren/root_solver.jl"
+validation = "test/test_root_solver.jl wet-bulb expansion tests"
+
+[items.wet_bulb_search_guardrail]
+kind = "numerical_policy"
+owner_spec = "006"
+status = "validated"
+provenance = "original_design"
+rationale = "The ±100 K air-relative bound prevents invalid saturation-pressure exploration while retaining a broad physical search domain."
+units = "K relative to air temperature"
+implementation = "src/liljegren/natural_wet_bulb.jl"
+validation = "test/test_root_solver.jl unbracketed and convergence tests"
+
+[items.root_location_tolerance]
+kind = "numerical_policy"
+owner_spec = "006"
+status = "validated"
+provenance = "original_design"
+rationale = "Root location stops at the configured Kelvin bracket tolerance, independently of residual acceptance."
+units = "K"
+implementation = "src/liljegren/root_solver.jl; src/types.jl"
+validation = "test/test_root_solver.jl tolerance and endpoint-stop assertions"
+
+[items.final_residual_acceptance]
+kind = "numerical_policy"
+owner_spec = "006"
+status = "validated"
+provenance = "original_design"
+rationale = "A separately evaluated physical residual prevents an algebraic location residual from being mistaken for an accepted component solution."
+units = "K"
+implementation = "src/liljegren/diagnostics.jl; src/liljegren/globe_temperature.jl; src/liljegren/natural_wet_bulb.jl"
+validation = "test/test_root_solver.jl component validation-residual assertions"
+
+[items.adjacent_endpoint_stop]
+kind = "numerical_policy"
+owner_spec = "006"
+status = "validated"
+provenance = "original_design"
+rationale = "When a midpoint is adjacent to an endpoint, Float32/Float64 representation cannot narrow the interval; select the endpoint with the smaller absolute location residual."
+implementation = "src/liljegren/root_solver.jl"
+validation = "test/test_root_solver.jl Float32 adjacent-representable-endpoint case"
+
+[items.diagnostic_evaluation_count]
+kind = "api_design"
+owner_spec = "006"
+status = "validated"
+provenance = "original_design"
+rationale = "Diagnostics count every residual invocation exactly once, including the final validation call only after successful root location."
+implementation = "src/liljegren/diagnostics.jl; src/liljegren/globe_temperature.jl; src/liljegren/natural_wet_bulb.jl"
+validation = "test/test_root_solver.jl location-plus-validation evaluation-count assertions"
+
+[items.scalar_wbgt_weighting]
+kind = "equation"
+owner_spec = "007"
+status = "validated"
+source = "liljegren_2008"
+location = "outdoor WBGT weighted composition"
+units = "degrees C"
+implementation = "src/liljegren/scalar.jl"
+validation = "test/test_liljegren_scalar.jl WBGT reconstruction and independent fixtures"
+
+[items.scalar_direct_fraction]
+kind = "api_design"
+owner_spec = "007"
+status = "validated"
+provenance = "original_design"
+rationale = "The scalar model consumes direct divided by total radiation; no unsourced derivation or fallback is exposed."
+units = "dimensionless fraction"
+implementation = "src/liljegren/scalar.jl; src/validation.jl"
+validation = "test/test_liljegren_scalar.jl invalid direct-fraction cases"
+
+[items.component_retention_missingness]
+kind = "api_design"
+owner_spec = "007"
+status = "validated"
+provenance = "original_design"
+rationale = "A valid component remains observable when its counterpart fails, while complete WBGT is missing unless both components are accepted."
+implementation = "src/liljegren/scalar.jl"
+validation = "test/test_liljegren_scalar.jl partial component retention and value/diagnostic equality"
+
+[items.scalar_temperature_domain]
+kind = "model_policy"
+owner_spec = "007"
+status = "validated"
+provenance = "original_design"
+rationale = "The public scalar boundary accepts the documented -40 to 50 degrees C psychrometric domain before property kernels are evaluated."
+units = "degrees C"
+implementation = "src/validation.jl"
+validation = "test/test_liljegren_scalar.jl invalid-temperature structured diagnostic cases"
+
+[items.horizon_mismatch_and_direct_clip_diagnostics]
+kind = "api_design"
+owner_spec = "007"
+status = "validated"
+provenance = "original_design"
+rationale = "Supplied radiation below the physical horizon and numerical clipping of direct-beam geometry are separate observable conditions."
+implementation = "src/validation.jl; src/types.jl; src/liljegren/scalar.jl"
+validation = "test/test_liljegren_scalar.jl night mismatch and near-horizon clipping cases"

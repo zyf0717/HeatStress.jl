@@ -35,6 +35,25 @@ function _scalar_value_allocations()
     return @allocated _scalar_value_call()
 end
 
+function _scalar_value_allocations(config::LiljegrenConfig)
+    _liljegren_wbgt(
+        30.0, 20.0, 1.0, 800.0, DateTime(2024, 6, 21, 12), 0.0, 0.0;
+        direct_fraction = 0.7, config,
+    )
+    return @allocated _liljegren_wbgt(
+        30.0, 20.0, 1.0, 800.0, DateTime(2024, 6, 21, 12), 0.0, 0.0;
+        direct_fraction = 0.7, config,
+    )
+end
+
+function _generated_scalar_fixture_data(global_precision::Int)
+    repository = dirname(@__DIR__)
+    generator = joinpath(repository, "test", "fixtures", "generate_liljegren_scalar_references.jl")
+    code = "setprecision(BigFloat, $global_precision); include(raw\"$generator\")"
+    output = read(`$(Base.julia_cmd()) --startup-file=no --project=$repository -e $code`, String)
+    return TOML.parse(output)
+end
+
 @testset "Liljegren scalar model" begin
     @testset "ordinary value and diagnostic agreement" begin
         diagnostic = _scalar_fixture()
@@ -67,8 +86,11 @@ end
     @testset "independent scalar component fixtures" begin
         fixture_path = joinpath(@__DIR__, "fixtures", "liljegren_scalar_reference.toml")
         fixture_data = TOML.parsefile(fixture_path)
-        @test fixture_data["schema_version"] == 1
+        @test fixture_data["schema_version"] == 2
         @test fixture_data["precision_bits"] == 256
+        @test fixture_data["generator_schema_version"] == 2
+        @test fixture_data["generator_path"] == "test/fixtures/generate_liljegren_scalar_references.jl"
+        @test "liljegren_2008" in fixture_data["source_identifiers"]
         for fixture in values(fixture_data["fixtures"])
             diagnostic = _diagnose_liljegren(
                 fixture["air_temperature_c"],
@@ -86,6 +108,23 @@ end
             @test result.natural_wet_bulb_c ≈ parse(Float64, fixture["natural_wet_bulb_c"]) atol = 1e-4 rtol = 1e-8
             @test result.wbgt_c ≈ parse(Float64, fixture["wbgt_c"]) atol = 1e-4 rtol = 1e-8
         end
+    end
+
+    @testset "fixture generation is precision-independent" begin
+        generated_default = _generated_scalar_fixture_data(256)
+        generated_changed = _generated_scalar_fixture_data(768)
+        @test generated_default["fixtures"] == generated_changed["fixtures"]
+
+        fixture_path = joinpath(@__DIR__, "fixtures", "liljegren_scalar_reference.toml")
+        committed = TOML.parsefile(fixture_path)
+        for (name, generated) in generated_default["fixtures"]
+            committed_fixture = committed["fixtures"][name]
+            @test generated["time"] == committed_fixture["time"]
+            for field in ("globe_temperature_c", "natural_wet_bulb_c", "wbgt_c")
+                @test parse(Float64, generated[field]) == parse(Float64, committed_fixture[field])
+            end
+        end
+        @test occursin(".250", committed["fixtures"]["subminute"]["time"])
     end
 
     @testset "solar, wind, and dew-point policies" begin
@@ -251,7 +290,7 @@ end
         )
         diagnostic32 = _diagnose_liljegren(
             30f0, 20f0, 1f0, 800f0, DateTime(2024, 6, 21, 12), 0f0, 0f0;
-            direct_fraction = 0.7f0, config = config32,
+            pressure_hpa = 1010f0, direct_fraction = 0.7f0, config = config32,
         )
         @test diagnostic32 isa DiagnosticWBGTResult{Float32}
         @test diagnostic32.globe.converged
@@ -282,11 +321,50 @@ end
         )
         @test (@inferred _diagnose_liljegren(
             30f0, 20f0, 1f0, 800f0, DateTime(2024, 6, 21, 12), 0f0, 0f0;
-            direct_fraction = 0.7f0, config = config32,
+            pressure_hpa = 1010f0, direct_fraction = 0.7f0, config = config32,
         )) isa DiagnosticWBGTResult{Float32}
 
-        # Current public composition allocates fixed diagnostic/root state;
-        # retain a measured ceiling until a dedicated zero-allocation redesign.
-        @test _scalar_value_allocations() <= 4096
+        @test _scalar_value_allocations() <= 1024
+        strict_allocations = _scalar_value_allocations(LiljegrenConfig(
+            solver = SolverConfig(root_tolerance_k = 1e-8, residual_tolerance_k = 1e-4),
+        ))
+        @test strict_allocations <= _scalar_value_allocations()
+    end
+
+    @testset "public signatures and mixed-precision failures" begin
+        config32 = LiljegrenConfig(
+            solver = SolverConfig(root_tolerance_k = 1f-6, residual_tolerance_k = 1f-4),
+            dew_point_tolerance_c = 1f-4,
+        )
+        arguments = (30.0, 20.0, 1.0, 800.0, DateTime(2024, 6, 21, 12), 0.0, 0.0)
+        default_pressure = _diagnose_liljegren(arguments...; direct_fraction = 0.7)
+        explicit_pressure = _diagnose_liljegren(arguments...; pressure_hpa = HeatStress.DEFAULT_PRESSURE_HPA, direct_fraction = 0.7)
+        @test default_pressure == explicit_pressure
+        @test_throws MethodError _diagnose_liljegren(arguments...; pressure_hpa = nothing, direct_fraction = 0.7)
+
+        missing_pressure = _diagnose_liljegren(arguments...; pressure_hpa = missing, direct_fraction = 0.7)
+        @test missing_pressure.input_status === MissingMeteorology
+        @test_throws MethodError _diagnose_liljegren(30.0, 20.0, 1.0, 800.0, Date(2024, 6, 21), 0.0, 0.0; direct_fraction = 0.7)
+
+        accepted = @inferred _diagnose_liljegren(arguments...; direct_fraction = 0.7, config = config32)
+        invalid_longitude = @inferred _diagnose_liljegren(30.0, 20.0, 1.0, 800.0, DateTime(2024, 6, 21, 12), 181.0, 0.0; direct_fraction = 0.7, config = config32)
+        invalid_temperature = @inferred _diagnose_liljegren(-41.0, -41.0, 1.0, 800.0, DateTime(2024, 6, 21, 12), 0.0, 0.0; direct_fraction = 0.7, config = config32)
+        missing_meteorology = @inferred _diagnose_liljegren(missing, 20.0, 1.0, 800.0, DateTime(2024, 6, 21, 12), 0.0, 0.0; direct_fraction = 0.7, config = config32)
+        missing_time = @inferred _diagnose_liljegren(30.0, 20.0, 1.0, 800.0, missing, 0.0, 0.0; direct_fraction = 0.7, config = config32)
+        for diagnostic in (accepted, invalid_longitude, invalid_temperature, missing_meteorology, missing_time)
+            @test diagnostic isa DiagnosticWBGTResult{Float64}
+        end
+        @test invalid_longitude.input_status === InvalidDomain
+        @test invalid_temperature.input_status === InvalidDomain
+        @test missing_meteorology.input_status === MissingMeteorology
+        @test missing_time.input_status === MissingTime
+        @test _liljegren_wbgt(missing, 20.0, 1.0, 800.0, DateTime(2024, 6, 21, 12), 0.0, 0.0; direct_fraction = 0.7, config = config32) ==
+              missing_meteorology.result
+        @test _liljegren_wbgt(30.0, 20.0, 1.0, 800.0, missing, 0.0, 0.0; direct_fraction = 0.7, config = config32) ==
+              missing_time.result
+
+        partial_arguments = (30.0, 20.0, 1.0, 1200.0, DateTime(2024, 9, 22, 6), 0.0, 0.0)
+        @test _liljegren_wbgt(partial_arguments...; direct_fraction = 0.8) ==
+              _diagnose_liljegren(partial_arguments...; direct_fraction = 0.8).result
     end
 end

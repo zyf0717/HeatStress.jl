@@ -2,7 +2,7 @@
 
 ## Status
 
-- [x] Planned
+- [ ] Planned
 - [x] In progress
 - [ ] Complete
 
@@ -45,4 +45,11 @@
   53.535 ms minimum / 56.999 ms median, 19.2 MB / 1,080,002 allocations;
   100,000 rows, 498.730 ms / 499.018 ms, 192 MB / 10,800,002 allocations;
   1,000,000 rows, 5.272 s / 5.272 s, 1.92 GB / 108,000,002 allocations.
+- Post value-materialization separation: ignored local report
+  `benchmark/results/scalar-e2e-value-mode.toml`, same host/runtime and
+  workload: 10,000 rows, 43.961 ms minimum / 44.801 ms median, 5.92 MB /
+  150,002 allocations; 100,000 rows, 441.078 ms / 446.462 ms, 59.2 MB /
+  1,500,002 allocations; 1,000,000 rows, 4.452 s / 4.536 s, 592 MB /
+  15,000,002 allocations. This is local preliminary evidence only, not a
+  cross-language result or scientific correctness gate.
 - Commit: `aab195c` (`perf: add scalar end-to-end benchmark harness`)

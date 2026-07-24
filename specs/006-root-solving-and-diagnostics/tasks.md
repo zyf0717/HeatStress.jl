@@ -2,9 +2,9 @@
 
 ## Status
 
-- [x] Planned
-- [ ] In progress
-- [x] Complete
+- [ ] Planned
+- [x] In progress
+- [ ] Complete
 
 ## Tasks
 
@@ -22,4 +22,9 @@
 - Evidence: `julia --project=. -e 'using Pkg; Pkg.test()'` passed on 2026-07-24
   (including 56 root-solver assertions) after correcting lower-only expansion
   and total diagnostic evaluation accounting.
-- Commit: `3ae4106` (`fix: harden scalar diagnostics and root expansion`)
+- Provenance: `validation/sources.toml` records every bracket, guardrail,
+  tolerance, endpoint-stop, validation and evaluation-count policy with its
+  implementation and regression invariant.
+- Commits: `3ae4106` (`fix: harden scalar diagnostics and root expansion`);
+  current provenance/status correction pending commit. This unit remains in
+  progress while spec 005 is in progress.

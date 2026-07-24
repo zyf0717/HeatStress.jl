@@ -19,6 +19,33 @@ function _not_attempted_diagnostics(config::SolverConfig{T}) where {T<:AbstractF
     )
 end
 
+"""Location result plus its independent residual validation, before materialization."""
+struct _ValidatedComponentSolve{T<:AbstractFloat}
+    location::_BracketedSolveResult{T}
+    validation_residual_k::Union{Missing,T}
+    validation_evaluations::Int
+end
+
+@inline function _validated_component_solve(
+    location::_BracketedSolveResult{T},
+    validation_residual_k::Union{Missing,T},
+    validation_evaluations::Int,
+) where {T<:AbstractFloat}
+    validation_evaluations >= 0 || throw(ArgumentError("validation_evaluations must be non-negative"))
+    return _ValidatedComponentSolve{T}(location, validation_residual_k, validation_evaluations)
+end
+
+@inline function _accepted_component_value(
+    component::_ValidatedComponentSolve{T},
+    config::SolverConfig{T},
+) where {T<:AbstractFloat}
+    location = component.location
+    accepted = location.converged && !ismissing(location.candidate_k) &&
+               !ismissing(component.validation_residual_k) && isfinite(component.validation_residual_k) &&
+               abs(component.validation_residual_k) <= config.residual_tolerance_k
+    return accepted ? location.candidate_k - convert(T, KELVIN_OFFSET) : missing
+end
+
 """Convert a location result and independent validation residual into diagnostics."""
 function _solver_diagnostics(
     solve::_BracketedSolveResult{T},
@@ -26,13 +53,11 @@ function _solver_diagnostics(
     config::SolverConfig{T},
     validation_evaluations::Int = 0,
 ) where {T<:AbstractFloat}
-    validation_evaluations >= 0 || throw(ArgumentError("validation_evaluations must be non-negative"))
+    component = _validated_component_solve(solve, validation_residual_k, validation_evaluations)
     candidate_c = ismissing(solve.candidate_k) ? missing : solve.candidate_k - convert(T, KELVIN_OFFSET)
-    accepted = solve.converged && !ismissing(solve.candidate_k) &&
-               !ismissing(validation_residual_k) && isfinite(validation_residual_k) &&
-               abs(validation_residual_k) <= config.residual_tolerance_k
+    value_c = _accepted_component_value(component, config)
+    accepted = !ismissing(value_c)
     reason = solve.converged ? (accepted ? NoFailure : ResidualValidationFailed) : solve.reason
-    value_c = accepted ? candidate_c : missing
 
     return SolverDiagnostics{T}(
         accepted,
@@ -40,7 +65,7 @@ function _solver_diagnostics(
         value_c,
         candidate_c,
         validation_residual_k,
-        solve.evaluations + validation_evaluations,
+        solve.evaluations + component.validation_evaluations,
         solve.iterations,
         solve.initial_lower_k,
         solve.initial_upper_k,

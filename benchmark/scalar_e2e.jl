@@ -90,6 +90,15 @@ function _measure(row_count::Int, samples::Int)
         "minimum_allocations" => minimum_estimate.allocs,
         "median_allocations" => median_estimate.allocs,
         "samples" => samples,
+        "raw_times_ns" => trial.times,
+    )
+end
+
+function _git_metadata()
+    repository = normpath(joinpath(@__DIR__, ".."))
+    return Dict(
+        "commit_sha" => readchomp(`git -C $repository rev-parse HEAD`),
+        "dirty" => !isempty(readchomp(`git -C $repository status --porcelain`)),
     )
 end
 
@@ -122,7 +131,10 @@ function main(args::Vector{String} = ARGS)
             "julia_version" => string(VERSION),
             "threads" => Threads.nthreads(),
             "cpu" => Sys.CPU_NAME,
-            "timestamp_local" => string(now()),
+            "timestamp_utc" => string(now(UTC)),
+            "benchmarktools_version" => string(Base.pkgversion(BenchmarkTools)),
+            "result_scope" => "local baseline evidence; not a cross-language comparison or scientific correctness gate",
+            "repository" => _git_metadata(),
         ),
         "measurements" => measurements,
     )

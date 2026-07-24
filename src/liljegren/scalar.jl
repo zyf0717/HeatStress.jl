@@ -96,7 +96,32 @@ end
     )
 end
 
-function _diagnose_prepared_liljegren(
+abstract type _ScalarResultMode end
+struct _ValueMode <: _ScalarResultMode end
+struct _DiagnosticMode <: _ScalarResultMode end
+
+"""Shared component-solve state; diagnostics are materialized only on demand."""
+struct _ScalarSolveData{T<:AbstractFloat}
+    globe::_ValidatedComponentSolve{T}
+    natural_wet_bulb::_ValidatedComponentSolve{T}
+end
+
+@inline function _wbgt_result(
+    air_temperature_c::T,
+    globe_temperature_c::Union{Missing,T},
+    natural_wet_bulb_c::Union{Missing,T},
+) where {T<:AbstractFloat}
+    wbgt_c = if !ismissing(globe_temperature_c) && !ismissing(natural_wet_bulb_c)
+        convert(T, 0.7) * natural_wet_bulb_c +
+        convert(T, 0.2) * globe_temperature_c +
+        convert(T, 0.1) * air_temperature_c
+    else
+        missing
+    end
+    return WBGTResult{T}(wbgt_c, natural_wet_bulb_c, globe_temperature_c)
+end
+
+function _solve_prepared_liljegren(
     prepared::_PreparedMeteorology{T},
     config::LiljegrenConfig{T},
 ) where {T<:AbstractFloat}
@@ -121,13 +146,13 @@ function _diagnose_prepared_liljegren(
         air_density,
         air_viscosity,
         mass_transfer_ratio,
-    )) || return _input_failure_diagnostic(InvalidDomain, config)
+    )) || return _InputPreparationFailure(InvalidDomain)
 
-    globe = _solve_globe_balance(
+    globe = _solve_globe_balance_data(
         _globe_balance(prepared, atmospheric_emissivity, effective_wind_speed_m_s, config),
         config.solver,
     )
-    natural_wet_bulb = _solve_natural_wet_bulb_balance(
+    natural_wet_bulb = _solve_natural_wet_bulb_balance_data(
         _wet_bulb_balance(
             prepared,
             vapour_pressure_hpa,
@@ -141,15 +166,39 @@ function _diagnose_prepared_liljegren(
         prepared.dew_point_k,
         config.solver,
     )
+    return _ScalarSolveData{T}(globe, natural_wet_bulb)
+end
 
-    wbgt_c = if !ismissing(globe.value_c) && !ismissing(natural_wet_bulb.value_c)
-        convert(T, 0.7) * natural_wet_bulb.value_c +
-        convert(T, 0.2) * globe.value_c +
-        convert(T, 0.1) * prepared.air_temperature_c
-    else
-        missing
-    end
-    result = WBGTResult{T}(wbgt_c, natural_wet_bulb.value_c, globe.value_c)
+@inline function _materialize_result(
+    prepared::_PreparedMeteorology{T},
+    data::_ScalarSolveData{T},
+    config::LiljegrenConfig{T},
+    ::_ValueMode,
+) where {T<:AbstractFloat}
+    globe_temperature_c = _accepted_component_value(data.globe, config.solver)
+    natural_wet_bulb_c = _accepted_component_value(data.natural_wet_bulb, config.solver)
+    return _wbgt_result(prepared.air_temperature_c, globe_temperature_c, natural_wet_bulb_c)
+end
+
+@inline function _materialize_result(
+    prepared::_PreparedMeteorology{T},
+    data::_ScalarSolveData{T},
+    config::LiljegrenConfig{T},
+    ::_DiagnosticMode,
+) where {T<:AbstractFloat}
+    result = _materialize_result(prepared, data, config, _ValueMode())
+    globe = _solver_diagnostics(
+        data.globe.location,
+        data.globe.validation_residual_k,
+        config.solver,
+        data.globe.validation_evaluations,
+    )
+    natural_wet_bulb = _solver_diagnostics(
+        data.natural_wet_bulb.location,
+        data.natural_wet_bulb.validation_residual_k,
+        config.solver,
+        data.natural_wet_bulb.validation_evaluations,
+    )
     return DiagnosticWBGTResult{T}(
         result,
         InputAccepted,
@@ -163,47 +212,72 @@ function _diagnose_prepared_liljegren(
     )
 end
 
-function _diagnose_liljegren(
-    air_temperature_c::Union{Missing,Real},
-    dew_point_c::Union{Missing,Real},
-    wind_speed_m_s::Union{Missing,Real},
-    solar_radiation_w_m2::Union{Missing,Real},
-    time::Missing,
-    longitude_deg::Real,
-    latitude_deg::Real;
-    pressure_hpa::Union{Nothing,Missing,Real} = nothing,
-    direct_fraction::Union{Missing,Real},
-    config::LiljegrenConfig = LiljegrenConfig(),
-)
-    return _input_failure_diagnostic(MissingTime, config)
+@inline _input_failure_result(::Type{T}, ::_ValueMode, ::InputStatus, ::LiljegrenConfig{T}) where {T<:AbstractFloat} =
+    WBGTResult{T}(missing, missing, missing)
+
+@inline _input_failure_result(::Type{T}, ::_DiagnosticMode, status::InputStatus, config::LiljegrenConfig{T}) where {T<:AbstractFloat} =
+    _input_failure_diagnostic(status, config)
+
+@inline _scalar_float_type(::Type{Missing}) = Union{}
+@inline _scalar_float_type(::Type{T}) where {T<:Real} = typeof(float(zero(T)))
+
+@noinline function _reject_public_pressure_hpa(function_object, arguments...)
+    throw(MethodError(function_object, arguments))
 end
 
-function _diagnose_liljegren(
+@inline function _scalar_input_type(
+    air_temperature_c,
+    dew_point_c,
+    wind_speed_m_s,
+    solar_radiation_w_m2,
+    pressure_hpa,
+    direct_fraction,
+    longitude_deg,
+    latitude_deg,
+    config::LiljegrenConfig,
+)
+    return promote_type(
+        _scalar_float_type(typeof(air_temperature_c)),
+        _scalar_float_type(typeof(dew_point_c)),
+        _scalar_float_type(typeof(wind_speed_m_s)),
+        _scalar_float_type(typeof(solar_radiation_w_m2)),
+        _scalar_float_type(typeof(pressure_hpa)),
+        _scalar_float_type(typeof(direct_fraction)),
+        _scalar_float_type(typeof(longitude_deg)),
+        _scalar_float_type(typeof(latitude_deg)),
+        _scalar_float_type(typeof(config.dew_point_tolerance_c)),
+    )
+end
+
+function _liljegren_scalar(
     air_temperature_c::Union{Missing,Real},
     dew_point_c::Union{Missing,Real},
     wind_speed_m_s::Union{Missing,Real},
     solar_radiation_w_m2::Union{Missing,Real},
-    time::Union{DateTime,ZonedDateTime},
+    time::Union{Missing,DateTime,ZonedDateTime},
     longitude_deg::Real,
     latitude_deg::Real;
-    pressure_hpa::Union{Nothing,Missing,Real} = nothing,
+    pressure_hpa::Union{Missing,Real} = DEFAULT_PRESSURE_HPA,
     direct_fraction::Union{Missing,Real},
     config::LiljegrenConfig = LiljegrenConfig(),
+    mode::_ScalarResultMode = _DiagnosticMode(),
 )
-    if isnothing(pressure_hpa)
-        input_type = _common_float_type(
-            air_temperature_c,
-            dew_point_c,
-            wind_speed_m_s,
-            solar_radiation_w_m2,
-            direct_fraction,
-            config.dew_point_tolerance_c,
-        )
-        pressure_hpa = convert(input_type, DEFAULT_PRESSURE_HPA)
-    end
+    input_type = _scalar_input_type(
+        air_temperature_c,
+        dew_point_c,
+        wind_speed_m_s,
+        solar_radiation_w_m2,
+        pressure_hpa,
+        direct_fraction,
+        longitude_deg,
+        latitude_deg,
+        config,
+    )
+    typed_config = _config_as_type(input_type, config)
+    ismissing(time) && return _input_failure_result(input_type, mode, MissingTime, typed_config)
     isfinite(longitude_deg) && -180 <= longitude_deg <= 180 &&
         isfinite(latitude_deg) && -90 <= latitude_deg <= 90 ||
-        return _input_failure_diagnostic(InvalidDomain, config)
+        return _input_failure_result(input_type, mode, InvalidDomain, typed_config)
     basic = _normalize_basic_meteorology(
         air_temperature_c,
         dew_point_c,
@@ -211,15 +285,17 @@ function _diagnose_liljegren(
         solar_radiation_w_m2;
         pressure_hpa,
         direct_fraction,
-        config,
+        config = typed_config,
+        float_type = input_type,
     )
-    basic isa _InputPreparationFailure && return _input_failure_diagnostic(basic.status, config)
+    basic isa _InputPreparationFailure && return _input_failure_result(input_type, mode, basic.status, typed_config)
 
     solar_zenith_rad = convert(typeof(basic.air_temperature_c), deg2rad(solar_zenith(time, longitude_deg, latitude_deg)))
     prepared = _apply_solar_policy(basic, solar_zenith_rad)
-    prepared isa _InputPreparationFailure && return _input_failure_diagnostic(prepared.status, config)
-    typed_config = _config_as_type(typeof(prepared.air_temperature_c), config)
-    return _diagnose_prepared_liljegren(prepared, typed_config)
+    prepared isa _InputPreparationFailure && return _input_failure_result(input_type, mode, prepared.status, typed_config)
+    data = _solve_prepared_liljegren(prepared, typed_config)
+    data isa _InputPreparationFailure && return _input_failure_result(input_type, mode, data.status, typed_config)
+    return _materialize_result(prepared, data, typed_config, mode)
 end
 
 """
@@ -232,19 +308,103 @@ Temperatures are °C, wind is m/s, radiation is W/m², pressure is hPa, and
 `direct_fraction` is direct divided by total radiation. `DateTime` is UTC;
 `ZonedDateTime` is converted to its UTC instant.
 """
-diagnose_liljegren(args...; kwargs...) = _diagnose_liljegren(args...; kwargs...)
+function diagnose_liljegren(
+    air_temperature_c::Union{Missing,Real},
+    dew_point_c::Union{Missing,Real},
+    wind_speed_m_s::Union{Missing,Real},
+    solar_radiation_w_m2::Union{Missing,Real},
+    time::Union{Missing,DateTime,ZonedDateTime},
+    longitude_deg::Real,
+    latitude_deg::Real;
+    pressure_hpa = DEFAULT_PRESSURE_HPA,
+    direct_fraction::Union{Missing,Real},
+    config::LiljegrenConfig = LiljegrenConfig(),
+)
+    pressure_hpa isa Union{Missing,Real} || _reject_public_pressure_hpa(
+        diagnose_liljegren,
+        air_temperature_c, dew_point_c, wind_speed_m_s, solar_radiation_w_m2,
+        time, longitude_deg, latitude_deg,
+    )
+    return _liljegren_scalar(
+        air_temperature_c, dew_point_c, wind_speed_m_s, solar_radiation_w_m2,
+        time, longitude_deg, latitude_deg;
+        pressure_hpa, direct_fraction, config, mode = _DiagnosticMode(),
+    )
+end
 
 """Return the scalar Liljegren WBGT result (°C components and WBGT)."""
-function liljegren_wbgt(args...; kwargs...)
-    return diagnose_liljegren(args...; kwargs...).result
+function liljegren_wbgt(
+    air_temperature_c::Union{Missing,Real},
+    dew_point_c::Union{Missing,Real},
+    wind_speed_m_s::Union{Missing,Real},
+    solar_radiation_w_m2::Union{Missing,Real},
+    time::Union{Missing,DateTime,ZonedDateTime},
+    longitude_deg::Real,
+    latitude_deg::Real;
+    pressure_hpa = DEFAULT_PRESSURE_HPA,
+    direct_fraction::Union{Missing,Real},
+    config::LiljegrenConfig = LiljegrenConfig(),
+)
+    pressure_hpa isa Union{Missing,Real} || _reject_public_pressure_hpa(
+        liljegren_wbgt,
+        air_temperature_c, dew_point_c, wind_speed_m_s, solar_radiation_w_m2,
+        time, longitude_deg, latitude_deg,
+    )
+    return _liljegren_scalar(
+        air_temperature_c, dew_point_c, wind_speed_m_s, solar_radiation_w_m2,
+        time, longitude_deg, latitude_deg;
+        pressure_hpa, direct_fraction, config, mode = _ValueMode(),
+    )
 end
 
 """Return scalar Liljegren globe temperature in °C, or `missing` on failure."""
-function globe_temperature(args...; kwargs...)
-    return diagnose_liljegren(args...; kwargs...).result.globe_temperature_c
+function globe_temperature(
+    air_temperature_c::Union{Missing,Real},
+    dew_point_c::Union{Missing,Real},
+    wind_speed_m_s::Union{Missing,Real},
+    solar_radiation_w_m2::Union{Missing,Real},
+    time::Union{Missing,DateTime,ZonedDateTime},
+    longitude_deg::Real,
+    latitude_deg::Real;
+    pressure_hpa = DEFAULT_PRESSURE_HPA,
+    direct_fraction::Union{Missing,Real},
+    config::LiljegrenConfig = LiljegrenConfig(),
+)
+    pressure_hpa isa Union{Missing,Real} || _reject_public_pressure_hpa(
+        globe_temperature,
+        air_temperature_c, dew_point_c, wind_speed_m_s, solar_radiation_w_m2,
+        time, longitude_deg, latitude_deg,
+    )
+    result = _liljegren_scalar(
+        air_temperature_c, dew_point_c, wind_speed_m_s, solar_radiation_w_m2,
+        time, longitude_deg, latitude_deg;
+        pressure_hpa, direct_fraction, config, mode = _ValueMode(),
+    )
+    return result.globe_temperature_c
 end
 
 """Return scalar Liljegren natural wet-bulb temperature in °C, or `missing` on failure."""
-function natural_wet_bulb_temperature(args...; kwargs...)
-    return diagnose_liljegren(args...; kwargs...).result.natural_wet_bulb_c
+function natural_wet_bulb_temperature(
+    air_temperature_c::Union{Missing,Real},
+    dew_point_c::Union{Missing,Real},
+    wind_speed_m_s::Union{Missing,Real},
+    solar_radiation_w_m2::Union{Missing,Real},
+    time::Union{Missing,DateTime,ZonedDateTime},
+    longitude_deg::Real,
+    latitude_deg::Real;
+    pressure_hpa = DEFAULT_PRESSURE_HPA,
+    direct_fraction::Union{Missing,Real},
+    config::LiljegrenConfig = LiljegrenConfig(),
+)
+    pressure_hpa isa Union{Missing,Real} || _reject_public_pressure_hpa(
+        natural_wet_bulb_temperature,
+        air_temperature_c, dew_point_c, wind_speed_m_s, solar_radiation_w_m2,
+        time, longitude_deg, latitude_deg,
+    )
+    result = _liljegren_scalar(
+        air_temperature_c, dew_point_c, wind_speed_m_s, solar_radiation_w_m2,
+        time, longitude_deg, latitude_deg;
+        pressure_hpa, direct_fraction, config, mode = _ValueMode(),
+    )
+    return result.natural_wet_bulb_c
 end

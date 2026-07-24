@@ -90,13 +90,7 @@ function _normalize_basic_meteorology(
     pressure_hpa::Union{Missing,Real} = DEFAULT_PRESSURE_HPA,
     direct_fraction::Union{Missing,Real},
     config::LiljegrenConfig = LiljegrenConfig(),
-)
-    if ismissing(air_temperature_c) || ismissing(dew_point_c) || ismissing(wind_speed_m_s) ||
-       ismissing(solar_radiation_w_m2) || ismissing(pressure_hpa) || ismissing(direct_fraction)
-        return _InputPreparationFailure(MissingMeteorology)
-    end
-
-    float_type = _common_float_type(
+    float_type::Type{<:AbstractFloat} = _common_float_type(
         air_temperature_c,
         dew_point_c,
         wind_speed_m_s,
@@ -104,7 +98,13 @@ function _normalize_basic_meteorology(
         pressure_hpa,
         direct_fraction,
         config.dew_point_tolerance_c,
-    )
+    ),
+)
+    if ismissing(air_temperature_c) || ismissing(dew_point_c) || ismissing(wind_speed_m_s) ||
+       ismissing(solar_radiation_w_m2) || ismissing(pressure_hpa) || ismissing(direct_fraction)
+        return _InputPreparationFailure(MissingMeteorology)
+    end
+
     air = convert(float_type, air_temperature_c)
     dew = convert(float_type, dew_point_c)
     wind = convert(float_type, wind_speed_m_s)

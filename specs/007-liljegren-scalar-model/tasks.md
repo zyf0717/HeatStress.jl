@@ -2,9 +2,9 @@
 
 ## Status
 
-- [x] Planned
-- [x] In progress
-- [ ] Complete
+- [ ] Planned
+- [ ] In progress
+- [x] Complete
 
 ## Tasks
 
@@ -16,17 +16,28 @@
 - [x] Add public-call inference and scalar allocation checks.
 - [x] Add invalid coordinate/temperature, direct-solar-clipping and component
   evaluation-count diagnostic regressions.
+- [x] Stabilize mixed-precision success and failure result types.
+- [x] Use explicit public scalar signatures and documented pressure behavior.
+- [x] Make independent fixture generation precision-independent and reproducible.
+- [x] Separate value-only result materialization from diagnostics without
+  duplicating physics, brackets or acceptance policy.
 - [x] Document physical configuration effects.
-- [ ] Run the acceptance checks in `quickstart.md`.
+- [x] Run the acceptance checks in `quickstart.md`.
 - [x] Record test, benchmark or validation evidence and commit SHA below.
 
 ## Evidence
 
 - Evidence: `julia --project=. -e 'using Pkg; Pkg.test()'` passed on 2026-07-24
-  (64 scalar-model assertions covering independent 256-bit component/WBGT
-  fixtures, inference, 4 KiB warm scalar allocation ceiling, ordinary, night,
-  zero-wind, saturated, dew-point policy, missing/invalid, clipping,
-  partial-component, timezone and Float32 cases). The full source-identified
-  fixture corpus remains owned by spec 010.
+  (105 scalar-model assertions covering independent fixtures, fresh-process
+  precision-independent regeneration, explicit public signatures,
+  mixed-precision inference, value/diagnostic equality and a 1 KiB warm value
+  allocation ceiling). `HEATSTRESS_QUALITY=1` additionally passed Aqua and
+  JET checks; `benchmark/scalar_e2e.jl --rows=100 --samples=1` passed as a
+  local metadata-rich smoke run.
+- Provenance: `validation/sources.toml` records scalar composition, direct
+  fraction, component-retention/missingness, temperature-domain and separate
+  horizon/clipping diagnostic policies.
 - Commits: `d2edb95` (`feat: implement root solver and scalar Liljegren model`);
-  `e9455fc` (keep incomplete scalar API unexported).
+  `c59d89c` (`test: add scalar validation fixtures`); current completion fix
+  pending commit. The full source-identified fixture corpus remains owned by
+  spec 010.
