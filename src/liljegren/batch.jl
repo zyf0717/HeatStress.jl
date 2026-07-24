@@ -121,10 +121,11 @@ function _prepare_batch_inputs(
         air, dew, wind, radiation, longitude, latitude, pressure_hpa, direct_fraction;
         config,
     )
-    return rows, T
+    return rows, T, _config_as_type(T, config)
 end
 
-function _batch_loop!(
+function _execute_value_batch!(
+    rows::Int,
     wbgt_out::AbstractVector,
     wet_out::AbstractVector,
     globe_out::AbstractVector,
@@ -137,28 +138,21 @@ function _batch_loop!(
     latitude;
     pressure_hpa,
     direct_fraction,
-    config::LiljegrenConfig,
+    config::LiljegrenConfig{T},
     threaded::Bool,
-)
-    rows, T = _prepare_batch_inputs(
-        air, dew, wind, radiation, time, longitude, latitude;
-        pressure_hpa, direct_fraction, config,
-    )
-    _validate_batch_outputs(rows, T, wbgt_out, wet_out, globe_out)
-    _validate_batch_aliases(
-        (wbgt_out, wet_out, globe_out),
-        air, dew, wind, radiation, time, longitude, latitude, pressure_hpa, direct_fraction,
-    )
-
+) where {T<:AbstractFloat}
     function solve_row(row)
-        result = liljegren_wbgt(
+        values = _liljegren_row_from_time(
             _at(air, row), _at(dew, row), _at(wind, row), _at(radiation, row), _at(time, row),
-            _at(longitude, row), _at(latitude, row);
-            pressure_hpa = _at(pressure_hpa, row), direct_fraction = _at(direct_fraction, row), config,
+            _at(longitude, row), _at(latitude, row), _at(pressure_hpa, row),
+            _at(direct_fraction, row), config, _ValueMode(),
         )
-        @inbounds wbgt_out[firstindex(wbgt_out) + row - 1] = result.wbgt_c
-        @inbounds wet_out[firstindex(wet_out) + row - 1] = result.natural_wet_bulb_c
-        @inbounds globe_out[firstindex(globe_out) + row - 1] = result.globe_temperature_c
+        @inbounds wbgt_out[firstindex(wbgt_out) + row - 1] =
+            _component_or_missing(values.wbgt_c, values.wbgt_missing)
+        @inbounds wet_out[firstindex(wet_out) + row - 1] =
+            _component_or_missing(values.natural_wet_bulb_c, values.natural_wet_bulb_missing)
+        @inbounds globe_out[firstindex(globe_out) + row - 1] =
+            _component_or_missing(values.globe_temperature_c, values.globe_temperature_missing)
     end
     if threaded && rows > 0
         Threads.@threads for row in 1:rows
@@ -169,7 +163,7 @@ function _batch_loop!(
             solve_row(row)
         end
     end
-    return T
+    return nothing
 end
 
 """
@@ -204,9 +198,18 @@ function liljegren_wbgt!(
     config::LiljegrenConfig = LiljegrenConfig(),
     threaded::Bool = false,
 )
-    T = _batch_loop!(
-        wbgt_out, wet_out, globe_out, air, dew, wind, radiation, time, longitude, latitude;
-        pressure_hpa, direct_fraction, config, threaded,
+    rows, T, typed_config = _prepare_batch_inputs(
+        air, dew, wind, radiation, time, longitude, latitude;
+        pressure_hpa, direct_fraction, config,
+    )
+    _validate_batch_outputs(rows, T, wbgt_out, wet_out, globe_out)
+    _validate_batch_aliases(
+        (wbgt_out, wet_out, globe_out),
+        air, dew, wind, radiation, time, longitude, latitude, pressure_hpa, direct_fraction,
+    )
+    _execute_value_batch!(
+        rows, wbgt_out, wet_out, globe_out, air, dew, wind, radiation, time, longitude, latitude;
+        pressure_hpa, direct_fraction, config = typed_config, threaded,
     )
     return WBGTBatchResult{T}(wbgt_out, wet_out, globe_out)
 end
@@ -236,17 +239,18 @@ function liljegren_wbgt_batch(
     config::LiljegrenConfig = LiljegrenConfig(),
     threaded::Bool = false,
 )
-    rows, T = _prepare_batch_inputs(
+    rows, T, typed_config = _prepare_batch_inputs(
         air, dew, wind, radiation, time, longitude, latitude;
         pressure_hpa, direct_fraction, config,
     )
     wbgt = Vector{Union{Missing,T}}(undef, rows)
     wet = Vector{Union{Missing,T}}(undef, rows)
     globe = Vector{Union{Missing,T}}(undef, rows)
-    return liljegren_wbgt!(
-        wbgt, wet, globe, air, dew, wind, radiation, time, longitude, latitude;
-        pressure_hpa, direct_fraction, config, threaded,
+    _execute_value_batch!(
+        rows, wbgt, wet, globe, air, dew, wind, radiation, time, longitude, latitude;
+        pressure_hpa, direct_fraction, config = typed_config, threaded,
     )
+    return WBGTBatchResult{T}(wbgt, wet, globe)
 end
 
 function _diagnostic_arrays(::Type{T}, rows::Int) where {T<:AbstractFloat}
@@ -294,7 +298,7 @@ function diagnose_liljegren_batch(
     config::LiljegrenConfig = LiljegrenConfig(),
     threaded::Bool = false,
 )
-    rows, T = _prepare_batch_inputs(
+    rows, T, typed_config = _prepare_batch_inputs(
         air, dew, wind, radiation, time, longitude, latitude;
         pressure_hpa, direct_fraction, config,
     )
@@ -309,10 +313,10 @@ function diagnose_liljegren_batch(
     clipped = fill(false, rows)
     globe_diagnostics, wet_diagnostics = _diagnostic_arrays(T, rows)
     function diagnose_row(row)
-        diagnostic = diagnose_liljegren(
+        diagnostic = _liljegren_row_from_time(
             _at(air, row), _at(dew, row), _at(wind, row), _at(radiation, row),
-            _at(time, row), _at(longitude, row), _at(latitude, row);
-            pressure_hpa = _at(pressure_hpa, row), direct_fraction = _at(direct_fraction, row), config,
+            _at(time, row), _at(longitude, row), _at(latitude, row), _at(pressure_hpa, row),
+            _at(direct_fraction, row), typed_config, _DiagnosticMode(),
         )
         @inbounds wbgt[row] = diagnostic.result.wbgt_c
         @inbounds wet[row] = diagnostic.result.natural_wet_bulb_c

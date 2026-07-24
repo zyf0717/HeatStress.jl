@@ -44,6 +44,17 @@ function _scalar_row_loop!(wbgt, wet, globe, air, dew, wind, radiation, time)
     return WBGTBatchResult{Float64}(wbgt, wet, globe)
 end
 
+function _scalar_public_results(air, dew, wind, radiation, time)
+    results = Vector{WBGTResult{Float64}}(undef, length(air))
+    for row in eachindex(air)
+        results[row] = HeatStress.liljegren_wbgt(
+            air[row], dew[row], wind[row], radiation[row], time[row], -74.0060, 40.7128;
+            direct_fraction = 0.7,
+        )
+    end
+    return results
+end
+
 function _validate(result::WBGTBatchResult)
     all(value -> !ismissing(value), result.wbgt_c) || error("benchmark produced missing WBGT")
     return nothing
@@ -56,13 +67,25 @@ function _assert_equal(actual::WBGTBatchResult, expected::WBGTBatchResult)
     return nothing
 end
 
+function _assert_equal(actual::Vector{WBGTResult{Float64}}, expected::WBGTBatchResult)
+    isequal([result.wbgt_c for result in actual], expected.wbgt_c) ||
+        error("benchmark scalar WBGT result mismatch")
+    isequal([result.natural_wet_bulb_c for result in actual], expected.natural_wet_bulb_c) ||
+        error("benchmark scalar wet-bulb result mismatch")
+    isequal([result.globe_temperature_c for result in actual], expected.globe_temperature_c) ||
+        error("benchmark scalar globe result mismatch")
+    return nothing
+end
+
 function _measure(rows::Int, samples::Int, mode::Symbol)
     air, dew, wind, radiation, time = batch_inputs(rows)
     reference_outputs = _outputs(rows)
     reference = _scalar_row_loop!(reference_outputs..., air, dew, wind, radiation, time)
     _validate(reference)
 
-    call = if mode === :scalar_row_loop
+    call = if mode === :public_scalar_results
+        () -> _scalar_public_results(air, dew, wind, radiation, time)
+    elseif mode === :public_scalar_preallocated
         outputs = _outputs(rows)
         () -> _scalar_row_loop!(outputs..., air, dew, wind, radiation, time)
     elseif mode === :preallocated_batch_serial || mode === :preallocated_batch_threaded
@@ -76,9 +99,9 @@ function _measure(rows::Int, samples::Int, mode::Symbol)
     end
 
     _assert_equal(call(), reference) # compile and validate before timing
-    trial = @benchmark $call() samples = samples evals = 1
+    trial = @benchmark $call() samples = samples evals = 1 seconds = 600
     result = call()
-    _validate(result)
+    result isa WBGTBatchResult && _validate(result)
     _assert_equal(result, reference)
     minimum_estimate, median_estimate = BenchmarkTools.minimum(trial), BenchmarkTools.median(trial)
     return Dict(
@@ -123,7 +146,12 @@ end
 
 function main(args::Vector{String} = ARGS)
     samples, rows, output_path = _parse_arguments(args)
-    modes = Symbol[:scalar_row_loop, :preallocated_batch_serial, :allocating_batch]
+    modes = Symbol[
+        :public_scalar_results,
+        :public_scalar_preallocated,
+        :preallocated_batch_serial,
+        :allocating_batch,
+    ]
     Threads.nthreads() > 1 && push!(modes, :preallocated_batch_threaded)
     measurements = [_measure(row_count, samples, mode) for row_count in rows for mode in modes]
     report = Dict(

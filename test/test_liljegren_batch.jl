@@ -84,6 +84,31 @@ end
         @test isempty(empty.wbgt_c)
     end
 
+    @testset "shared typed row execution" begin
+        air, dew, wind, radiation, time = _batch_inputs(1)
+        config = HeatStress._config_as_type(Float64, LiljegrenConfig())
+        from_time = HeatStress._liljegren_row_from_time(
+            air[1], dew[1], wind[1], radiation[1], time[1], -74.0060, 40.7128,
+            1010.0, 0.7, config, HeatStress._ValueMode(),
+        )
+        zenith = deg2rad(HeatStress.solar_zenith(time[1], -74.0060, 40.7128))
+        from_zenith = HeatStress._liljegren_row_from_zenith(
+            air[1], dew[1], wind[1], radiation[1], zenith, 1010.0, 0.7,
+            config, HeatStress._ValueMode(),
+        )
+        scalar = HeatStress.liljegren_wbgt(
+            air[1], dew[1], wind[1], radiation[1], time[1], -74.0060, 40.7128;
+            pressure_hpa = 1010.0, direct_fraction = 0.7,
+        )
+        @test isequal(from_time.wbgt_c, from_zenith.wbgt_c)
+        @test isequal(from_time.wbgt_c, scalar.wbgt_c)
+        @test isequal(from_time.natural_wet_bulb_c, from_zenith.natural_wet_bulb_c)
+        @test isequal(from_time.natural_wet_bulb_c, scalar.natural_wet_bulb_c)
+        @test isequal(from_time.globe_temperature_c, from_zenith.globe_temperature_c)
+        @test isequal(from_time.globe_temperature_c, scalar.globe_temperature_c)
+        @test isbitstype(typeof(from_time))
+    end
+
     @testset "ordinal AbstractVector indexing and permissive outputs" begin
         air, dew, wind, radiation, time = _batch_inputs()
         offset_air = OffsetArray(air, -2:1)
