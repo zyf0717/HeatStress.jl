@@ -6,6 +6,7 @@ using HeatStress
 end
 
 include("test_types.jl")
+include("test_validation.jl")
 
 if get(ENV, "HEATSTRESS_QUALITY", "0") == "1"
     using Aqua

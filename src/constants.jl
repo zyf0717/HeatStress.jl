@@ -1,1 +1,36 @@
-# Reserved for constants with recorded scientific provenance.
+# Shared physical constants and fixed Liljegren-instrument parameters.
+#
+# Sources are inventoried in `docs/src/provenance.md`.  The values below are
+# deliberately model constants, rather than periodically updated CODATA values:
+# the Liljegren calculation must retain its documented numerical convention.
+
+# Exact Celsius-to-Kelvin conversion (SI Brochure; K = °C + 273.15).
+const KELVIN_OFFSET = 273.15
+
+# Liljegren et al. (2008), Table 1; W m^-2 K^-4.
+# Retained as published for model compatibility; see provenance for the CODATA
+# comparison value.
+const STEFAN_BOLTZMANN = 5.6696e-8
+
+# Liljegren et al. (2008), Table 1 and supporting heat/mass-transfer equations.
+const SPECIFIC_HEAT_DRY_AIR = 1003.5 # J kg^-1 K^-1
+const MOLAR_MASS_DRY_AIR = 28.97 # kg kmol^-1
+const MOLAR_MASS_WATER = 18.015 # kg kmol^-1
+const UNIVERSAL_GAS_CONSTANT = 8314.34 # J kmol^-1 K^-1
+const GAS_CONSTANT_DRY_AIR = UNIVERSAL_GAS_CONSTANT / MOLAR_MASS_DRY_AIR # J kg^-1 K^-1
+
+# Liljegren-model input defaults.  Pressure and direct fraction are model input
+# conventions; instrument geometry and optical properties are device parameters.
+const DEFAULT_PRESSURE_HPA = 1010.0
+const DEFAULT_SURFACE_ALBEDO = 0.45
+const DEFAULT_GLOBE_DIAMETER_M = 0.0508
+const DEFAULT_MINIMUM_WIND_SPEED_M_S = 0.13
+const DEFAULT_DIRECT_FRACTION = 0.8
+
+const GLOBE_EMISSIVITY = 0.95
+const GLOBE_ALBEDO = 0.05
+const SURFACE_EMISSIVITY = 0.999
+const WICK_EMISSIVITY = 0.95
+const WICK_ALBEDO = 0.4
+const WICK_DIAMETER_M = 0.007
+const WICK_LENGTH_M = 0.0254

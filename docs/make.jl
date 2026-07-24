@@ -8,6 +8,7 @@ makedocs(
     sitename = "HeatStress.jl",
     pages = [
         "Home" => "index.md",
+        "Units and input policies" => "units-and-policies.md",
         "Scientific provenance" => "provenance.md",
     ],
 )
