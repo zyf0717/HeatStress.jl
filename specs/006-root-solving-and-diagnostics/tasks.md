@@ -26,5 +26,5 @@
   tolerance, endpoint-stop, validation and evaluation-count policy with its
   implementation and regression invariant.
 - Commits: `3ae4106` (`fix: harden scalar diagnostics and root expansion`);
-  current provenance/status correction pending commit. This unit remains in
-  progress while spec 005 is in progress.
+  `b9564d2` (`feat: complete scalar Liljegren validation`). This unit remains
+  in progress while spec 005 is in progress.

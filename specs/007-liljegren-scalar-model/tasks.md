@@ -38,6 +38,6 @@
   fraction, component-retention/missingness, temperature-domain and separate
   horizon/clipping diagnostic policies.
 - Commits: `d2edb95` (`feat: implement root solver and scalar Liljegren model`);
-  `c59d89c` (`test: add scalar validation fixtures`); current completion fix
-  pending commit. The full source-identified fixture corpus remains owned by
-  spec 010.
+  `c59d89c` (`test: add scalar validation fixtures`); `b9564d2` (`feat:
+  complete scalar Liljegren validation`). The full source-identified fixture
+  corpus remains owned by spec 010.
