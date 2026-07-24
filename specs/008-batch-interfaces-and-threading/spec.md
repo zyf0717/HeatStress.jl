@@ -94,12 +94,25 @@ Preallocated output element types must accept `missing` and promoted `T`; otherw
 
 ## Serial loop
 
-Implement the serial loop first over ordinal rows `1:n`, translating each row to the corresponding index of each input/output:
+The public scalar APIs and both batch APIs share one canonical typed row path.
+At its public boundary, scalar execution determines the promoted floating type and
+converts `LiljegrenConfig` once, then calls the internal time-based row path.
+Batch execution does the same conversion once per batch before its ordinal loop;
+the loop must not call `liljegren_wbgt` or `diagnose_liljegren` per row.
+
+The internal path is conceptually split into a time form and a prepared-zenith
+form. The time form computes solar geometry and calls the prepared-zenith form,
+which owns the shared meteorological preparation and component solves. Neither
+method is public. Value-mode rows return a compact isbits internal outcome; the
+public scalar boundary alone materializes `WBGTResult`, while a preallocated
+batch loop writes its three fields directly to caller outputs.
+
+Implement the serial loop over ordinal rows `1:n`, translating each row to the corresponding index of each input/output:
 
 ```julia
 for row in 1:n
-    result = liljegren_wbgt(... row ...)
-    write outputs
+    values = _liljegren_row_from_time(... row ..., typed_config, _ValueMode())
+    write outputs from values
 end
 ```
 
@@ -122,21 +135,23 @@ Rules:
 - do not change global thread configuration;
 - do not create processes.
 
+Row-dependent solar geometry and all downstream scientific computation remain
+inside each worker iteration. The orchestration thread may validate, convert
+configuration, allocate required outputs, and select scheduling, but must not
+add a serial whole-batch solar or meteorological preprocessing pass. Any future
+material preprocessing must itself be parallelised.
+
 For small arrays, permit automatic serial execution even when `threaded=true`; define and document a threshold only after benchmarking. Initially, respect `threaded=true` literally to keep semantics simple.
 
 ## Solar geometry reuse
 
-Implement in two stages.
-
-### v0.1 correctness stage
-
-Each scalar row may calculate its own zenith. Establish correctness and baseline performance.
-
-### optimisation stage
-
-Profile. If solar geometry is material, precompute a zenith array using the grouped/unique-time implementation from spec 04, then pass prepared zenith into an internal row solver. This is preferable to moving all computation into R-style worker chunks.
-
-The precomputed and row-by-row paths must have exact or documented-tolerance equality.
+Spec 008 retains worker-local, row-by-row solar geometry as its fused
+correctness and scaling baseline. It provides the private prepared-zenith row
+form only to permit later investigation without duplicating scientific logic.
+Grouped solar caching, unique-key preprocessing, SIMD, residual-equation
+restructuring, specialized fixed-station kernels, and advanced batch solvers
+are deferred to spec 011 after profiling. A future prepared-zenith path must
+parallelise its preparation phase and retain end-to-end numerical equivalence.
 
 ## Diagnostic batch layout
 
@@ -199,11 +214,20 @@ Do not warn for missing/unattempted rows. Do not emit one warning per row or per
 
 Do not require a speedup from threading on tiny arrays.
 
-For a representative 876,000-row Float64 fixture on a multicore developer machine:
+For a representative Float64 fixture on a multicore developer machine:
 
-- serial Julia batch should be benchmarked against its scalar kernel;
+- compare preallocated serial batch with a public scalar row loop writing the
+  same three preallocated component arrays, using identical structure-of-arrays
+  inputs, row order, controls and output validation;
 - threaded mode should not be materially slower than serial at sufficiently large row counts;
 - outputs must remain equal before performance claims are accepted.
+
+The serial preallocated path must remove avoidable public-wrapper and public
+result-container work. A large wall-clock speedup is not required when the
+nonlinear component solves dominate, but an unexplained regression is
+unacceptable. End-to-end timings include all work required by the public batch
+call; a future prepared-zenith phase must never be excluded from that primary
+measurement.
 
 The cross-implementation benchmark against HeatStressR v2.1.6 is required by
 spec 011, not by this unit. Spec 008 closes on correctness and usable batch
@@ -212,7 +236,8 @@ indices or release polish.
 
 Performance goals are directional, not a registration blocker:
 
-- substantial improvement over repeated public scalar calls and acceptable scaling on large workloads;
+- no material regression against the identical public scalar/preallocated-output
+  control, and acceptable threaded scaling on large workloads;
 - no PSOCK serialisation or R worker startup costs;
 - preallocated calls allocate no replacement result arrays; total allocations
   from the shared scalar value path are measured and documented before further
@@ -233,6 +258,10 @@ Performance goals are directional, not a registration blocker:
 - no process-based parallel dependency exists;
 - preallocated API performs no result-array allocations;
 - scientific fixtures pass for serial and threaded modes.
+- scalar and batch routes share the canonical typed scientific row path;
+- configuration converts once per batch and preallocated value mode does not
+  materialize `WBGTResult` per row;
+- worker-local solar computation is retained in threaded execution.
 
 ## Suggested commit
 
