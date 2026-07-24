@@ -77,8 +77,9 @@ function _assert_equal(actual::Vector{WBGTResult{Float64}}, expected::WBGTBatchR
     return nothing
 end
 
-function _measure(rows::Int, samples::Int, mode::Symbol)
-    air, dew, wind, radiation, time = batch_inputs(rows)
+function _measure(inputs, samples::Int, mode::Symbol)
+    air, dew, wind, radiation, time = inputs
+    rows = length(air)
     reference_outputs = _outputs(rows)
     reference = _scalar_row_loop!(reference_outputs..., air, dew, wind, radiation, time)
     _validate(reference)
@@ -153,7 +154,11 @@ function main(args::Vector{String} = ARGS)
         :allocating_batch,
     ]
     Threads.nthreads() > 1 && push!(modes, :preallocated_batch_threaded)
-    measurements = [_measure(row_count, samples, mode) for row_count in rows for mode in modes]
+    measurements = Dict{String,Any}[]
+    for row_count in rows
+        inputs = batch_inputs(row_count)
+        append!(measurements, (_measure(inputs, samples, mode) for mode in modes))
+    end
     report = Dict(
         "metadata" => Dict(
             "benchmark" => "comparable public scalar and Liljegren batch end-to-end throughput",
