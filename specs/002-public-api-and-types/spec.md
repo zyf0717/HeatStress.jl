@@ -131,7 +131,10 @@ Policy design:
 | compute solar geometry from full instant | `TimestampSolarTime` |
 | compute a documented date-at-noon approximation | `DateNoonSolarTime` |
 
-[NEEDS CLARIFICATION: Select and justify the v0.1 default dewpoint policy before implementing the default `LiljegrenConfig()` constructor. Explicit non-default policies may be implemented and tested independently.]
+The v0.1 default is `ClampDewPoint`. It preserves the supplied air temperature
+and makes a physically inconsistent dew point explicit through the diagnostic
+adjustment flag. `SwapAirAndDewPoint` remains opt-in for legacy-data repair and
+`RejectInvalidDewPoint` remains available for strict ingestion workflows.
 
 ## Configuration types
 
@@ -153,7 +156,7 @@ struct LiljegrenConfig{T<:AbstractFloat}
 end
 ```
 
-Provide validating outer constructors. Candidate defaults, subject to the unresolved policy/provenance/solver gates in specs 002, 003 and 006:
+Provide validating outer constructors. The API defaults are:
 
 ```julia
 SolverConfig(

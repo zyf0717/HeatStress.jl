@@ -27,5 +27,31 @@ include("indices/discomfort_index.jl")
 include("indices/heat_index.jl")
 
 # Public exports are declared here once their owning specifications are complete.
+export DewPointPolicy,
+    ClampDewPoint,
+    SwapAirAndDewPoint,
+    RejectInvalidDewPoint,
+    SolarTimeMode,
+    TimestampSolarTime,
+    DateNoonSolarTime,
+    InputStatus,
+    InputAccepted,
+    MissingMeteorology,
+    MissingTime,
+    InvalidDewPoint,
+    InvalidDomain,
+    FailureReason,
+    NoFailure,
+    NotAttempted,
+    Unbracketed,
+    NonFiniteResidual,
+    ResidualValidationFailed,
+    IterationLimit,
+    SolverConfig,
+    LiljegrenConfig,
+    WBGTResult,
+    SolverDiagnostics,
+    DiagnosticWBGTResult,
+    WBGTBatchResult
 
 end

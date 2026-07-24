@@ -15,5 +15,14 @@ The authoritative detail and citations remain in `spec.md`; software implementat
 
 ## Open questions
 
-- Resolve the blocking default dew-point policy decision in `spec.md` before implementing `LiljegrenConfig()`.
 - Decide whether optional string-time convenience methods are warranted after core completion.
+
+## Resolved decisions
+
+- **Default dew-point policy: `ClampDewPoint`.** A dew point above air temperature is
+  physically inconsistent. Clamping the dew point to saturation preserves the supplied
+  air temperature, avoids silently reinterpreting the measurement columns, and is
+  deterministic for routine data-quality defects. The diagnostic result explicitly
+  records the adjustment. `SwapAirAndDewPoint` remains available only as an opt-in
+  legacy-data repair policy; `RejectInvalidDewPoint` remains available for strict
+  ingestion workflows.
