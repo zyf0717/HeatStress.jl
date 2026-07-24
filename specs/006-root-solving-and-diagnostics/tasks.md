@@ -3,8 +3,8 @@
 ## Status
 
 - [x] Planned
-- [x] In progress
-- [ ] Complete
+- [ ] In progress
+- [x] Complete
 
 ## Tasks
 
@@ -22,4 +22,4 @@
 - Evidence: `julia --project=. -e 'using Pkg; Pkg.test()'` passed on 2026-07-24
   (including 56 root-solver assertions) after correcting lower-only expansion
   and total diagnostic evaluation accounting.
-- Commit: correction uncommitted
+- Commit: `3ae4106` (`fix: harden scalar diagnostics and root expansion`)

@@ -30,7 +30,7 @@
 - [ ] Record performance environment, timing boundaries, correctness tolerance
   and unresolved discrepancies in the local report.
 - [ ] Run the acceptance checks in `quickstart.md`.
-- [ ] Record test, benchmark or validation evidence and commit SHA below.
+- [x] Record test, benchmark or validation evidence and commit SHA below.
 
 ## Evidence
 
@@ -45,4 +45,4 @@
   53.535 ms minimum / 56.999 ms median, 19.2 MB / 1,080,002 allocations;
   100,000 rows, 498.730 ms / 499.018 ms, 192 MB / 10,800,002 allocations;
   1,000,000 rows, 5.272 s / 5.272 s, 1.92 GB / 108,000,002 allocations.
-- Commit: pending
+- Commit: `aab195c` (`perf: add scalar end-to-end benchmark harness`)
