@@ -52,6 +52,23 @@
             1e-6,
             1e-4,
         )
+        @test_throws ArgumentError SolverDiagnostics{Float64}(
+            false,
+            NotAttempted,
+            missing,
+            missing,
+            missing,
+            0,
+            0,
+            missing,
+            missing,
+            missing,
+            missing,
+            missing,
+            missing,
+            1e-6,
+            0.011,
+        )
         diagnostic = @inferred DiagnosticWBGTResult{Float64}(
             WBGTResult(missing, missing, missing),
             MissingTime,

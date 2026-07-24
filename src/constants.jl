@@ -19,13 +19,16 @@ const MOLAR_MASS_WATER = 18.015 # kg kmol^-1
 const UNIVERSAL_GAS_CONSTANT = 8314.34 # J kmol^-1 K^-1
 const GAS_CONSTANT_DRY_AIR = UNIVERSAL_GAS_CONSTANT / MOLAR_MASS_DRY_AIR # J kg^-1 K^-1
 
-# Liljegren-model input defaults.  Pressure and direct fraction are model input
-# conventions; instrument geometry and optical properties are device parameters.
+# Package API fallback; pressure is an explicit meteorological input in the
+# canonical Liljegren model, not a model-defined default.
 const DEFAULT_PRESSURE_HPA = 1010.0
 const DEFAULT_SURFACE_ALBEDO = 0.45
 const DEFAULT_GLOBE_DIAMETER_M = 0.0508
+# Canonical Liljegren computational wind floor, configurable as package policy.
 const DEFAULT_MINIMUM_WIND_SPEED_M_S = 0.13
-const DEFAULT_DIRECT_FRACTION = 0.8
+# Temporary package approximation used only when direct fraction is not derived
+# from solar geometry and observed radiation; not a canonical Liljegren default.
+const FALLBACK_DIRECT_FRACTION = 0.8
 
 const GLOBE_EMISSIVITY = 0.95
 const GLOBE_ALBEDO = 0.05

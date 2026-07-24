@@ -18,7 +18,7 @@ liljegren_wbgt_batch(
     longitude_deg,
     latitude_deg;
     pressure_hpa = 1010,
-    direct_fraction = 0.8,
+    direct_fraction = nothing,
     config = LiljegrenConfig(),
     threaded = false,
 )
@@ -39,7 +39,7 @@ liljegren_wbgt!(
     longitude_deg,
     latitude_deg;
     pressure_hpa = 1010,
-    direct_fraction = 0.8,
+    direct_fraction = nothing,
     config = LiljegrenConfig(),
     threaded = false,
 )
@@ -63,6 +63,10 @@ Allow scalar or aligned arrays for:
 - latitude;
 - pressure;
 - direct fraction.
+
+`nothing` for direct fraction requests spec-004 derivation per row; an explicit
+scalar or aligned numeric value overrides derivation. The package fallback 0.8
+is not a public batch default.
 
 Use internal ordinal scalar-or-vector accessors, not `repeat`/materialisation. The concrete methods must be restricted to supported scalar types rather than accepting arbitrary objects:
 

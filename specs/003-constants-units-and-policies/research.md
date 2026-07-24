@@ -9,7 +9,9 @@
 | Dry-air heat capacity and molar masses | Hall et al. (2022), §2.3.1 | 1003.5 J kg⁻¹ K⁻¹, 28.97 and 18.015 kg kmol⁻¹ | Retain model values. |
 | SI conversion and modern reference comparison | NIST SP 250-39 (2009), Appendix A; NIST CODATA 2022 | 273.15 K offset; modern gas and Stefan–Boltzmann references | Model constants take precedence where they differ. |
 | Surface albedo and wind floor | Kong et al. (2025), model-description text; Choi et al. (2022), methods | 0.45; original 0.13 m s⁻¹ | Compatibility values exposed in configuration. |
-| Pressure and direct fraction defaults | v0.1 public API policy | 1010 hPa; 0.8 | Not physical invariants; callers may override. |
+| Pressure fallback | v0.1 public API policy | 1010 hPa | Package fallback only; the canonical model takes observed pressure explicitly. |
+| Direct-fraction fallback | v0.1 public API policy | 0.8 | Reserved approximation only when spec-004 derivation is unavailable; explicit values override derivation. |
+| Minimum wind floor | Liljegren model convention | 0.13 m s⁻¹ | Canonical computational floor, configurable by package policy. |
 
 ## Discrepancy record
 

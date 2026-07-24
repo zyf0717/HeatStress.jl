@@ -76,10 +76,10 @@ Value-only functions should call the same internal diagnostic computation and di
 
 ## Direct fraction
 
-- scalar finite value from 0 through 1;
+- `nothing` requests derivation by the selected spec-004 solar model;
+- an explicit scalar finite value from 0 through 1 overrides derivation;
 - interpreted as `direct / (direct + diffuse)`;
-- default `0.8` only if supported by the selected model/instrument source, with citation;
-- not inferred from global radiation;
+- the package fallback `0.8` is not a canonical Liljegren or public API default;
 - validate before solver invocation.
 
 ## Pressure

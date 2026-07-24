@@ -223,6 +223,8 @@ struct SolverDiagnostics{T<:AbstractFloat}
         iterations >= 0 || throw(ArgumentError("iterations must be non-negative"))
         _require_finite_positive(root_tolerance_k, :root_tolerance_k)
         _require_finite_positive(residual_tolerance_k, :residual_tolerance_k)
+        residual_tolerance_k <= T(0.01) ||
+            throw(ArgumentError("residual_tolerance_k must not exceed 0.01 K"))
         return new{T}(
             converged,
             reason,

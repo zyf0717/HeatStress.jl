@@ -1,4 +1,19 @@
-# Prepared scalar meteorology in the package's internal numeric units.
+# Basic scalar meteorology after input validation and non-solar policies.
+struct _BasicMeteorology{T<:AbstractFloat}
+    air_temperature_c::T
+    dew_point_c::T
+    air_temperature_k::T
+    dew_point_k::T
+    wind_speed_m_s::T
+    solar_radiation_w_m2::T
+    pressure_hpa::T
+    direct_fraction::T
+    dew_point_adjusted::Bool
+    wind_speed_clamped::Bool
+    solar_radiation_clamped::Bool
+end
+
+# Prepared scalar meteorology after solar policy has been applied.
 struct _PreparedMeteorology{T<:AbstractFloat}
     air_temperature_c::T
     dew_point_c::T
@@ -62,36 +77,23 @@ function _effective_wind_speed_m_s(
     return max(wind_speed_m_s, minimum_wind_speed_m_s)
 end
 
-# Normalize one meteorological observation before component physics. Temperatures
-# are Celsius at this boundary; pressure is hPa, wind is m/s, radiation is W/m²,
-# coordinates are degrees, and `solar_zenith_rad` is radians. The caller supplies
-# the zenith calculated by the solar-geometry kernel so this policy layer remains
-# independent of a specific solar-position equation.
-function _normalize_meteorology(
+# Normalize one meteorological observation before solar geometry and component
+# physics. Temperatures are Celsius at this boundary; pressure is hPa, wind is
+# m/s, radiation is W/m², and `direct_fraction` is direct / total radiation.
+function _normalize_basic_meteorology(
     air_temperature_c::Union{Missing,Real},
     dew_point_c::Union{Missing,Real},
     wind_speed_m_s::Union{Missing,Real},
     solar_radiation_w_m2::Union{Missing,Real},
-    time,
-    longitude_deg::Real,
-    latitude_deg::Real;
+    ;
     pressure_hpa::Union{Missing,Real} = DEFAULT_PRESSURE_HPA,
-    direct_fraction::Union{Missing,Real} = DEFAULT_DIRECT_FRACTION,
-    solar_zenith_rad::Union{Missing,Real} = missing,
+    direct_fraction::Union{Missing,Real},
     config::LiljegrenConfig = LiljegrenConfig(),
 )
-    _validate_longitude_deg(longitude_deg)
-    _validate_latitude_deg(latitude_deg)
-    _validate_pressure_hpa(pressure_hpa; allow_missing = true)
-    ismissing(direct_fraction) && return _InputPreparationFailure(MissingMeteorology)
-    _validate_direct_fraction(direct_fraction)
-
     if ismissing(air_temperature_c) || ismissing(dew_point_c) || ismissing(wind_speed_m_s) ||
-       ismissing(solar_radiation_w_m2) || ismissing(pressure_hpa)
+       ismissing(solar_radiation_w_m2) || ismissing(pressure_hpa) || ismissing(direct_fraction)
         return _InputPreparationFailure(MissingMeteorology)
     end
-    ismissing(time) && return _InputPreparationFailure(MissingTime)
-    ismissing(solar_zenith_rad) && return _InputPreparationFailure(InvalidDomain)
 
     float_type = _common_float_type(
         air_temperature_c,
@@ -100,7 +102,6 @@ function _normalize_meteorology(
         solar_radiation_w_m2,
         pressure_hpa,
         direct_fraction,
-        solar_zenith_rad,
         config.dew_point_tolerance_c,
     )
     air = convert(float_type, air_temperature_c)
@@ -109,9 +110,8 @@ function _normalize_meteorology(
     radiation = convert(float_type, solar_radiation_w_m2)
     pressure = convert(float_type, pressure_hpa)
     fraction = convert(float_type, direct_fraction)
-    zenith = convert(float_type, solar_zenith_rad)
 
-    all(isfinite, (air, dew, wind, radiation, pressure, fraction, zenith)) ||
+    all(isfinite, (air, dew, wind, radiation, pressure, fraction)) ||
         return _InputPreparationFailure(InvalidDomain)
     pressure > zero(float_type) || return _InputPreparationFailure(InvalidDomain)
     zero(float_type) <= fraction <= one(float_type) || return _InputPreparationFailure(InvalidDomain)
@@ -127,25 +127,51 @@ function _normalize_meteorology(
     wind_clamped = wind < zero(float_type)
     radiation_clamped = radiation < zero(float_type)
     wind = max(wind, zero(float_type))
-    supplied_positive_radiation = radiation > zero(float_type)
     radiation = max(radiation, zero(float_type))
-    below_horizon = cos(zenith) <= zero(float_type)
-    mismatch = supplied_positive_radiation && below_horizon
-    below_horizon && (radiation = zero(float_type))
 
-    return _PreparedMeteorology(
+    return _BasicMeteorology(
         resolution.air_temperature_c,
         resolution.dew_point_c,
         resolution.air_temperature_c + float_type(KELVIN_OFFSET),
         resolution.dew_point_c + float_type(KELVIN_OFFSET),
         wind,
         radiation,
-        zenith,
         pressure,
         fraction,
         resolution.adjusted,
         wind_clamped,
         radiation_clamped,
+    )
+end
+
+# Apply solar forcing policy to basic meteorology. Zenith is radians from the
+# selected solar kernel and must lie in the physical interval [0, π].
+function _apply_solar_policy(
+    basic::_BasicMeteorology{T},
+    solar_zenith_rad::Union{Missing,Real},
+) where {T<:AbstractFloat}
+    ismissing(solar_zenith_rad) && return _InputPreparationFailure(InvalidDomain)
+    zenith = convert(T, solar_zenith_rad)
+    isfinite(zenith) && zero(T) <= zenith <= T(pi) ||
+        return _InputPreparationFailure(InvalidDomain)
+
+    below_horizon = zenith >= T(pi / 2)
+    mismatch = basic.solar_radiation_w_m2 > zero(T) && below_horizon
+    radiation = below_horizon ? zero(T) : basic.solar_radiation_w_m2
+
+    return _PreparedMeteorology(
+        basic.air_temperature_c,
+        basic.dew_point_c,
+        basic.air_temperature_k,
+        basic.dew_point_k,
+        basic.wind_speed_m_s,
+        radiation,
+        zenith,
+        basic.pressure_hpa,
+        basic.direct_fraction,
+        basic.dew_point_adjusted,
+        basic.wind_speed_clamped,
+        basic.solar_radiation_clamped,
         mismatch,
     )
 end
