@@ -5,6 +5,8 @@ using HeatStress
     @test isdefined(HeatStress, :HeatStress)
 end
 
+include("test_types.jl")
+
 if get(ENV, "HEATSTRESS_QUALITY", "0") == "1"
     using Aqua
     using JET
