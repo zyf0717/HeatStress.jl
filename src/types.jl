@@ -272,24 +272,24 @@ struct DiagnosticWBGTResult{T<:AbstractFloat}
 end
 
 """Aligned batch result; all three arrays contain °C values or `missing`."""
-struct WBGTBatchResult{T<:AbstractFloat,V<:AbstractVector{Union{Missing,T}}}
-    wbgt_c::V
-    natural_wet_bulb_c::V
-    globe_temperature_c::V
+struct WBGTBatchResult{T<:AbstractFloat,VW<:AbstractVector{Union{Missing,T}},VN<:AbstractVector{Union{Missing,T}},VG<:AbstractVector{Union{Missing,T}}}
+    wbgt_c::VW
+    natural_wet_bulb_c::VN
+    globe_temperature_c::VG
 
-    function WBGTBatchResult{T,V}(wbgt_c::V, natural_wet_bulb_c::V, globe_temperature_c::V) where {T<:AbstractFloat,V<:AbstractVector{Union{Missing,T}}}
+    function WBGTBatchResult{T,VW,VN,VG}(wbgt_c::VW, natural_wet_bulb_c::VN, globe_temperature_c::VG) where {T<:AbstractFloat,VW<:AbstractVector{Union{Missing,T}},VN<:AbstractVector{Union{Missing,T}},VG<:AbstractVector{Union{Missing,T}}}
         axes(wbgt_c) == axes(natural_wet_bulb_c) == axes(globe_temperature_c) ||
             throw(ArgumentError("batch result vectors must have identical axes"))
-        return new{T,V}(wbgt_c, natural_wet_bulb_c, globe_temperature_c)
+        return new{T,VW,VN,VG}(wbgt_c, natural_wet_bulb_c, globe_temperature_c)
     end
 end
 
-function WBGTBatchResult(wbgt_c::V, natural_wet_bulb_c::V, globe_temperature_c::V) where {V<:AbstractVector}
-    element_type = eltype(V)
-    float_type = Base.nonmissingtype(element_type)
-    float_type <: AbstractFloat && element_type === Union{Missing,float_type} ||
+function WBGTBatchResult(wbgt_c::VW, natural_wet_bulb_c::VN, globe_temperature_c::VG) where {VW<:AbstractVector,VN<:AbstractVector,VG<:AbstractVector}
+    element_types = (eltype(VW), eltype(VN), eltype(VG))
+    float_type = Base.nonmissingtype(first(element_types))
+    all(element_type -> element_type === Union{Missing,float_type}, element_types) && float_type <: AbstractFloat ||
         throw(ArgumentError("batch result vectors must have Union{Missing, T} floating-point elements"))
-    return WBGTBatchResult{float_type,V}(wbgt_c, natural_wet_bulb_c, globe_temperature_c)
+    return WBGTBatchResult{float_type,VW,VN,VG}(wbgt_c, natural_wet_bulb_c, globe_temperature_c)
 end
 
 """Structure-of-arrays component diagnostics for aligned Liljegren batch rows."""
@@ -307,11 +307,39 @@ struct SolverDiagnosticsBatch{T<:AbstractFloat}
     final_upper_k::Vector{Union{Missing,T}}
     lower_location_residual::Vector{Union{Missing,T}}
     upper_location_residual::Vector{Union{Missing,T}}
+
+    function SolverDiagnosticsBatch{T}(
+        converged::Vector{Bool},
+        reason::Vector{FailureReason},
+        value_c::Vector{Union{Missing,T}},
+        candidate_c::Vector{Union{Missing,T}},
+        validation_residual_k::Vector{Union{Missing,T}},
+        evaluations::Vector{Int},
+        iterations::Vector{Int},
+        initial_lower_k::Vector{Union{Missing,T}},
+        initial_upper_k::Vector{Union{Missing,T}},
+        final_lower_k::Vector{Union{Missing,T}},
+        final_upper_k::Vector{Union{Missing,T}},
+        lower_location_residual::Vector{Union{Missing,T}},
+        upper_location_residual::Vector{Union{Missing,T}},
+    ) where {T<:AbstractFloat}
+        rows = length(converged)
+        all(length(values) == rows for values in (
+            reason, value_c, candidate_c, validation_residual_k, evaluations, iterations,
+            initial_lower_k, initial_upper_k, final_lower_k, final_upper_k,
+            lower_location_residual, upper_location_residual,
+        )) || throw(ArgumentError("batch diagnostic vectors must have identical lengths"))
+        return new{T}(
+            converged, reason, value_c, candidate_c, validation_residual_k, evaluations,
+            iterations, initial_lower_k, initial_upper_k, final_lower_k, final_upper_k,
+            lower_location_residual, upper_location_residual,
+        )
+    end
 end
 
 """Structure-of-arrays diagnostic result for aligned Liljegren batch rows."""
 struct DiagnosticWBGTBatchResult{T<:AbstractFloat}
-    result::WBGTBatchResult{T,Vector{Union{Missing,T}}}
+    result::WBGTBatchResult{T,Vector{Union{Missing,T}},Vector{Union{Missing,T}},Vector{Union{Missing,T}}}
     input_status::Vector{InputStatus}
     dew_point_adjusted::Vector{Bool}
     wind_speed_clamped::Vector{Bool}

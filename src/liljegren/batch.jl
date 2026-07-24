@@ -108,7 +108,7 @@ end
 
 function _diagnostic_arrays(::Type{T}, rows::Int) where {T<:AbstractFloat}
     missing_values() = fill!(Vector{Union{Missing,T}}(undef, rows), missing)
-    component() = SolverDiagnosticsBatch{T}(falses(rows), fill(NotAttempted, rows), missing_values(), missing_values(), missing_values(), zeros(Int, rows), zeros(Int, rows), missing_values(), missing_values(), missing_values(), missing_values(), missing_values(), missing_values())
+    component() = SolverDiagnosticsBatch{T}(fill(false, rows), fill(NotAttempted, rows), missing_values(), missing_values(), missing_values(), zeros(Int, rows), zeros(Int, rows), missing_values(), missing_values(), missing_values(), missing_values(), missing_values(), missing_values())
     return component(), component()
 end
 
@@ -124,9 +124,18 @@ function diagnose_liljegren_batch(air::AbstractVector, dew::AbstractVector, wind
     radiation::AbstractVector, time::AbstractVector, longitude, latitude;
     pressure_hpa = DEFAULT_PRESSURE_HPA, direct_fraction, config::LiljegrenConfig = LiljegrenConfig(), threaded::Bool = false)
     rows = _batch_rows(air, dew, wind, radiation, time)
+    _validate_batch_argument(longitude, rows, :longitude_deg)
+    _validate_batch_argument(latitude, rows, :latitude_deg)
+    _validate_batch_argument(pressure_hpa, rows, :pressure_hpa)
+    _validate_batch_argument(direct_fraction, rows, :direct_fraction)
     T = _batch_float_type(air, dew, wind, radiation, longitude, latitude, pressure_hpa, direct_fraction; config)
     wbgt = Vector{Union{Missing,T}}(undef, rows); wet = similar(wbgt); globe = similar(wbgt)
-    status = Vector{InputStatus}(undef, rows); dew_adjusted = falses(rows); wind_clamped = falses(rows); radiation_clamped = falses(rows); mismatch = falses(rows); clipped = falses(rows)
+    status = Vector{InputStatus}(undef, rows)
+    dew_adjusted = fill(false, rows)
+    wind_clamped = fill(false, rows)
+    radiation_clamped = fill(false, rows)
+    mismatch = fill(false, rows)
+    clipped = fill(false, rows)
     globe_diagnostics, wet_diagnostics = _diagnostic_arrays(T, rows)
     function diagnose_row(row)
         diagnostic = diagnose_liljegren(_at(air,row), _at(dew,row), _at(wind,row), _at(radiation,row), _at(time,row), _at(longitude,row), _at(latitude,row); pressure_hpa=_at(pressure_hpa,row), direct_fraction=_at(direct_fraction,row), config)
