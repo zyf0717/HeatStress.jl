@@ -24,9 +24,9 @@ The authoritative detail and citations remain in `spec.md`; software implementat
   host-specific evidence only (0.0455 s serial; 0.0235 s threaded median).
   It establishes a baseline for future grouped-solar and scalar-core allocation
   work, rather than a portable performance claim.
-- The same host was measured at 2–6 Julia threads for 10,000, 100,000 and
+- The same host was measured at 1–6 Julia threads for 10,000, 100,000 and
   1,000,000 rows (three samples per size). At one million rows, median
-  throughput increased from 396k rows/s at two threads to 1.03M rows/s at six
-  threads (4.57× relative to that run's serial control). The full table and
-  invocation are retained in `benchmark/README.md`; raw host-specific reports
-  remain ignored under `benchmark/results/`.
+  throughput increased from 227k rows/s at one thread to 1.03M rows/s at six
+  threads (4.52×). The full table and invocation are retained in
+  `benchmark/README.md`; raw host-specific reports remain ignored under
+  `benchmark/results/`.

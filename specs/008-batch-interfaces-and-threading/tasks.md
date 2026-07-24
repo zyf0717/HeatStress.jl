@@ -27,7 +27,7 @@
   validation, diagnostic row alignment, and independent scalar fixture values.
   `julia --threads=2 --project=benchmark benchmark/batch_e2e.jl --rows=10000
   --samples=3` recorded a local preallocated baseline: 0.0455 s serial and
-  0.0235 s threaded median. A follow-up 2–6-thread, 10k/100k/1M sweep is
+  0.0235 s threaded median. A follow-up 1–6-thread, 10k/100k/1M sweep is
   summarized in `benchmark/README.md`; results remain host-specific local
   evidence only.
 - Commits: `617f945` (`feat: add Liljegren batch execution`); `b028d89`

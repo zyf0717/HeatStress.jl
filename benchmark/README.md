@@ -33,17 +33,19 @@ julia --threads=auto --project=benchmark benchmark/batch_e2e.jl --rows=10000 --s
 
 The following host-specific medians used Julia 1.10.11, BenchmarkTools 1.8.0,
 CPU `znver3`, three samples per size, and the preallocated `liljegren_wbgt!`
-path. Each thread count was run in a fresh Julia process with a serial control.
-They are not portable performance claims or a Julia-versus-R comparison.
+path. Each thread count was run in a fresh Julia process. They are not portable
+performance claims or a Julia-versus-R comparison.
 
-| Julia threads | 10,000 rows | 100,000 rows | 1,000,000 rows | 1M throughput | 1M speedup vs. serial control |
+| Julia threads | 10,000 rows | 100,000 rows | 1,000,000 rows | 1M throughput | 1M speedup vs. 1 thread |
 | ---: | ---: | ---: | ---: | ---: | ---: |
-| 2 | 23.7 ms | 236.4 ms | 2.525 s | 396k rows/s | 1.82× |
-| 3 | 17.8 ms | 161.3 ms | 1.696 s | 589k rows/s | 2.59× |
-| 4 | 12.8 ms | 124.1 ms | 1.319 s | 758k rows/s | 3.37× |
-| 5 | 10.2 ms | 102.9 ms | 1.102 s | 907k rows/s | 4.04× |
-| 6 | 9.4 ms | 90.2 ms | 974 ms | 1.03M rows/s | 4.57× |
+| 1 | 44.1 ms | 441.8 ms | 4.406 s | 227k rows/s | 1.00× |
+| 2 | 23.7 ms | 236.4 ms | 2.525 s | 396k rows/s | 1.74× |
+| 3 | 17.8 ms | 161.3 ms | 1.696 s | 589k rows/s | 2.60× |
+| 4 | 12.8 ms | 124.1 ms | 1.319 s | 758k rows/s | 3.34× |
+| 5 | 10.2 ms | 102.9 ms | 1.102 s | 907k rows/s | 4.00× |
+| 6 | 9.4 ms | 90.2 ms | 974 ms | 1.03M rows/s | 4.52× |
 
 The same revision's public scalar benchmark was 4.50 s for 1,000,000 rows
-(222k rows/s), so the serial batch path remains computationally equivalent to
-the scalar loop while threaded row parallelism provides the observed gain.
+(222k rows/s), consistent with the one-thread batch result. The serial batch
+path therefore remains computationally equivalent to the scalar loop while
+threaded row parallelism provides the observed gain.
