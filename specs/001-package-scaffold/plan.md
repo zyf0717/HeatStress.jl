@@ -6,7 +6,9 @@
 
 ## Design
 
-Create the conventional Julia package, minimal dependency graph, CI matrix and policy files; no scientific placeholder values.
+Create the conventional Julia package, minimal dependency graph, one-job
+Ubuntu/Julia 1.10 CI workflow, and policy files; no scientific placeholder
+values. Broader CI quality gates are deferred to spec 012.
 
 ## Sequence
 

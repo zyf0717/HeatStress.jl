@@ -10,4 +10,5 @@
 ## Validation
 
 - Run `julia --project -e 'using Pkg; Pkg.instantiate(); Pkg.test()'`.
-- Run `using HeatStress` and the configured quality jobs.
+- Run `using HeatStress`; Aqua, JET, and docs builds remain manual checks until
+  spec 012 enables their CI gates.

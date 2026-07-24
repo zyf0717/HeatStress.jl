@@ -20,7 +20,8 @@
 
 - Evidence: Julia 1.10.11; clean depot `/tmp/heatstress-julia-depot.HuYhfo`:
   `using Pkg; Pkg.instantiate(); Pkg.precompile(); Pkg.test()` passed on
-  2026-07-24. `HEATSTRESS_QUALITY=1 julia --project=. -e 'using Pkg;
+  2026-07-24. The CI workflow is one Ubuntu/Julia 1.10 `Pkg.test()` job for
+  pushes to `main`. `HEATSTRESS_QUALITY=1 julia --project=. -e 'using Pkg;
   Pkg.test()'` passed Aqua and JET. Documentation built successfully with
   `julia --project=docs docs/make.jl`. The same test, quality, and docs
   commands passed on Julia 1.12.6 (the installed `release` channel).
