@@ -18,7 +18,7 @@ liljegren_wbgt_batch(
     longitude_deg,
     latitude_deg;
     pressure_hpa = 1010,
-    direct_fraction = nothing,
+    direct_fraction,
     config = LiljegrenConfig(),
     threaded = false,
 )
@@ -39,7 +39,7 @@ liljegren_wbgt!(
     longitude_deg,
     latitude_deg;
     pressure_hpa = 1010,
-    direct_fraction = nothing,
+    direct_fraction,
     config = LiljegrenConfig(),
     threaded = false,
 )
@@ -64,9 +64,9 @@ Allow scalar or aligned arrays for:
 - pressure;
 - direct fraction.
 
-`nothing` for direct fraction requests spec-004 derivation per row; an explicit
-scalar or aligned numeric value overrides derivation. The package fallback 0.8
-is not a public batch default.
+Direct fraction is required as a scalar or aligned numeric value in `[0, 1]`.
+It is not derived from spec-004 solar geometry, and there is no package
+fallback batch default.
 
 Use internal ordinal scalar-or-vector accessors, not `repeat`/materialisation. The concrete methods must be restricted to supported scalar types rather than accepting arbitrary objects:
 

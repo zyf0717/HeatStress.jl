@@ -76,10 +76,11 @@ Value-only functions should call the same internal diagnostic computation and di
 
 ## Direct fraction
 
-- `nothing` requests derivation by the selected spec-004 solar model;
-- an explicit scalar finite value from 0 through 1 overrides derivation;
+- require an explicit scalar finite value from 0 through 1;
 - interpreted as `direct / (direct + diffuse)`;
-- the package fallback `0.8` is not a canonical Liljegren or public API default;
+- solar geometry does not derive direct fraction; a future derivation requires
+  its own sourced model and specification change;
+- no package fallback is a canonical Liljegren or public API default;
 - validate before solver invocation.
 
 ## Pressure

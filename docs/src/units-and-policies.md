@@ -12,9 +12,8 @@ zenith is radians internally and degrees only when a public API says so.
 Input preparation rejects non-finite scalar meteorology, invalid coordinates,
 non-positive pressure, and direct fractions outside `[0, 1]`. A batch boundary
 may represent a missing pressure as a row-level missing meteorology result.
-Public `direct_fraction = nothing` requests solar-model derivation; an explicit
-fraction overrides it. The package’s 0.8 fallback is not a canonical model
-default.
+`direct_fraction` is explicit: solar geometry does not determine the
+direct/diffuse split, and v0.1 has no package fallback.
 
 Negative wind and solar radiation are clamped to zero and reported by diagnostic
 flags. Dew point above air temperature is reconciled within the configured
@@ -28,7 +27,6 @@ public-boundary normalization.
 
 ```@docs
 DewPointPolicy
-SolarTimeMode
 InputStatus
 FailureReason
 SolverConfig
@@ -37,4 +35,24 @@ WBGTResult
 SolverDiagnostics
 DiagnosticWBGTResult
 WBGTBatchResult
+```
+
+## Solar and psychrometric kernels
+
+Solar timestamps are explicit UTC `DateTime` values or `ZonedDateTime` values
+converted to UTC. Longitude is positive east and both coordinate inputs are
+degrees. Solar zenith is returned in degrees; values above 90° are below the
+geometric horizon. `Date` is intentionally unsupported.
+
+Psychrometric temperatures are Celsius and saturation/actual vapour pressures
+are hPa. Relative humidity arguments and results are percentages. Temperature
+inputs are limited to -40--50 °C; `vapour_pressure` also requires humidity in
+0--100 percent. Invalid inputs throw `ArgumentError`.
+
+```@docs
+HeatStress.solar_zenith
+HeatStress.solar_zenith_batch
+HeatStress.saturation_vapour_pressure_hpa
+HeatStress.vapour_pressure
+HeatStress.relative_humidity_from_dewpoint
 ```

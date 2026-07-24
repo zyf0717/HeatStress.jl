@@ -6,17 +6,15 @@ Implement reusable solar and humidity calculations as pure, independently source
 
 ## Source-selection gate
 
-Before coding, add a table to this spec:
-
 | Component | Selected publication/standard | Equation/section | Units | Notes |
 | --- | --- | --- | --- | --- |
-| solar zenith | | | | |
-| saturation vapour pressure | | | | |
-| RH from dewpoint | | | | |
+| solar zenith | Spencer (1971) | equations 1–4, *Search* 2:172 | radians, degrees | third-harmonic declination and second-harmonic equation of time; expected error ≤2° in zenith at hourly resolution; suitable for WBGT solar forcing |
+| saturation vapour pressure | Allen et al. (1998), FAO-56 | equation 11, *Crop Evapotranspiration* | hPa | Magnus-Tetens form; T in °C; standard agricultural/hydrology reference |
+| RH from dewpoint | derived from saturation VP | e(T_d) / e_s(T_a) | fraction | Compute e_s at dewpoint and air temperature via Magnus-Tetens; RH = 100 × e(T_d) / e_s(T_a) |
+
+Accuracy target: solar zenith error ≤ 2° vs. high-accuracy ephemeris at hourly resolution (Liljegren WBGT solar forcing is insensitive to sub-degree precision).
 
 The implementation agent must not take coefficients from HeatStressR, the original C source or memory. If the Liljegren paper delegates a subformula to another reference, obtain and cite that reference or select an independently justified authoritative formulation and document the resulting model difference.
-
-[NEEDS CLARIFICATION: Complete the source-selection table, including an accuracy target for the solar method, before implementing these formula families.]
 
 ## Solar geometry
 
@@ -25,7 +23,8 @@ Select a documented solar-position approximation suitable for hourly meteorologi
 - accepts a UTC instant, longitude and latitude;
 - handles leap years and day-of-year correctly;
 - provides solar zenith in a stated angular unit;
-- is continuous and stable near sunrise/sunset;
+- is stable near sunrise/sunset; the selected daily Spencer approximation is
+  piecewise-continuous at UTC day boundaries;
 - clamps inverse-trigonometric inputs against floating-point drift;
 - has a documented expected error appropriate for WBGT calculations;
 - can be decomposed into time-only and coordinate-dependent terms for batch reuse.
@@ -34,22 +33,12 @@ Do not hard-code a coefficient set until its publication and equation are record
 
 ## Solar-time modes
 
-### `TimestampSolarTime`
-
-Use the full instant. Convert `ZonedDateTime` to UTC. Equivalent instants with different offsets must produce identical zenith.
-
-### `DateNoonSolarTime`
-
-Use the UTC calendar date at 12:00 UTC. Retain this mode only if it serves a documented scientific or compatibility use case; otherwise defer it from v0.1.0.
-
-[NEEDS CLARIFICATION: Decide whether `DateNoonSolarTime` has a supported v0.1 use case. If deferred, remove `Date` support and the enum value from the v0.1 public contract rather than leaving a dormant mode.]
-
-Use explicit policy values, not paired Boolean switches.
+Use the full instant. Convert `ZonedDateTime` to UTC. Equivalent instants with different offsets must produce identical zenith. `DateNoonSolarTime` has no documented scientific or compatibility use case, so it is not part of the v0.1 public contract; `Date` inputs are rejected by dispatch.
 
 ## Scalar API
 
 ```julia
-solar_zenith(time, longitude_deg, latitude_deg; mode=TimestampSolarTime)
+solar_zenith(time, longitude_deg, latitude_deg)
 ```
 
 Return degrees publicly unless the package charter is amended. Add internal helpers only after the selected equations are known:
@@ -88,15 +77,47 @@ Atmospheric emissivity, viscosity and diffusivity belong to the heat-transfer la
 
 ## Formula transcription procedure
 
-For each helper:
+For the solar calculation, with `n` the UTC day of year (unitless), `t` the
+UTC minute of day (min), `λ` longitude (degrees, positive east), and `φ`
+latitude (radians), Spencer's equations are:
 
-1. copy the equation into the spec using mathematical notation, not source code;
-2. list every symbol and unit;
-3. record constants and conversion factors;
-4. derive at least one hand-checkable or BigFloat case;
-5. implement the scalar Julia function from the equation;
-6. compare the implementation to the independently calculated case;
-7. only then compose it into higher-level kernels.
+\[
+\gamma = 2\pi(n - 1)/365
+\]
+\[
+\delta = 0.006918 - 0.399912\cos\gamma + 0.070257\sin\gamma
+- 0.006758\cos2\gamma + 0.000907\sin2\gamma
+- 0.002697\cos3\gamma + 0.00148\sin3\gamma
+\]
+\[
+E = (720/\pi)[0.0000075 + 0.001868\cos\gamma - 0.032077\sin\gamma
+- 0.014615\cos2\gamma - 0.040849\sin2\gamma]\quad\mathrm{min}
+\]
+\[
+H = \pi[t + E + 4\lambda - 720]/720,\qquad
+z = \arccos(\sin\phi\sin\delta + \cos\phi\cos\delta\cos H).
+\]
+
+The factor `4 min/degree` converts east-positive longitude to local mean
+solar time. `acos` receives its argument clamped to [-1, 1]. `γ`, `δ`, `H`,
+and `z` are radians internally; `z` is converted to degrees at the public
+boundary. The source's 365-day approximation is intentionally retained on
+leap-year day 366. Declination and equation-of-time terms use integer UTC day
+of year, as documented by Spencer; consequently the kernel is
+piecewise-continuous, with a small step at UTC midnight rather than a false
+claim of global continuity.
+
+For psychrometrics, FAO-56 equation 11 is:
+
+\[
+e_s(T) = 6.108\exp[17.27T/(T+237.3)]\quad\mathrm{hPa},
+\]
+
+where `T` is degrees Celsius. Actual vapour pressure is
+`e = RH_percent e_s(T) / 100`, and humidity from dew point is
+`RH_percent = 100 e_s(T_d) / e_s(T_a)`. The explicit valid temperature domain
+is -40 to 50 °C; non-finite and out-of-domain temperatures, and RH outside
+0--100 percent for `vapour_pressure`, throw `ArgumentError`.
 
 ## Tests
 

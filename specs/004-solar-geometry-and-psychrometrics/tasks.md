@@ -2,22 +2,27 @@
 
 ## Status
 
-- [x] Planned
-- [ ] In progress
+- [ ] Planned
+- [x] In progress
 - [ ] Complete
 
 ## Tasks
 
-- [ ] Resolve the solar-method source/accuracy gate.
-- [ ] Implement timestamp mode and conditionally implement date-noon mode only if retained.
-- [ ] Implement `solar_zenith`, vapour pressure and humidity kernels.
-- [ ] Add below-horizon and leap/calendar boundary tests.
-- [ ] Add independent numerical fixtures and invariants.
-- [ ] Document numerical precision and units.
-- [ ] Run the acceptance checks in `quickstart.md`.
-- [ ] Record test, benchmark or validation evidence and commit SHA below.
+- [x] Resolve the solar-method source/accuracy gate.
+- [x] Implement UTC timestamp mode; remove the undocumented date-noon mode.
+- [x] Implement `solar_zenith`, vapour pressure and humidity kernels.
+- [x] Add below-horizon and leap/calendar boundary tests.
+- [x] Add independent numerical fixtures and invariants.
+- [x] Document numerical precision and units.
+- [x] Run the acceptance checks in `quickstart.md`.
+- [ ] Benchmark fixed-coordinate, repeated-coordinate and unique-coordinate batch workloads.
+- [x] Record test and validation evidence below; commit SHA remains pending.
 
 ## Evidence
 
-- Evidence: pending
+- Evidence: `julia --project=. -e 'using Pkg; Pkg.test()'` and
+  `HEATSTRESS_QUALITY=1 julia --project=. -e 'using Pkg; Pkg.test()'`
+  (pass: 184 tests; quality checks pass; 2026-07-24); 15 NREL-SPA fixtures
+  have a maximum absolute zenith error of 0.344 degrees and are recorded in
+  `research.md`. `julia --project=docs docs/make.jl` also passes.
 - Commit: pending
