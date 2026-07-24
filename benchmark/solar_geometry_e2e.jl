@@ -46,4 +46,13 @@ function main(rows::Int = DEFAULT_ROWS)
     return nothing
 end
 
-abspath(PROGRAM_FILE) == abspath(@__FILE__) && main()
+function _rows_from_args(args::Vector{String} = ARGS)
+    isempty(args) && return DEFAULT_ROWS
+    length(args) == 1 && startswith(first(args), "--rows=") ||
+        error("usage: solar_geometry_e2e.jl [--rows=<positive integer>]")
+    rows = parse(Int, split(first(args), '='; limit = 2)[2])
+    rows > 0 || throw(ArgumentError("rows must be positive"))
+    return rows
+end
+
+abspath(PROGRAM_FILE) == abspath(@__FILE__) && main(_rows_from_args())

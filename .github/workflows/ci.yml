@@ -83,7 +83,7 @@ jobs:
         with:
           version: '1.10'
       - name: Validate benchmark outputs
-        run: julia --project=benchmark -e 'using Pkg; Pkg.develop(path="."); Pkg.instantiate()' && julia --project=benchmark benchmark/batch_e2e.jl --rows=100 --samples=1 && julia --project=benchmark benchmark/solar_geometry_e2e.jl
+        run: julia --project=benchmark -e 'using Pkg; Pkg.develop(path="."); Pkg.instantiate()' && julia --project=benchmark benchmark/batch_e2e.jl --rows=100 --samples=1 && julia --project=benchmark benchmark/solar_geometry_e2e.jl --rows=100
 
   clean-depot-smoke:
     name: Clean-depot install and load
