@@ -9,27 +9,30 @@
 ## Tasks
 
 - [x] Define alignment/broadcasting and output-allocation rules.
-- [x] Implement allocating and `!` batch APIs.
-- [x] Preserve per-row status, missingness and component values.
-- [x] Add thread-safe diagnostics arrays.
-- [x] Test fixed, grouped and unique coordinate modes.
-- [x] Benchmark before further optimization.
-- [x] Run the acceptance checks in `quickstart.md`.
-- [x] Record test, benchmark or validation evidence and commit SHA below.
+- [x] Implement atomic preallocated and input-validation boundaries.
+- [x] Preserve and verify complete per-row diagnostics under threading.
+- [x] Add one-thread and multithreaded CI coverage.
+- [x] Test fixed, grouped, unique and offset-indexed coordinate modes.
+- [x] Benchmark comparable scalar and batch modes; measure allocation scaling.
+- [x] Run the corrected acceptance checks in `quickstart.md`.
+- [x] Record final test, benchmark and validation evidence below.
 
 ## Evidence
 
-- Evidence: `HEATSTRESS_QUALITY=1 julia --project=. -e 'using Pkg; Pkg.test()'`
-  passed on 2026-07-24 (full suite, Aqua and JET). `julia --threads=2
-  --project=. -e 'include("test/test_liljegren_batch.jl")'` passed 38 assertions:
-  serial/preallocated/threaded equivalence, fixed/grouped/unique coordinates,
-  scalar and aligned secondary inputs, empty/mismatched inputs, output
-  validation, diagnostic row alignment, and independent scalar fixture values.
-  `julia --threads=2 --project=benchmark benchmark/batch_e2e.jl --rows=10000
-  --samples=3` recorded a local preallocated baseline: 0.0455 s serial and
-  0.0235 s threaded median. A follow-up 1–6-thread, 10k/100k/1M sweep is
-  summarized in `benchmark/README.md`; results remain host-specific local
-  evidence only.
-- Commits: `617f945` (`feat: add Liljegren batch execution`); `b028d89`
-  (`test: complete batch execution coverage`); `0cbc8b1`
-  (`test: validate batch execution against fixtures`).
+- Evidence: `HEATSTRESS_QUALITY=1 julia --threads=1 --project=. -e 'using
+  Pkg; Pkg.test()'` passed the full suite, Aqua and JET (159 batch assertions).
+  `HEATSTRESS_EXPECT_MULTITHREADED=true julia --threads=4 --project=. -e
+  'using Pkg; Pkg.test()'` passed the complete suite with 160 batch assertions
+  and verifies actual multi-thread availability. `.github/workflows/ci.yml`
+  now runs complete test jobs at one and four threads, plus a one-thread quality
+  job. Coverage includes pre-mutation input/output/alias failure checks,
+  arbitrary offset axes, type/missingness policies, independent fixtures and
+  every row-varying diagnostic field.
+
+  `julia --threads=4 --project=benchmark benchmark/batch_e2e.jl
+  --rows=10000,100000,1000000 --samples=3` measured identical-input scalar,
+  preallocated serial, allocating and threaded modes. At one million rows the
+  medians were 4.457 s, 4.471 s, 4.515 s and 1.312 s; preallocated serial
+  allocations were 544 bytes and 15 allocations per row plus fixed wrapper
+  overhead. Full host-scoped evidence is in `benchmark/README.md`.
+- Commit: `6501e11` (`fix: harden batch validation and threading`).
