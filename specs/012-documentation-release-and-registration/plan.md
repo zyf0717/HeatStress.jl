@@ -21,8 +21,8 @@ source files exist.
    `[compat]` metadata.
 3. Configure/review Aqua, JET, documentation and supported-platform CI, then
    run clean-depot installation/testing.
-4. Recheck package name and validate Registrator, TagBot, CompatHelper and
-   archival configuration without publishing.
+4. Recheck package name and validate Registrator, TagBot and archival
+   configuration without publishing.
 5. Freeze the candidate tree and hand its post-commit SHA to focused spec 013.
 
 ## Completion rule

@@ -18,8 +18,8 @@
   Linux/macOS/Windows (including threaded) quality gates.
 - [x] Confirm host-specific benchmark documentation and scoped scientific
   validation evidence; make no unsupported cross-language performance claim.
-- [ ] Recheck package-name availability and validate Registrator, TagBot,
-  CompatHelper and archival workflow without publication.
+- [ ] Recheck package-name availability and validate Registrator, TagBot and
+  archival workflow without publication.
 - [ ] Freeze the candidate tree and define how its post-commit SHA is passed to
   spec 013.
 - [ ] Run the acceptance checks in `quickstart.md`.

@@ -57,8 +57,8 @@ availability.
 
 Use standard MIT licence text, identify holder/year, include citation and
 contribution provenance guidance, and add no third-party source without a
-recorded compatible licence. Validate Registrator, TagBot, CompatHelper and the
-intended archival workflow without publishing.
+recorded compatible licence. Validate Registrator, TagBot and the intended
+archival workflow without publishing.
 
 ## Release-readiness checklist
 
@@ -71,8 +71,8 @@ intended archival workflow without publishing.
 5. run clean-depot installation/test and Linux/macOS/Windows CI, including
    threaded coverage, Aqua, JET and warning-free docs;
 6. record scoped scientific validation and host-specific benchmark evidence;
-7. recheck package-name conflict and validate Registrator, TagBot, CompatHelper
-   and archival setup without publication;
+7. recheck package-name conflict and validate Registrator, TagBot and archival
+   setup without publication;
 8. freeze the candidate tree and define the handoff that passes its post-commit
    SHA to spec 013.
 
