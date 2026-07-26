@@ -14,12 +14,13 @@
   documentation for the released Liljegren surface.
 - [x] Add/verify MIT, citation and contribution material; audit exports,
   docstrings, licences and `[compat]`.
-- [ ] Configure and run documentation, Aqua, JET, clean-depot and
-  Linux/macOS/Windows (including threaded) quality gates.
+- [ ] Configure and run the three routine CI checks (Linux Julia 1.10 with
+  threads, Linux current Julia with Aqua/JET/docs, Windows current Julia),
+  plus a separate clean-depot release-readiness check.
 - [x] Confirm host-specific benchmark documentation and scoped scientific
   validation evidence; make no unsupported cross-language performance claim.
-- [ ] Recheck package-name availability and validate Registrator, TagBot,
-  CompatHelper and archival workflow without publication.
+- [ ] Recheck package-name availability and validate Registrator, TagBot and
+  archival workflow without publication.
 - [ ] Freeze the candidate tree and define how its post-commit SHA is passed to
   spec 013.
 - [ ] Run the acceptance checks in `quickstart.md`.

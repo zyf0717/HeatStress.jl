@@ -49,16 +49,18 @@ calls. Plain `DateTime` is documented as UTC.
 
 ## Release-wide quality and registration readiness
 
-Complete Aqua, JET, documentation CI and supported Linux/macOS/Windows test
-coverage for the release surface. Keep benchmark CI to output-validating smoke
-tests; do not enforce wall-clock thresholds on shared runners. Run clean-depot
-installation/testing, audit exports and `[compat]`, and recheck package-name
-availability.
+Routine pull-request CI has exactly three checks: minimum Julia 1.10 with four
+threads on Linux, current Julia on Linux with Aqua, JET and documentation, and
+current Julia on Windows. Cancel superseded runs for the same pull request.
+Do not run macOS, benchmark or clean-depot jobs in routine CI. Retain
+clean-depot testing and output-validating benchmark smoke commands for manual
+release-readiness validation; do not enforce wall-clock thresholds on shared
+runners. Audit exports and `[compat]`, and recheck package-name availability.
 
 Use standard MIT licence text, identify holder/year, include citation and
 contribution provenance guidance, and add no third-party source without a
-recorded compatible licence. Validate Registrator, TagBot, CompatHelper and the
-intended archival workflow without publishing.
+recorded compatible licence. Validate Registrator, TagBot and the intended
+archival workflow without publishing.
 
 ## Release-readiness checklist
 
@@ -68,11 +70,12 @@ intended archival workflow without publishing.
 3. make README, examples, API documentation, units/timestamp semantics,
    numerical-failure explanation, provenance and limitations accurate;
 4. audit MIT/citation/contribution material, licences, exports and `[compat]`;
-5. run clean-depot installation/test and Linux/macOS/Windows CI, including
-   threaded coverage, Aqua, JET and warning-free docs;
+5. run the three routine CI checks: Linux Julia 1.10 with four threads, Linux
+   current Julia with Aqua, JET and warning-free docs, and Windows current
+   Julia; run clean-depot installation/test separately for release readiness;
 6. record scoped scientific validation and host-specific benchmark evidence;
-7. recheck package-name conflict and validate Registrator, TagBot, CompatHelper
-   and archival setup without publication;
+7. recheck package-name conflict and validate Registrator, TagBot and archival
+   setup without publication;
 8. freeze the candidate tree and define the handoff that passes its post-commit
    SHA to spec 013.
 
@@ -89,8 +92,9 @@ actions governed by spec 013.
   presenting HeatStressR as the source;
 - release material describes an independent MIT Liljegren-first implementation,
   not a port or all-index package;
-- quality, clean-depot, platform, compatibility, export and registration
-  readiness checks pass for the focused release surface;
+- routine CI covers minimum Julia, threading, current Julia, Windows, Aqua,
+  JET and documentation; clean-depot, export and registration readiness checks
+  pass separately for the focused release surface;
 - no tag, archive, registry submission or other public release action occurs
   before spec 013 authorises the candidate commit.
 

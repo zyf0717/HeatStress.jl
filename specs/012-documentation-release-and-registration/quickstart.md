@@ -12,8 +12,9 @@
 - Confirm the declared Liljegren-only release surface and that secondary
   indices are excluded from public claims.
 - Build docs with scalar, zoned-time and batch examples.
-- Run clean-depot tests, Aqua, JET, documentation and supported-platform,
-  threaded CI checks.
+- Run the three routine CI checks: Linux Julia 1.10 with four threads, Linux
+  current Julia with Aqua/JET/docs, and Windows current Julia. Run clean-depot
+  testing separately as release-readiness validation.
 - Audit exports, `[compat]`, MIT/citation/provenance and package-name
   availability.
 - Validate Registrator/TagBot workflow without publishing; review every public

@@ -56,7 +56,7 @@ reproducible, correctness-gated report in this repository.
 | 009 | [Other heat indices](./009-other-heat-indices/) | Planned | Post-v0.1 feature unit; its released formulas require their own 010 validation coverage |
 | 010 | [Scientific fixtures and validation](./010-scientific-fixtures-and-validation/) | Planned | v0.1 requires only its Liljegren/core slice; secondary-index validation is post-v0.1 |
 | 011 | [Liljegren performance benchmarking](./011-performance-quality-and-ci/) | In progress | v0.1 requires only its publication gate; comparison/optimisation tier is post-v0.1 |
-| 012 | [Documentation and release readiness](./012-documentation-release-and-registration/) | Planned | 000–008 release-scope evidence; Liljegren slice of 010; publication gate of 011; 014 |
+| 012 | [Documentation and release readiness](./012-documentation-release-and-registration/) | In progress | 000–008 release-scope evidence; Liljegren slice of 010; publication gate of 011; 014 |
 | 013 | [Final scientific audit and release authorisation](./013-final-scientific-audit/) | Planned | 012 and all declared v0.1 release-scope evidence |
 | 014 | [Readability refactor](./014-readability-refactor/) | Complete | Preserves completed 007–008 behaviour; v0.1 readiness input |
 
