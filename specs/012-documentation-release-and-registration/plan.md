@@ -19,8 +19,9 @@ source files exist.
    failure and limitations.
 2. Audit public exports, docstrings, provenance, licence, citation and
    `[compat]` metadata.
-3. Configure/review Aqua, JET, documentation and supported-platform CI, then
-   run clean-depot installation/testing.
+3. Configure three routine PR checks: Julia 1.10 with four threads on Linux,
+   current Julia with Aqua/JET/docs on Linux, and current Julia on Windows.
+   Run clean-depot installation/testing separately from routine CI.
 4. Recheck package name and validate Registrator, TagBot and archival
    configuration without publishing.
 5. Freeze the candidate tree and hand its post-commit SHA to focused spec 013.
