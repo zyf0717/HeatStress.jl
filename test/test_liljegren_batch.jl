@@ -109,38 +109,6 @@ end
         @test isbitstype(typeof(from_time))
     end
 
-    @testset "cached solar preparation preserves row semantics" begin
-        air, dew, wind, radiation, _ = _batch_inputs()
-        repeated_time = DateTime(2024, 6, 21, 12)
-        time = Union{Missing,DateTime}[repeated_time, repeated_time, missing, repeated_time]
-        longitude = [0.0, 0.0, 0.0, 181.0]
-        latitude = fill(45.0, 4)
-        zenith = HeatStress._batch_solar_zenith(4, time, longitude, latitude)
-        expected_zenith = HeatStress.solar_zenith(repeated_time, 0.0, 45.0)
-        @test zenith[1] == expected_zenith
-        @test zenith[2] == expected_zenith
-        @test isnan(zenith[3])
-        @test isnan(zenith[4])
-
-        batch = liljegren_wbgt_batch(
-            air, dew, wind, radiation, time, longitude, latitude;
-            direct_fraction = 0.7,
-        )
-        _assert_matches_scalar(
-            batch,
-            _scalar_row_results(
-                air, dew, wind, radiation, time, longitude, latitude;
-                direct_fraction = 0.7,
-            ),
-        )
-        diagnostic = diagnose_liljegren_batch(
-            air, dew, wind, radiation, time, longitude, latitude;
-            direct_fraction = 0.7,
-        )
-        @test diagnostic.input_status ==
-              [InputAccepted, InputAccepted, MissingTime, InvalidDomain]
-    end
-
     @testset "ordinal AbstractVector indexing and permissive outputs" begin
         air, dew, wind, radiation, time = _batch_inputs()
         offset_air = OffsetArray(air, -2:1)

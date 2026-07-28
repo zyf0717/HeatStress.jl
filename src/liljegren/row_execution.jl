@@ -98,28 +98,3 @@ function _liljegren_row_from_time(
         pressure_hpa, direct_fraction, config, mode,
     )
 end
-
-function _liljegren_row_from_cached_zenith(
-    air_temperature_c::Union{Missing,Real},
-    dew_point_c::Union{Missing,Real},
-    wind_speed_m_s::Union{Missing,Real},
-    solar_radiation_w_m2::Union{Missing,Real},
-    time::Union{Missing,DateTime,ZonedDateTime},
-    longitude_deg::Real,
-    latitude_deg::Real,
-    solar_zenith_deg::Real,
-    pressure_hpa::Union{Missing,Real},
-    direct_fraction::Union{Missing,Real},
-    config::LiljegrenConfig{T},
-    mode::_ScalarResultMode,
-) where {T<:AbstractFloat}
-    ismissing(time) && return _input_failure_result(T, mode, MissingTime, config)
-    isfinite(longitude_deg) && -180 <= longitude_deg <= 180 &&
-        isfinite(latitude_deg) && -90 <= latitude_deg <= 90 ||
-        return _input_failure_result(T, mode, InvalidDomain, config)
-    solar_zenith_rad = convert(T, deg2rad(solar_zenith_deg))
-    return _liljegren_row_from_zenith(
-        air_temperature_c, dew_point_c, wind_speed_m_s, solar_radiation_w_m2, solar_zenith_rad,
-        pressure_hpa, direct_fraction, config, mode,
-    )
-end

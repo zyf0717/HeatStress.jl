@@ -48,9 +48,15 @@ function solar_zenith_batch(
     for i in eachindex(times, longitude_deg, latitude_deg)
         longitude = _validate_longitude_deg(longitude_deg[i])
         latitude = _validate_latitude_deg(latitude_deg[i])
-        result[i] = _cached_solar_zenith(
-            times[i], longitude, latitude, terms, coordinates,
-        )
+        coordinate_terms = get!(coordinates, (Float64(longitude), Float64(latitude))) do
+            latitude_rad = deg2rad(Float64(latitude))
+            (deg2rad(Float64(longitude)), sin(latitude_rad), cos(latitude_rad))
+        end
+        utc_time = _utc_datetime(times[i])
+        time_terms = get!(terms, utc_time) do
+            _solar_time_terms(utc_time)
+        end
+        result[i] = _zenith_from_cached_terms(time_terms..., coordinate_terms...)
     end
     return result
 end
@@ -85,26 +91,6 @@ end
 
 _utc_datetime(time::DateTime) = time
 _utc_datetime(time::ZonedDateTime) = DateTime(time, UTC)
-
-function _cached_solar_zenith(
-        time::Union{DateTime,ZonedDateTime},
-        longitude_deg::Real,
-        latitude_deg::Real,
-        time_terms::Dict{DateTime,NTuple{3,Float64}},
-        coordinate_terms::Dict{Tuple{Float64,Float64},NTuple{3,Float64}},
-    )::Float64
-    longitude = Float64(longitude_deg)
-    latitude = Float64(latitude_deg)
-    coordinates = get!(coordinate_terms, (longitude, latitude)) do
-        latitude_rad = deg2rad(latitude)
-        (deg2rad(longitude), sin(latitude_rad), cos(latitude_rad))
-    end
-    utc_time = _utc_datetime(time)
-    solar_time = get!(time_terms, utc_time) do
-        _solar_time_terms(utc_time)
-    end
-    return _zenith_from_cached_terms(solar_time..., coordinates...)
-end
 
 # Spencer (1971), equations 1--4. The argument uses 365 days as specified by
 # the published approximation, including on leap-year day 366.
