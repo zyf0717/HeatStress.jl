@@ -13,6 +13,6 @@
   defer secondary-index rows until those APIs are introduced.
 - Run clean-depot tests, Linux/macOS/Windows and threaded CI, docs, Aqua/JET,
   benchmark/allocation review and scoped scientific validation.
-- Verify release sign-off includes the exact audited source commit, report,
-  approver and permitted audit-record paths; verify the resulting release commit
-  diff before tagging it.
+- Verify release sign-off includes the exact audited source commit, existing
+  validation evidence, approver and permitted audit-record paths; verify the
+  resulting release commit diff before tagging it.

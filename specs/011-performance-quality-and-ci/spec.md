@@ -80,17 +80,20 @@ input parsing and formatting.
 
 ## Optimisation policy
 
-The released baseline preserves worker-local fused execution:
+The v0.1.0 baseline preserves worker-local fused execution:
 
 ```text
 solar geometry → meteorological preparation → component solves → output write
 ```
 
-Prepared-zenith experiments, grouped repeated-key reuse, residual-overhead
-reduction, inlining, SIMD and advanced batch solving are Tier 2 only. Measure
-one-thread and multi-thread end-to-end time, allocations, numerical
-equivalence and scaling before retaining any of them. Do not use `@fastmath` in
-the production scientific path.
+Post-v0.1 batch execution may prepare cached zenith values before row solving
+when repeated timestamps or coordinates justify the additional batch-level
+storage. It must preserve missing-time and invalid-coordinate diagnostics,
+scalar numerical equivalence and deterministic serial/threaded output.
+Residual-overhead reduction, inlining, SIMD and advanced batch solving remain
+Tier 2 only. Measure one-thread and multi-thread end-to-end time, allocations,
+numerical equivalence and scaling before retaining any of them. Do not use
+`@fastmath` in the production scientific path.
 
 ## Allocation and quality policy
 

@@ -11,7 +11,7 @@ Audit provenance, scientific correctness, licensing, quality evidence and one ex
 ## Sequence
 
 1. Confirm candidate scope and complete provenance/independence scans.
-2. Generate the Liljegren/core scientific validation report.
+2. Consolidate the existing Liljegren/core scientific validation evidence.
 3. Review clean-depot, platform, threaded, Aqua, JET, docs and benchmark evidence for released APIs.
 4. Record accepted deviations or block release.
 5. Create the v0.1 decision record and authorise or reject publication of the audited commit.

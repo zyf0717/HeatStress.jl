@@ -8,10 +8,10 @@ match it.
 
 ## Current delivery focus
 
-Publish the smallest scientifically defensible, useful and maintainable package
-first. The immediate milestone is a focused Liljegren-first `v0.1.0`: close
-only the remaining Liljegren validation and publication-readiness gaps, audit
-one exact candidate, then tag, release and register it in Julia General.
+HeatStress v0.1.0 is registered in Julia General and published as a focused
+Liljegren-first release. Current work maintains that released surface while
+secondary indices, deeper validation and profile-led optimisation remain
+post-v0.1 work.
 
 The v0.1.0 release surface is limited to the coherent core already supporting
 the Liljegren model:
@@ -54,14 +54,15 @@ reproducible, correctness-gated report in this repository.
 | 007 | [Liljegren scalar model](./007-liljegren-scalar-model/) | Complete | 004 Solar geometry and psychrometrics; 005 Physical kernels; 006 Root solving and diagnostics |
 | 008 | [Batch interfaces and threading](./008-batch-interfaces-and-threading/) | Complete | 007 Liljegren scalar model |
 | 009 | [Other heat indices](./009-other-heat-indices/) | Planned | Post-v0.1 feature unit; its released formulas require their own 010 validation coverage |
-| 010 | [Scientific fixtures and validation](./010-scientific-fixtures-and-validation/) | Planned | v0.1 requires only its Liljegren/core slice; secondary-index validation is post-v0.1 |
+| 010 | [Scientific fixtures and validation](./010-scientific-fixtures-and-validation/) | In progress | v0.1 requires only its Liljegren/core slice; secondary-index validation is post-v0.1 |
 | 011 | [Liljegren performance benchmarking](./011-performance-quality-and-ci/) | In progress | v0.1 requires only its publication gate; comparison/optimisation tier is post-v0.1 |
-| 012 | [Documentation and release readiness](./012-documentation-release-and-registration/) | In progress | 000–008 release-scope evidence; Liljegren slice of 010; publication gate of 011; 014 |
-| 013 | [Final scientific audit and release authorisation](./013-final-scientific-audit/) | Planned | 012 and all declared v0.1 release-scope evidence |
+| 012 | [Documentation and release readiness](./012-documentation-release-and-registration/) | Complete | 000–008 release-scope evidence; Liljegren slice of 010; publication gate of 011; 014 |
+| 013 | [Final scientific audit and release authorisation](./013-final-scientific-audit/) | Complete | 012 and all declared v0.1 release-scope evidence |
 | 014 | [Readability refactor](./014-readability-refactor/) | Complete | Preserves completed 007–008 behaviour; v0.1 readiness input |
 
-The v0.1.0 path is `000–008 → Liljegren/core slice of 010 → publication gate
-of 011 → 012 → focused 013 audit → tag, release and General registration`.
+The completed v0.1.0 path was `000–008 → Liljegren/core slice of 010 →
+publication gate of 011 → 012 → focused 013 audit → tag, release and General
+registration`.
 The source and contracts completed in 007, 008 and 014 are stable foundations;
 this roadmap does not reopen their scientific implementation.
 
@@ -70,9 +71,9 @@ cross-language comparisons and optimisation only where profiling justifies it.
 Julia follows pre-1.0 versioning: later feature and API growth is released in
 appropriately scoped `0.x` versions.
 
-Release tagging, archival and General registration remain post-audit actions.
-Unit 012 establishes readiness; unit 013 audits one exact candidate source
-commit. The release tag may point to a subsequent audit-record commit only
+Release tagging and General registration were post-audit actions. Unit 012
+established readiness and unit 013 audited the exact v0.1.0 candidate source
+commit. Future release tags may point to a subsequent audit-record commit only
 when its diff contains no source, fixture or scientific-contract change.
 
 ## Directory convention

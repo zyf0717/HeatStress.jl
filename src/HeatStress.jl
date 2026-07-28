@@ -24,14 +24,6 @@ include("liljegren/result_materialisation.jl")
 include("liljegren/row_execution.jl")
 include("liljegren/api.jl")
 include("liljegren/batch.jl")
-include("indices/stull.jl")
-include("indices/bernard.jl")
-include("indices/simplified_wbgt.jl")
-include("indices/apparent_temperature.jl")
-include("indices/effective_temperature.jl")
-include("indices/humidex.jl")
-include("indices/discomfort_index.jl")
-include("indices/heat_index.jl")
 
 # Public exports are declared here once their owning specifications are complete.
 export DewPointPolicy,
