@@ -52,9 +52,15 @@ Scan for `HeatStressR`, `GPL`, R dotted names, source hashes and private paths;
 each remaining occurrence must be intentional documentation rather than
 implementation provenance.
 
-## Numerical validation report
+## Numerical validation evidence
 
-Generate `validation/scientific-validation-report.md` for the released surface: audited package commit, fixture schema/version and counts, status/missingness mismatches, maximum/percentile output errors, largest differences, residual validation, serial/threaded comparison, Float32/Float64/BigFloat comparison, invariants and known deviations. Optional private cross-implementation findings are explicitly advisory.
+Record evidence for the released surface in this unit's `tasks.md` and the
+release-scoped validation unit. The record identifies the audited package
+commit, fixture schema/version and counts, status/missingness checks, residual
+validation, serial/threaded comparison, Float32/Float64/BigFloat coverage,
+invariants and known deviations. A dedicated generated report is optional; the
+record must cite only artifacts that exist in the repository. Optional private
+cross-implementation findings are explicitly advisory.
 
 Block release if any released fixture has undocumented status/missingness mismatch, an accepted root violates residual tolerance, threaded output differs in order/status from serial output, a released fixture lacks traceable source/generation method, or released source has unresolved licensing provenance.
 
@@ -70,7 +76,10 @@ Block release if any released fixture has undocumented status/missingness mismat
 
 ## Final release decision
 
-The validation report and decision record may be committed after the audited source commit. The record identifies the audited commit and permitted audit-record paths. Verify the resulting diff, then record the exact release commit in signed tag or release metadata.
+The validation evidence and decision record may be committed after the audited
+source commit. The record identifies the audited commit and permitted
+audit-record paths. Verify the resulting diff, then record the exact release
+commit in signed tag or release metadata.
 
 ```markdown
 ## v0.1.0 sign-off
@@ -80,7 +89,7 @@ The validation report and decision record may be committed after the audited sou
 - HeatStress.jl audited source commit: `<sha>`
 - Permitted audit-record paths: `<paths>`
 - Intended release ref: `verified audit-record commit`
-- Validation report: `validation/scientific-validation-report.md`
+- Validation evidence: `<existing paths/results>`
 - Implementation-independence audit: `<path/result>`
 - Known deviations: `<list or none>`
 - Approved by: `<name>`
@@ -93,7 +102,8 @@ Approval authorises only listed audit records. If the candidate-to-release diff 
 
 - every released source-provenance, contract, independence, numerical, quality and release-decision item has evidence;
 - no release-blocking condition remains;
-- the decision record identifies scope, audited source commit, permitted paths, validation report, approver, date and known deviations;
+- the decision record identifies scope, audited source commit, permitted paths,
+  existing validation evidence, approver, date and known deviations;
 - the post-audit procedure verifies the diff and records the exact release commit before publication;
 - no out-of-scope secondary index blocks v0.1.0.
 

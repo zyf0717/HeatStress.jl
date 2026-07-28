@@ -15,8 +15,7 @@ Julia 1.10 or newer is required.
 julia -e 'using Pkg; Pkg.add("HeatStress")'
 ```
 
-This command becomes available with the v0.1.0 General registration. Until
-then, install a checkout with `Pkg.develop(path="/path/to/HeatStress.jl")`.
+HeatStress is registered in Julia General.
 
 ## Quick start
 
@@ -77,5 +76,7 @@ cross-language claim.
 ## AI assistance and release review
 
 Generative AI tools assisted implementation, testing, and documentation.
-Release approval is contingent on human review of the exported runtime code,
-scientific equations, numerical policies, and validation evidence.
+Before v0.1.0 was published, the maintainer reviewed and approved the exported
+runtime code, scientific equations, numerical policies, and validation
+evidence. This software release review is not independent scientific peer
+review.
