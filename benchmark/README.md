@@ -37,6 +37,21 @@ julia --project=benchmark benchmark/batch_e2e.jl
 julia --threads=auto --project=benchmark benchmark/batch_e2e.jl --rows=10000 --samples=3 --output=benchmark/results/batch-e2e.toml
 ```
 
+`cached_batch_solar_e2e.jl` is the post-v0.1 prepared-solar acceptance
+benchmark. Run the same script and options from isolated environments that
+develop clean `v0.1.0` and candidate worktrees. With one and four Julia
+threads, it measures complete preallocated public batch calls and the
+implementation-specific solar preparation for fixed/repeated, grouped and
+unique keys at 10,000, 100,000 and 1,000,000 rows. It validates scalar/batch
+values and serial/threaded diagnostic status and missingness before timing:
+
+```sh
+julia --threads=1 --project=/path/to/isolated-env benchmark/cached_batch_solar_e2e.jl \
+  --samples=3 --output=/tmp/cached-solar-1-thread.toml
+julia --threads=4 --project=/path/to/isolated-env benchmark/cached_batch_solar_e2e.jl \
+  --samples=3 --output=/tmp/cached-solar-4-threads.toml
+```
+
 ## Comparable local evidence (2026-07-24)
 
 On `znver3` with Julia 1.10.11, BenchmarkTools 1.8.0 and four Julia threads,

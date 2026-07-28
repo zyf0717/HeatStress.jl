@@ -68,6 +68,13 @@ preallocated outputs, preallocated serial batch, allocating serial batch and,
 when threads are available, preallocated threaded batch. Each mode must use
 identical inputs and check WBGT/component equality before timing.
 
+Prepared-solar optimisation experiments use complete public Liljegren batch
+calls at 10,000, 100,000 and 1,000,000 rows with one and four Julia threads.
+The matrix covers fixed/repeated, grouped and unique timestamp/coordinate keys
+from separate clean worktrees at `v0.1.0` and the candidate revision. Record
+minimum/median wall time, throughput, allocations, bytes, solar-preparation
+time, complete-call time and exact value/status/missingness equivalence.
+
 Do not enforce wall-clock thresholds in shared CI. A benchmark smoke test
 checks output equivalence only.
 
@@ -90,6 +97,12 @@ Post-v0.1 batch execution may prepare cached zenith values before row solving
 when repeated timestamps or coordinates justify the additional batch-level
 storage. It must preserve missing-time and invalid-coordinate diagnostics,
 scalar numerical equivalence and deterministic serial/threaded output.
+Retain the prepared pass only when at least one intended repeated/grouped
+workload improves materially (approximately 5% or more), unique-key and
+four-thread workloads do not regress materially, small-batch overhead remains
+acceptable, one-million-row memory is documented and the serial preparation
+pass does not dominate the complete call. A change within benchmark noise does
+not justify the added buffer and dictionaries.
 Residual-overhead reduction, inlining, SIMD and advanced batch solving remain
 Tier 2 only. Measure one-thread and multi-thread end-to-end time, allocations,
 numerical equivalence and scaling before retaining any of them. Do not use

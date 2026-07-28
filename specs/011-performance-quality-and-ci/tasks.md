@@ -23,9 +23,15 @@
 
 ## Post-v0.1 comparison and optimisation
 
-- [x] Route Liljegren value and diagnostic batches through cached solar
+- [ ] Route Liljegren value and diagnostic batches through cached solar
   geometry for repeated timestamps/coordinates; preserve scalar numerical and
   row-level failure equivalence and record an end-to-end benchmark comparison.
+- [ ] Run the clean-worktree v0.1.0/candidate matrix at 10,000, 100,000 and
+  1,000,000 rows, one/four threads and fixed/grouped/unique key distributions;
+  record complete-call/preparation time, throughput, allocations, bytes and
+  exact value/status/missingness equivalence.
+- [ ] Apply the material-improvement, unique/threaded non-regression,
+  small-batch, one-million-row memory and serial-bottleneck acceptance gate.
 - [ ] Verify the local HeatStressR checkout is v2.1.6 and record both
   repositories' commits and dirty states.
 - [ ] Create the ignored public-API comparison adapter and deterministic
@@ -71,7 +77,7 @@
 - Quality/smoke: `HEATSTRESS_QUALITY=1 julia --project=. -e 'using Pkg;
   Pkg.test()'` and `julia --threads=4 --project=benchmark
   benchmark/batch_e2e.jl --rows=10000 --samples=1` passed on 2026-07-25.
-- Cached-solar optimisation: on 2026-07-28, three-sample 100,000-row
+- Preliminary cached-solar experiment: on 2026-07-28, three-sample 100,000-row
   fixed-station/repeated-time serial batch medians changed from 0.424583 s to
   0.417228 s; the retained four-thread median was 0.121999 s versus the
   0.131 s release-candidate smoke result. The prepared Float64 zenith buffer
@@ -79,4 +85,5 @@
   `HEATSTRESS_QUALITY=1 julia --threads=1 --project=. -e 'using Pkg;
   Pkg.test()'` and the explicit four-thread suite passed, including scalar
   numerical equivalence and unchanged `MissingTime`/`InvalidDomain`
-  diagnostics.
+  diagnostics. This limited result is insufficient for the post-v0.1
+  optimisation acceptance gate.
