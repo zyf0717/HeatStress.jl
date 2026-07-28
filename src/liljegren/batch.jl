@@ -134,6 +134,31 @@ function _prepare_batch_inputs(
     return rows, T, _config_as_type(T, config)
 end
 
+function _batch_solar_zenith(
+    rows::Int,
+    time::AbstractVector,
+    longitude,
+    latitude,
+)::Vector{Float64}
+    time_terms = Dict{DateTime,NTuple{3,Float64}}()
+    coordinate_terms = Dict{Tuple{Float64,Float64},NTuple{3,Float64}}()
+    # Row validation consumes these sentinels as MissingTime or InvalidDomain.
+    result = fill(NaN, rows)
+    for row in 1:rows
+        timestamp = _at(time, row)
+        longitude_deg = _at(longitude, row)
+        latitude_deg = _at(latitude, row)
+        ismissing(timestamp) && continue
+        isfinite(longitude_deg) && -180 <= longitude_deg <= 180 &&
+            isfinite(latitude_deg) && -90 <= latitude_deg <= 90 ||
+            continue
+        result[row] = _cached_solar_zenith(
+            timestamp, longitude_deg, latitude_deg, time_terms, coordinate_terms,
+        )
+    end
+    return result
+end
+
 function _execute_value_batch!(
     rows::Int,
     wbgt_out::AbstractVector,
@@ -146,15 +171,17 @@ function _execute_value_batch!(
     time::AbstractVector,
     longitude,
     latitude;
+    solar_zenith_deg::AbstractVector{Float64},
     pressure_hpa,
     direct_fraction,
     config::LiljegrenConfig{T},
     threaded::Bool,
 ) where {T<:AbstractFloat}
     function solve_row(row)
-        values = _liljegren_row_from_time(
+        values = _liljegren_row_from_cached_zenith(
             _at(air, row), _at(dew, row), _at(wind, row), _at(radiation, row), _at(time, row),
-            _at(longitude, row), _at(latitude, row), _at(pressure_hpa, row),
+            _at(longitude, row), _at(latitude, row), @inbounds(solar_zenith_deg[row]),
+            _at(pressure_hpa, row),
             _at(direct_fraction, row), config, _ValueMode(),
         )
         @inbounds wbgt_out[firstindex(wbgt_out) + row - 1] =
@@ -217,9 +244,10 @@ function liljegren_wbgt!(
         (wbgt_out, wet_out, globe_out),
         air, dew, wind, radiation, time, longitude, latitude, pressure_hpa, direct_fraction,
     )
+    solar_zenith_deg = _batch_solar_zenith(rows, time, longitude, latitude)
     _execute_value_batch!(
         rows, wbgt_out, wet_out, globe_out, air, dew, wind, radiation, time, longitude, latitude;
-        pressure_hpa, direct_fraction, config = typed_config, threaded,
+        solar_zenith_deg, pressure_hpa, direct_fraction, config = typed_config, threaded,
     )
     return WBGTBatchResult{T}(wbgt_out, wet_out, globe_out)
 end
@@ -256,9 +284,10 @@ function liljegren_wbgt_batch(
     wbgt = Vector{Union{Missing,T}}(undef, rows)
     wet = Vector{Union{Missing,T}}(undef, rows)
     globe = Vector{Union{Missing,T}}(undef, rows)
+    solar_zenith_deg = _batch_solar_zenith(rows, time, longitude, latitude)
     _execute_value_batch!(
         rows, wbgt, wet, globe, air, dew, wind, radiation, time, longitude, latitude;
-        pressure_hpa, direct_fraction, config = typed_config, threaded,
+        solar_zenith_deg, pressure_hpa, direct_fraction, config = typed_config, threaded,
     )
     return WBGTBatchResult{T}(wbgt, wet, globe)
 end
@@ -330,10 +359,12 @@ function diagnose_liljegren_batch(
     mismatch = fill(false, rows)
     clipped = fill(false, rows)
     globe_diagnostics, wet_diagnostics = _diagnostic_arrays(T, rows)
+    solar_zenith_deg = _batch_solar_zenith(rows, time, longitude, latitude)
     function diagnose_row(row)
-        diagnostic = _liljegren_row_from_time(
+        diagnostic = _liljegren_row_from_cached_zenith(
             _at(air, row), _at(dew, row), _at(wind, row), _at(radiation, row),
-            _at(time, row), _at(longitude, row), _at(latitude, row), _at(pressure_hpa, row),
+            _at(time, row), _at(longitude, row), _at(latitude, row),
+            @inbounds(solar_zenith_deg[row]), _at(pressure_hpa, row),
             _at(direct_fraction, row), typed_config, _DiagnosticMode(),
         )
         @inbounds wbgt[row] = diagnostic.result.wbgt_c
