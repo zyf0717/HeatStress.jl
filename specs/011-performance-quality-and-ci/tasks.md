@@ -26,11 +26,11 @@
 - [ ] Route Liljegren value and diagnostic batches through cached solar
   geometry for repeated timestamps/coordinates; preserve scalar numerical and
   row-level failure equivalence and record an end-to-end benchmark comparison.
-- [ ] Run the clean-worktree v0.1.0/candidate matrix at 10,000, 100,000 and
+- [x] Run the clean-worktree v0.1.0/candidate matrix at 10,000, 100,000 and
   1,000,000 rows, one/four threads and fixed/grouped/unique key distributions;
   record complete-call/preparation time, throughput, allocations, bytes and
   exact value/status/missingness equivalence.
-- [ ] Apply the material-improvement, unique/threaded non-regression,
+- [x] Apply the material-improvement, unique/threaded non-regression,
   small-batch, one-million-row memory and serial-bottleneck acceptance gate.
 - [ ] Verify the local HeatStressR checkout is v2.1.6 and record both
   repositories' commits and dirty states.
@@ -87,3 +87,9 @@
   numerical equivalence and unchanged `MissingTime`/`InvalidDomain`
   diagnostics. This limited result is insufficient for the post-v0.1
   optimisation acceptance gate.
+- Full acceptance matrix: `benchmark/cached-batch-solar-evidence.md` records
+  clean `v0.1.0`/candidate, one/four-thread, fixed/grouped/unique results at
+  10,000, 100,000 and 1,000,000 rows. Values, statuses and missingness match
+  exactly, but repeated/grouped gains remain below 2.4%, four-thread cases
+  regress and one-million unique keys regress 34.4% while adding about 305 MB.
+  The unconditional prepared-solar pass is rejected and must not be merged.
