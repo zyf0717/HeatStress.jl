@@ -19,8 +19,8 @@
 ## Evidence
 
 - Candidate source commit: `4c51b28f53e056bc331c5353f37e574aa62639ef`.
-- Permitted post-candidate audit-record path:
-  `specs/015-v020-scientific-audit/tasks.md`.
+- Permitted post-candidate audit-record paths:
+  `specs/015-v020-scientific-audit/tasks.md` and `specs/README.md`.
 - Approval: pending
 - Local evidence: full suite passed with 85 secondary-measure assertions and
   316 scientific-validation assertions; four-thread suite, Aqua/JET,
