@@ -2,9 +2,9 @@
 
 ## Purpose
 
-Audit one exact v0.2.0 candidate source commit after the selected spec 009
-secondary measures and their spec 010 validation are complete. Preserve the
-completed v0.1 audit in spec 013 unchanged.
+Audit the exact final v0.2.0 PR head after the selected spec 009 secondary
+measures and their spec 010 validation are complete. Preserve the completed
+v0.1 audit in spec 013 unchanged.
 
 ## Release surface
 
@@ -35,19 +35,29 @@ the audit scope.
 
 ## Decision record
 
-Record the exact audited source commit, fixture metadata, validation evidence,
-known deviations, approver and UTC date. Any subsequent source, fixture or
-scientific-contract change invalidates the audit.
+The pull request is the approval record. Before its final CI run, it must
+contain the complete audit checklist, fixture metadata, validation evidence and
+known deviations. The exact candidate is the final PR head on which every
+required check succeeds.
 
-An audit-record commit after the source freeze may change only the paths
-explicitly authorised by the decision record. This unit does not authorise a
-tag, GitHub release, archive or registry action.
+Approval occurs when an authorised maintainer squash-merges that checked head.
+GitHub records the checked revision, merge actor, UTC time and resulting squash
+commit. No post-candidate audit-record commit is required. A new push or any
+source, fixture or scientific-contract change invalidates earlier CI and
+approval and must pass the gate again.
+
+The squash commit tree must match the checked PR head tree. This unit does not
+authorise a tag, GitHub release, archive or registry action.
 
 ## Acceptance criteria
 
 - every released v0.2 formula/API has source, contract and validation evidence;
-- all required checks pass for the exact candidate revision;
+- all required checks pass for the exact final PR head;
 - no unresolved licensing, independence, numerical or documentation blocker
   remains;
-- the maintainer approves the recorded candidate;
+- an authorised maintainer squash-merges that checked head;
 - no publication action occurs under this unit.
+
+The repository checklist may be marked `Complete` once its evidence package is
+merge-ready. Publication authorisation becomes effective only when the CI and
+squash-merge conditions above are satisfied.

@@ -28,4 +28,5 @@
   regenerated at 256-bit precision by
   `validation/generate_simple_indices.jl`; the scientific-validation corpus
   passes 316 assertions.
-- Commit: exact candidate source commit is recorded by spec 015 after freeze.
+- Handoff: spec 015 identifies the exact candidate through the final checked
+  audit PR head and its squash merge.

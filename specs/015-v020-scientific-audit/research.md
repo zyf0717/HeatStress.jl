@@ -14,5 +14,6 @@ scientific-conformance hierarchy.
   independence and advisory-comparison documentation.
 - Local full, four-thread, Aqua/JET, clean-depot, deterministic-fixture and
   warning-free documentation checks pass on Julia 1.10.11.
-- Current Linux/Windows routine CI and explicit maintainer approval remain
-  required after the candidate source commit is frozen.
+- Required Linux/Windows CI on the final PR head and its authorised squash
+  merge form the external approval record. A new push reruns the gate; no
+  follow-up audit commit is needed.

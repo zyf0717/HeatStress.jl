@@ -42,5 +42,5 @@
   formula-specific tolerances. `validation/generate_simple_indices.jl --check`
   passes without importing `HeatStress`; the scientific-validation corpus
   passes 316 assertions and reports the worst secondary-measure row/source.
-- v0.2 commit: exact candidate source commit is recorded by spec 015 after
-  freeze.
+- v0.2 handoff: spec 015 identifies the exact candidate through the final
+  checked audit PR head and its squash merge.

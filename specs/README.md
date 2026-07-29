@@ -39,7 +39,9 @@ reproducible, correctness-gated report in this repository.
 
 - `Planned` — requirements are captured; implementation has not met its acceptance criteria.
 - `In progress` — implementation is active; record test/benchmark evidence in that unit’s `tasks.md`.
-- `Complete` — all acceptance criteria pass and evidence includes the relevant test or result path plus the commit or PR revision when one exists.
+- `Complete` — the repository evidence package is complete. For a merge-gated
+  audit, publication authorisation becomes effective only after required CI
+  passes on the final PR head and an authorised maintainer squash-merges it.
 
 ## Dependency order
 
@@ -60,7 +62,7 @@ reproducible, correctness-gated report in this repository.
 | 012 | [Documentation and release readiness](./012-documentation-release-and-registration/) | Complete | 000–008 release-scope evidence; Liljegren slice of 010; publication gate of 011; 014 |
 | 013 | [Final scientific audit and release authorisation](./013-final-scientific-audit/) | Complete | 012 and all declared v0.1 release-scope evidence |
 | 014 | [Readability refactor](./014-readability-refactor/) | Complete | Preserves completed 007–008 behaviour; v0.1 readiness input |
-| 015 | [v0.2 scientific audit](./015-v020-scientific-audit/) | In progress | Completed 009 and 010 v0.2 slice; frozen v0.2 candidate |
+| 015 | [v0.2 scientific audit](./015-v020-scientific-audit/) | Complete | Completed 009 and 010 v0.2 slice; PR CI and authorised squash merge gate |
 
 The completed v0.1.0 path was `000–008 → Liljegren/core slice of 010 →
 publication gate of 011 → 012 → focused 013 audit → tag, release and General
@@ -69,15 +71,18 @@ The source and contracts completed in 007, 008 and 014 are stable foundations;
 this roadmap does not reopen their scientific implementation.
 
 The current v0.2 path is `009 + remaining 010 → v0.2 documentation and
-candidate checks → 015`. Deeper 011 profiling, cross-language comparisons and
-optimisation remain optional and proceed only where profiling justifies them.
-Julia follows pre-1.0 versioning: later feature and API growth is released in
-appropriately scoped `0.x` versions.
+candidate checks → 015 audit package → required PR CI → authorised squash
+merge`. Deeper 011 profiling, cross-language comparisons and optimisation
+remain optional and proceed only where profiling justifies them. Julia follows
+pre-1.0 versioning: later feature and API growth is released in appropriately
+scoped `0.x` versions.
 
-Release tagging and General registration were post-audit actions. Unit 012
-established readiness and unit 013 audited the exact v0.1.0 candidate source
-commit. Future release tags may point to a subsequent audit-record commit only
-when its diff contains no source, fixture or scientific-contract change.
+Release tagging and General registration are post-audit actions. Unit 012
+established readiness and unit 013 preserves the completed v0.1.0 audit record.
+For v0.2 and later, required CI validates the final audit PR head and an
+authorised squash merge both approves and integrates that tree. GitHub retains
+the checked revision, approver, time and resulting commit; no separate
+audit-record commit is required.
 
 ## Directory convention
 
