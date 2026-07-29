@@ -63,4 +63,8 @@ This repository is `HeatStress.jl`, an independent MIT-licensed Julia implementa
 
 * For documentation-only changes, tests are not required; state that explicitly.
 
-* Do not tag, publish, archive or register a release until the final scientific audit explicitly authorises the audited source revision. A release commit may add only the resulting audit/evidence records; any source, fixture or scientific-contract change requires a new audit.
+* Do not tag, publish, archive or register a release until the final scientific
+  audit PR passes its required CI on the final head and an authorised maintainer
+  squash-merges it. The successful CI and squash merge are the approval record;
+  no follow-up audit commit is required. Any later source, fixture or
+  scientific-contract change requires a new audit.

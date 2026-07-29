@@ -1,11 +1,26 @@
 # Public API
 
-The public surface currently covers Liljegren outdoor WBGT and its supporting
-configuration, status, result, and diagnostic types.
+The public surface covers Liljegren outdoor WBGT, selected direct heat
+measures, and their supporting helpers and types.
 
 `solar_zenith`, `solar_zenith_batch`, `saturation_vapour_pressure_hpa`,
 `vapour_pressure`, and `relative_humidity_from_dewpoint` are also exported
 helpers. See [Inputs and policies](@ref) for their units and timestamp rules.
+
+## Secondary measures
+
+```julia
+wbgt_with_solar_load(natural_wet_bulb_c, globe_temperature_c,
+                     dry_bulb_temperature_c)
+wbgt_without_solar_load(natural_wet_bulb_c, globe_temperature_c)
+heat_index_nws(air_temperature_c, relative_humidity_percent)
+wet_bulb_temperature_stull(air_temperature_c, relative_humidity_percent)
+humidex(air_temperature_c, dew_point_c)
+```
+
+These functions return promoted scalar values or `missing`. Use broadcasting
+for arrays. Their exact sources, domains, and limitations are documented in
+[Secondary heat measures](@ref).
 
 ## Scalar calls
 

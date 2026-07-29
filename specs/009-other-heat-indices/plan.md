@@ -1,20 +1,28 @@
-# Other heat indices: implementation plan
+# Secondary heat measures: implementation plan
 
 ## Dependency gate
 
-003 Constants, units and policies. Bernard WBGT additionally requires 004 psychrometrics and 006 root solving. Completion requires validation coverage from 010.
+Specs 003 and 004 provide units, validation conventions and psychrometric
+vocabulary. Completion requires the selected v0.2 fixture slice in spec 010.
 
 ## Design
 
-Implement cited secondary indices as direct, independently validated formulas with explicit applicability and unit behavior.
+Implement the five selected public functions as source-separated scalar files
+under `src/indices/`. Each formula validates its native inputs, uses promoted
+typed coefficients, propagates `missing`, and relies on broadcasting for
+arrays.
 
 ## Sequence
 
-1. Select the exact v0.1 index set and record source/formula/provenance for each index.
-2. Implement one scalar formula at a time.
-3. Add domain and unit tests.
-4. Validate each against independent fixtures before declaring completion.
+1. Finalise formula, policy and source records.
+2. Implement measured WBGT, NWS heat index, Stull wet bulb and humidex.
+3. Add independent high-precision fixtures and boundary tests.
+4. Document applicability and update the v0.2 public surface.
+5. Complete spec 010 evidence, then freeze and audit the candidate under
+   spec 015.
 
 ## Completion rule
 
-Do not mark this unit complete until every acceptance criterion in `spec.md` passes and the concrete evidence is recorded in `tasks.md`.
+Do not mark this unit complete until every selected formula and acceptance
+criterion in `spec.md` has recorded evidence. Deferred candidates are not part
+of this unit's completion boundary.

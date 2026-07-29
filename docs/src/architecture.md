@@ -34,3 +34,11 @@ public batch API
 `threaded=true` partitions rows across Julia threads. Rows write only their
 own output positions, and the same typed row path supplies serial and threaded
 execution.
+
+## Direct-formula execution
+
+Measured WBGT, NWS heat index, Stull wet bulb, and humidex are independent
+scalar formula families. Each promotes inputs once, validates its native
+domain, evaluates with coefficients converted to the promoted type, and
+returns a value or `missing`. Broadcasting supplies array behavior without a
+parallel batch abstraction.

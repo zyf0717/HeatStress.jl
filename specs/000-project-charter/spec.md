@@ -87,13 +87,15 @@ These results are advisory. Any discrepancy must be resolved against the literat
 3. A documented solar-geometry implementation selected from cited literature.
 4. Explicit structured diagnostics for invalid input and numerical failure.
 5. Scalar, preallocated batch and threaded batch interfaces.
-6. Independently sourced implementations of the selected secondary heat-stress indices.
+6. Independently sourced implementations of any secondary heat-stress indices
+   selected for the release.
 7. Offline scientific fixtures derived from equations, published examples, high-precision calculations and invariants.
 8. Cross-platform CI, documentation and benchmark harnesses.
 9. No runtime or test dependency on R, RCall, HeatStressR, the original C executable or network access.
 
 ### Deferred beyond v0.1.0
 
+- Secondary heat measures selected for later `0.x` releases.
 - GPU kernels or CUDA/AMDGPU support.
 - Distributed-memory execution.
 - DataFrames-specific APIs.

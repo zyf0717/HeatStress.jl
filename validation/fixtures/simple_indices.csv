@@ -1,0 +1,13 @@
+id,formula,air_temperature_c,dew_point_c,relative_humidity_percent,natural_wet_bulb_c,globe_temperature_c,dry_bulb_temperature_c,expected_value,authority,source_id,atol,rtol
+wbgt_solar_basic,wbgt_with_solar_load,,,,20,30,25,22.5,analytic,osha_wbgt,1e-12,1e-12
+wbgt_solar_decimal,wbgt_with_solar_load,,,,28.2,36.4,31,30.12,analytic,osha_wbgt,1e-12,1e-12
+wbgt_no_solar_basic,wbgt_without_solar_load,,,,20,30,,23.0,analytic,osha_wbgt,1e-12,1e-12
+wbgt_no_solar_decimal,wbgt_without_solar_load,,,,28.2,36.4,,30.66,analytic,osha_wbgt,1e-12,1e-12
+heat_index_simple,heat_index_nws,20,,50,,,,19.680555555555557,high_precision,nws_heat_index,1e-10,1e-12
+heat_index_rothfusz,heat_index_nws,32,,70,,,,40.409273679555554,high_precision,nws_heat_index,1e-10,1e-12
+heat_index_low_rh_adjustment,heat_index_nws,40,,10,,,,36.70530588031804,high_precision,nws_heat_index,1e-10,1e-12
+heat_index_high_rh_adjustment,heat_index_nws,30,,90,,,,40.774647,high_precision,nws_heat_index,1e-10,1e-12
+stull_published_example,wet_bulb_temperature_stull,20,,50,,,,13.69934196898814,published_example,stull_2011,1e-10,1e-12
+stull_warm_humid,wet_bulb_temperature_stull,30,,70,,,,25.595662363342065,high_precision,stull_2011,1e-10,1e-12
+humidex_warm,humidex,30,20,,,,,37.57931098581259,high_precision,eccc_humidex,1e-10,1e-12
+humidex_reporting_threshold_not_domain,humidex,15,10,,,,,16.283232431406564,high_precision,eccc_humidex,1e-10,1e-12

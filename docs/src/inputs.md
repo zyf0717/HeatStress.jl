@@ -1,6 +1,6 @@
 # Inputs and policies
 
-The v0.1 numeric API accepts air, dew-point and component temperatures in °C;
+The numeric API accepts air, dew-point and component temperatures in °C;
 pressure in hPa; wind speed in m/s; radiation in W/m²; and longitude/latitude
 in degrees. Thermodynamic kernels use K. Relative humidity is percent at the
 public convenience boundary and a fraction only in names ending `_fraction`.
@@ -21,3 +21,7 @@ Batch primary meteorology/time vectors are ordinally aligned. Coordinates,
 pressure, and direct fraction may be shared scalars or row-aligned vectors.
 `liljegren_wbgt!` validates all inputs, output types/lengths, and aliases
 before writing any output.
+
+Secondary measures use formula-native inputs. Relative humidity is always a
+percentage, not a fraction. Invalid finite domains and non-finite real inputs
+throw `DomainError`; any `missing` input returns `missing`.

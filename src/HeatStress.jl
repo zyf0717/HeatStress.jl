@@ -13,6 +13,11 @@ include("validation.jl")
 include("psychrometrics.jl")
 include("solar_geometry.jl")
 include("heat_transfer.jl")
+include("indices/validation.jl")
+include("indices/measured_wbgt.jl")
+include("indices/heat_index_nws.jl")
+include("indices/wet_bulb_stull.jl")
+include("indices/humidex.jl")
 include("liljegren/residuals.jl")
 include("liljegren/root_solver.jl")
 include("liljegren/diagnostics.jl")
@@ -62,6 +67,11 @@ export DewPointPolicy,
     solar_zenith_batch,
     saturation_vapour_pressure_hpa,
     vapour_pressure,
-    relative_humidity_from_dewpoint
+    relative_humidity_from_dewpoint,
+    wbgt_with_solar_load,
+    wbgt_without_solar_load,
+    heat_index_nws,
+    wet_bulb_temperature_stull,
+    humidex
 
 end

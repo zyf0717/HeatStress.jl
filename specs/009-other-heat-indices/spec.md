@@ -1,112 +1,99 @@
-# Other heat indices
+# Secondary heat measures
 
 ## Purpose
 
-Implement selected non-Liljegren heat-stress calculations as independently sourced, idiomatic scalar Julia functions with broadcasting. HeatStressR's export list may inform feature prioritisation privately, but it is not the formula source.
+Add a focused v0.2.0 set of independently sourced scalar heat measures without
+changing the released Liljegren APIs. HeatStressR may inform private feature
+prioritisation, but it is not a formula or validation source.
 
-## General rule
+## Selected v0.2 formulas
 
-Each index is implemented as a scalar function. Users obtain array behaviour with broadcasting:
+| Public name | Selected authority and formulation | Inputs | Output/applicability |
+| --- | --- | --- | --- |
+| `wbgt_with_solar_load` | OSHA measured-component WBGT: `0.7Tnwb + 0.2Tg + 0.1Tdb` | natural wet-bulb, globe and dry-bulb temperatures in °C | WBGT in °C; solar/radiant-load environments |
+| `wbgt_without_solar_load` | OSHA measured-component WBGT: `0.7Tnwb + 0.3Tg` | natural wet-bulb and globe temperatures in °C | WBGT in °C; indoors or outdoors without solar load |
+| `heat_index_nws` | Current NWS operational procedure: simple Steadman-consistent estimate, Rothfusz regression and low/high-RH adjustments | air temperature in °C and RH in percent | heat index in °C; shaded, resting-person interpretation |
+| `wet_bulb_temperature_stull` | Stull (2011), equation 1 | air temperature in °C and RH in percent | wet-bulb approximation in °C at 101.325 kPa; `T ∈ [-20, 50]`, `RH ∈ [5, 99]` |
+| `humidex` | Environment and Climate Change Canada standard dew-point formulation | air temperature and dew point in °C | dimensionless humidex value customarily expressed on a Celsius-like scale |
 
-```julia
-wet_bulb_temperature_stull.(temperature, humidity)
-```
+The Stull paper qualitatively excludes combinations having both low humidity
+and cold temperature but gives no algebraic boundary for that region. Enforce
+the published numeric rectangle and document the qualitative exclusion rather
+than inventing a threshold.
 
-Optional aligned-array methods may validate dimensions or preallocate output, but must delegate to the scalar formula.
+The NWS operational procedure gives no exact outer air-temperature limits for
+the complete piecewise algorithm. Enforce finite temperature and RH in
+`[0, 100]`, implement the published branch procedure exactly, and document the
+NWS warning that the regression is not valid for extreme conditions.
 
-## Formula-selection gate
+ECCC's rule for displaying humidex only above specified reporting thresholds is
+a presentation policy, not part of the formula domain. `humidex` evaluates the
+formula for finite physically consistent inputs with dew point above absolute
+zero and no greater than air temperature.
 
-Before implementation, complete this table. Names remain candidates until the exact formulation and domain are selected:
+## API and numerical contract
 
-| Candidate public name | Selected publication/standard and formulation | Input/output units | Valid domain | Final public name |
-| --- | --- | --- | --- | --- |
-| `wet_bulb_temperature_stull` | | | | |
-| `wbgt_bernard` | | | | |
-| `simplified_wbgt` | | | | |
-| `apparent_temperature` | | | | |
-| `effective_temperature` | | | | |
-| `humidex` | | | | |
-| `discomfort_index` | | | | |
-| `heat_index` | | | | |
+Each measure is a pure scalar function. Array behavior uses ordinary Julia
+broadcasting. Do not add aligned-array, batch-result or diagnostic containers
+for these direct formulas.
 
-Do not add a function merely because HeatStressR exports it. Before implementation, add a source record containing the publication or standard, exact formula/version, valid domain, units and known limitations.
+- Promote real inputs to a floating type and preserve Float32 when all real
+  inputs are Float32.
+- Return `missing` when any input is `missing`.
+- Throw `DomainError` for non-finite or out-of-domain real inputs.
+- Keep formula coefficients in the promoted type.
+- Do not silently clamp, extrapolate past numeric bounds, or convert RH
+  fractions to percentages.
+- Cite the exact authority, formulation, units and limitations in every public
+  docstring.
 
-`relative_humidity_from_dewpoint` and `vapour_pressure` are psychrometric functions owned by spec 004, not secondary indices.
+## Source and independence requirements
 
-[NEEDS CLARIFICATION: Select the v0.1 formula set and final public names. Generic names such as `simplified_wbgt`, `apparent_temperature` and `effective_temperature` must not be implemented until they are bound to an unambiguous cited formulation.]
+Before implementing a formula, add its authority and equation/policy entries to
+`validation/sources.toml` with `status = "specified"`. Advance entries to
+`implemented` and `validated` only when the referenced source and validation
+paths exist.
 
-## Formula-source requirements
+Transcribe equations from the selected publications or government technical
+pages. Do not copy or translate HeatStressR, another package, or third-party
+test fixtures.
 
-### Stull wet-bulb approximation
+## Validation
 
-Use Stull's published approximation and cite the original publication. Transcribe coefficients from the publication, not from HeatStressR. Record its valid temperature/humidity range and test behaviour at and outside that range.
+For every selected formula:
 
-### Simplified WBGT
+- independently calculate direct or 256-bit expected values without importing
+  `HeatStress`;
+- test each formula/branch boundary and invalid-domain boundary;
+- verify scalar/broadcast equivalence, Float32/Float64 behavior, promotion and
+  missing propagation;
+- store traceable rows in `validation/fixtures/simple_indices.csv`;
+- report the worst mismatching row and source identifier.
 
-Choose and document one named published formulation. Because several “simplified WBGT” equations circulate with different vapour-pressure units and constants, expose the precise formula and units in the docstring. Do not silently select the HeatStressR variant.
+Heat-index tests cover the simple/full transition, both humidity adjustments
+and every documented temperature/RH threshold immediately below, at and above
+the boundary.
 
-### Apparent and effective temperature
+## Deferred candidates
 
-Identify the exact published formulation before coding. If multiple versions exist, either:
+Bernard WBGT, empirical simplified WBGT, apparent temperature, effective
+temperature, discomfort index and UTCI are not selected for v0.2.0 and do not
+block this unit. Each requires a later release scope and exact formulation;
+UTCI additionally requires mean-radiant-temperature and 10 m wind contracts.
 
-- select one canonical version and name/cite it clearly; or
-- expose explicitly named variants.
-
-Avoid a generic name whose semantics depend on undocumented coefficients.
-
-### Bernard indoor/shade WBGT
-
-Derive the psychrometric relation from its original publication or an authoritative technical source. Express it as a signed residual where mathematically valid and solve with the shared bracketed solver. Treat saturation as a documented trivial-root case. Do not reproduce an `optimize(abs(residual))` pattern merely because another implementation uses it.
-
-### Humidex, discomfort index and heat index
-
-Use authoritative published/government sources. Heat-index tests must cover every documented piecewise branch and each threshold from the selected source.
-
-## Input validation
-
-- state temperature units explicitly;
-- state whether vapour pressure is Pa, hPa or kPa;
-- require finite RH and document the accepted domain;
-- state wind units for apparent/effective temperature;
-- propagate `missing` through explicit methods and broadcasting;
-- raise or return a documented status for out-of-domain values instead of silently returning complex/nonsensical results.
-
-## Return types
-
-Simple indices return promoted floating values or `missing`.
-
-Bernard may return:
-
-```julia
-struct BernardWBGTResult{T<:AbstractFloat}
-    wbgt_c::Union{Missing,T}
-    psychrometric_wet_bulb_c::Union{Missing,T}
-end
-```
-
-## Tests
-
-For each index:
-
-- examples recomputed directly from the cited formula;
-- branch and domain boundaries;
-- scalar versus broadcast;
-- Float32 and Float64;
-- missing propagation;
-- dimensional/unit sanity checks;
-- at least one independently calculated high-precision expected value.
-
-Private black-box comparisons against HeatStressR may be run after these tests pass, but mismatches are investigation prompts rather than automatic failures.
+`relative_humidity_from_dewpoint` and `vapour_pressure` remain psychrometric
+functions owned by spec 004.
 
 ## Acceptance criteria
 
-- every function has an authoritative formula citation;
-- no formula is sourced only from software code;
-- no simple index requires vector construction;
-- scientific fixtures pass with function-specific tolerances;
-- public names describe the selected formulation accurately;
-- no R dotted names are exported.
+- all five exports implement the selected authoritative formulations;
+- public names expose formulation or physical-load semantics;
+- domain and missing behavior matches this specification;
+- scientific fixtures and formula-specific tests pass;
+- documentation distinguishes measured-component WBGT, modeled Liljegren WBGT,
+  heat index, wet-bulb approximation and humidex;
+- no R aliases, generic heat-index aliases or unselected measures are exported.
 
 ## Suggested commit
 
-`feat: implement independently sourced heat stress indices`
+`feat: add independently sourced secondary heat measures`

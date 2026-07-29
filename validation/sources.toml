@@ -20,6 +20,10 @@ generation_method = "Standalone 256-bit calculation; validation/generate_validat
 sources = ["package_contract"]
 generation_method = "Declared input and numerical-policy invariants."
 
+[fixture_families.simple_indices]
+sources = ["osha_wbgt", "nws_heat_index", "stull_2011", "eccc_humidex"]
+generation_method = "Independent 256-bit direct evaluation of the selected equations without importing HeatStress."
+
 [registry]
 item_key_format = "lowercase_snake_case"
 item_table_format = "items.<item_key>"
@@ -109,6 +113,42 @@ pages = "645-655"
 doi = "10.1080/15459620802310770"
 role = "Primary source for the outdoor Liljegren WBGT model"
 
+[sources.osha_wbgt]
+kind = "government_technical_manual"
+authors = "Occupational Safety and Health Administration"
+title = "OSHA Technical Manual, Section III, Chapter 4: Heat Stress"
+year = 2017
+url = "https://www.osha.gov/otm/section-3-health-hazards/chapter-4"
+role = "Measured-component WBGT equations with and without solar load"
+
+[sources.nws_heat_index]
+kind = "government_technical_page"
+authors = "National Weather Service"
+title = "Heat: How is the Heat Index calculated?"
+year = 2026
+url = "https://www.weather.gov/ctp/heat"
+role = "Operational heat-index procedure, Rothfusz regression and humidity adjustments"
+
+[sources.stull_2011]
+kind = "journal_article"
+authors = "Stull, R."
+title = "Wet-Bulb Temperature from Relative Humidity and Air Temperature"
+journal = "Journal of Applied Meteorology and Climatology"
+year = 2011
+volume = "50"
+issue = "11"
+pages = "2267-2269"
+doi = "10.1175/JAMC-D-11-0143.1"
+role = "Empirical wet-bulb approximation and applicability"
+
+[sources.eccc_humidex]
+kind = "government_technical_page"
+authors = "Environment and Climate Change Canada"
+title = "Climate glossary: Humidex"
+year = 2026
+url = "https://www.wateroffice.ec.gc.ca/glossary_e.html"
+role = "Standard Canadian humidex equation and reporting interpretation"
+
 [sources.nrel_spa]
 kind = "technical_report"
 authors = "Reda, I.; Andreas, A."
@@ -178,6 +218,112 @@ volume = "35"
 article = "100420"
 doi = "10.1016/j.wace.2022.100420"
 role = "Independent published transcription of Liljegren balance equations and unit conversions"
+
+[items.measured_wbgt_with_solar_load]
+kind = "equation"
+owner_spec = "009"
+status = "validated"
+source = "osha_wbgt"
+location = "Section IV, Step 1, outdoor WBGT equation"
+units = "degrees Celsius components to degrees Celsius WBGT"
+implementation = "src/indices/measured_wbgt.jl"
+validation = "test/test_secondary_indices.jl and validation/fixtures/simple_indices.csv solar-load WBGT cases"
+
+[items.measured_wbgt_without_solar_load]
+kind = "equation"
+owner_spec = "009"
+status = "validated"
+source = "osha_wbgt"
+location = "Section IV, Step 1, indoor/no-solar-load WBGT equation"
+units = "degrees Celsius components to degrees Celsius WBGT"
+implementation = "src/indices/measured_wbgt.jl"
+validation = "test/test_secondary_indices.jl and validation/fixtures/simple_indices.csv no-solar-load WBGT cases"
+
+[items.measured_wbgt_input_policy]
+kind = "api_design"
+owner_spec = "009"
+status = "validated"
+provenance = "original_design"
+rationale = "Explicit function names expose the selected solar-load equation; finite component values are required and missing values propagate."
+implementation = "src/indices/measured_wbgt.jl"
+validation = "test/test_secondary_indices.jl finite-domain, missing, promotion and broadcast cases"
+
+[items.nws_heat_index_simple_estimate]
+kind = "equation"
+owner_spec = "009"
+status = "validated"
+source = "nws_heat_index"
+location = "How is the Heat Index calculated?, simple Steadman-consistent formula"
+units = "degrees Fahrenheit and RH percent to degrees Fahrenheit"
+implementation = "src/indices/heat_index_nws.jl"
+validation = "test/test_secondary_indices.jl simple/full transition and validation/fixtures/simple_indices.csv"
+
+[items.nws_heat_index_rothfusz_regression]
+kind = "equation"
+owner_spec = "009"
+status = "validated"
+source = "nws_heat_index"
+location = "How is the Heat Index calculated?, Rothfusz regression"
+units = "degrees Fahrenheit and RH percent to degrees Fahrenheit"
+implementation = "src/indices/heat_index_nws.jl"
+validation = "test/test_secondary_indices.jl Rothfusz cases and validation/fixtures/simple_indices.csv"
+
+[items.nws_heat_index_humidity_adjustments]
+kind = "equation"
+owner_spec = "009"
+status = "validated"
+source = "nws_heat_index"
+location = "How is the Heat Index calculated?, low- and high-RH adjustments"
+units = "degrees Fahrenheit and RH percent to degrees Fahrenheit adjustment"
+implementation = "src/indices/heat_index_nws.jl"
+validation = "test/test_secondary_indices.jl exact low/high humidity adjustment boundaries"
+
+[items.nws_heat_index_input_policy]
+kind = "api_design"
+owner_spec = "009"
+status = "validated"
+provenance = "original_design"
+rationale = "The operational procedure accepts finite Celsius air temperature and RH percent in [0, 100]; the authority supplies no exact outer temperature boundary."
+implementation = "src/indices/heat_index_nws.jl"
+validation = "test/test_secondary_indices.jl RH domain, missing, promotion and broadcast cases"
+
+[items.stull_wet_bulb_approximation]
+kind = "equation"
+owner_spec = "009"
+status = "validated"
+source = "stull_2011"
+location = "equation 1 and figures 2-3"
+units = "degrees Celsius and RH percent to degrees Celsius"
+implementation = "src/indices/wet_bulb_stull.jl"
+validation = "test/test_secondary_indices.jl and validation/fixtures/simple_indices.csv published/high-precision cases"
+
+[items.stull_wet_bulb_input_policy]
+kind = "model_policy"
+owner_spec = "009"
+status = "validated"
+source = "stull_2011"
+location = "abstract and figures 2-3 applicability statement"
+implementation = "src/indices/wet_bulb_stull.jl"
+validation = "test/test_secondary_indices.jl numeric rectangle boundary and invalid-domain cases"
+
+[items.eccc_humidex]
+kind = "equation"
+owner_spec = "009"
+status = "validated"
+source = "eccc_humidex"
+location = "Humidex glossary entry, standard formula"
+units = "degrees Celsius air/dew point to dimensionless Celsius-like index"
+implementation = "src/indices/humidex.jl"
+validation = "test/test_secondary_indices.jl and validation/fixtures/simple_indices.csv ECCC equation cases"
+
+[items.humidex_input_policy]
+kind = "api_design"
+owner_spec = "009"
+status = "validated"
+provenance = "original_design"
+rationale = "Require finite physically consistent air/dew-point inputs; ECCC display thresholds are documented rather than imposed on formula evaluation."
+implementation = "src/indices/humidex.jl"
+validation = "test/test_secondary_indices.jl physical-domain, missing, promotion and broadcast cases"
 
 [items.atmospheric_emissivity]
 kind = "equation"

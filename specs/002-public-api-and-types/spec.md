@@ -6,20 +6,20 @@ Define the stable Julia-facing vocabulary before formulas are implemented. Avoid
 
 ## Public API names
 
-The Liljegren, solver and batch names below are the stable v0.1 candidates. Solar/psychrometric names are finalised by 004; secondary-index names are finalised by 009 after each exact formulation is selected. Export a name only when its owning specification is complete.
+The Liljegren, solver and batch names below are the stable v0.1 surface.
+Solar/psychrometric names are finalised by 004; the selected v0.2
+secondary-measure names are finalised by 009. Export a name only when its
+owning specification is complete.
 
 ```julia
 solar_zenith
 relative_humidity_from_dewpoint
 vapour_pressure
+wbgt_with_solar_load
+wbgt_without_solar_load
 wet_bulb_temperature_stull
-wbgt_bernard
-simplified_wbgt
-apparent_temperature
-effective_temperature
+heat_index_nws
 humidex
-discomfort_index
-heat_index
 globe_temperature
 natural_wet_bulb_temperature
 liljegren_wbgt
@@ -29,7 +29,9 @@ diagnose_liljegren
 diagnose_liljegren_batch
 ```
 
-The generic secondary-index names above are not commitments to unspecified formula variants. Spec 009 must either bind each name to one cited formulation or replace it with a formulation-specific name before implementation.
+Spec 009 binds every selected secondary-measure name to one cited formulation.
+Bernard WBGT, simplified WBGT, apparent/effective temperature, discomfort
+index and UTCI remain deferred and have no reserved public names.
 
 Do not export R aliases such as `wbgt.Liljegren`, `fTg`, `fTnwb`, `wbt.Stull`, `apparentTemp` or `tashurs2vap.pres` in v0.1.0. A separate compatibility extension may be considered later.
 

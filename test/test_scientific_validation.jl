@@ -85,6 +85,42 @@ end
         end
     end
 
+    @testset "secondary-measure fixtures" begin
+        @test isfile(joinpath(_VALIDATION_ROOT, "metadata", "fixture-set-v2.toml"))
+        rows = collect(_fixture("simple_indices.csv"))
+        values = map(rows) do row
+            if row.formula == "wbgt_with_solar_load"
+                wbgt_with_solar_load(
+                    row.natural_wet_bulb_c,
+                    row.globe_temperature_c,
+                    row.dry_bulb_temperature_c,
+                )
+            elseif row.formula == "wbgt_without_solar_load"
+                wbgt_without_solar_load(
+                    row.natural_wet_bulb_c,
+                    row.globe_temperature_c,
+                )
+            elseif row.formula == "heat_index_nws"
+                heat_index_nws(row.air_temperature_c, row.relative_humidity_percent)
+            elseif row.formula == "wet_bulb_temperature_stull"
+                wet_bulb_temperature_stull(
+                    row.air_temperature_c,
+                    row.relative_humidity_percent,
+                )
+            elseif row.formula == "humidex"
+                humidex(row.air_temperature_c, row.dew_point_c)
+            else
+                error("unsupported simple-index fixture formula: $(row.formula)")
+            end
+        end
+        errors = abs.(values .- getproperty.(rows, :expected_value))
+        _maximum_error("secondary measures", errors, getproperty.(rows, :id))
+        @test all(
+            error <= row.atol + row.rtol * abs(row.expected_value)
+            for (error, row) in zip(errors, rows)
+        )
+    end
+
     @testset "Liljegren high-precision references and residuals" begin
         rows = collect(_fixture("liljegren_reference.csv"))
         reference_diagnostics = [
@@ -168,5 +204,8 @@ end
         generator = joinpath(_VALIDATION_ROOT, "generate_validation_cases.jl")
         include(generator)
         @test ValidationReferenceGenerator.reference_matches()
+        simple_generator = joinpath(_VALIDATION_ROOT, "generate_simple_indices.jl")
+        include(simple_generator)
+        @test SimpleIndexReferenceGenerator.fixture_matches()
     end
 end
