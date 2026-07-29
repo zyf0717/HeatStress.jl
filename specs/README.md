@@ -8,11 +8,11 @@ match it.
 
 ## Current delivery focus
 
-HeatStress v0.1.0 is registered in Julia General and published as a focused
-Liljegren-first release. Current work maintains that released surface while
-secondary measures, their validation and profile-led optimisation are
-post-v0.1 work. The current v0.2 focus is a small independently sourced
-secondary-measure slice.
+HeatStress v0.2.0 is registered in Julia General and published. It preserves
+the focused v0.1.0 Liljegren-first surface and adds the independently sourced
+secondary-measure slice completed by specs 009, 010 and 015. Current work
+maintains those released surfaces while deferred measures and profile-led
+optimisation remain later work.
 
 The v0.1.0 release surface is limited to the coherent core already supporting
 the Liljegren model:
@@ -24,8 +24,8 @@ the Liljegren model:
   diagnostics.
 
 Measured-component WBGT, NWS heat index, Stull wet bulb and humidex are the
-selected v0.2 scope. Bernard/simplified WBGT, apparent/effective temperature,
-discomfort index and UTCI remain deferred.
+published v0.2.0 additions. Bernard/simplified WBGT, apparent/effective
+temperature, discomfort index and UTCI remain deferred.
 
 Existing reproducible Julia scalar/batch benchmarks, threading evidence and
 the completed readability refactor are sufficient performance evidence for the
@@ -70,7 +70,7 @@ registration`.
 The source and contracts completed in 007, 008 and 014 are stable foundations;
 this roadmap does not reopen their scientific implementation.
 
-The current v0.2 path is `009 + remaining 010 → v0.2 documentation and
+The completed v0.2.0 path was `009 + remaining 010 → v0.2 documentation and
 candidate checks → 015 audit package → required PR CI → authorised squash
 merge`. Deeper 011 profiling, cross-language comparisons and optimisation
 remain optional and proceed only where profiling justifies them. Julia follows
