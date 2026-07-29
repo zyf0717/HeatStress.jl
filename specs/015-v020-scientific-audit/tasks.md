@@ -12,13 +12,15 @@
 - [x] Audit formula provenance, contracts and implementation independence.
 - [x] Consolidate scientific fixture and boundary-test evidence.
 - [ ] Review full/quality/docs/clean-depot/cross-platform evidence.
-- [ ] Record the exact candidate source commit and permitted audit paths.
+- [x] Record the exact candidate source commit and permitted audit paths.
 - [ ] Record maintainer approval, UTC date and known deviations.
 - [x] Verify no publication action occurred.
 
 ## Evidence
 
-- Candidate: pending
+- Candidate source commit: `4c51b28f53e056bc331c5353f37e574aa62639ef`.
+- Permitted post-candidate audit-record path:
+  `specs/015-v020-scientific-audit/tasks.md`.
 - Approval: pending
 - Local evidence: full suite passed with 85 secondary-measure assertions and
   316 scientific-validation assertions; four-thread suite, Aqua/JET,
