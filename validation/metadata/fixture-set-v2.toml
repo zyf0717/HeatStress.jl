@@ -1,0 +1,9 @@
+schema_version = 1
+fixture_set = "secondary-measures-v2"
+generator = "validation/generate_simple_indices.jl"
+generator_revision = "v1"
+julia_version = "1.10"
+precision_bits = 256
+timezone = "UTC"
+random_seed = 0
+simple_indices_method = "independent 256-bit direct evaluation without importing HeatStress"

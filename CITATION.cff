@@ -1,7 +1,7 @@
 cff-version: 1.2.0
 message: "If you use HeatStress.jl, please cite it using the metadata below."
 title: "HeatStress.jl"
-version: 0.1.0
+version: 0.2.0
 license: MIT
 repository-code: "https://github.com/zyf0717/HeatStress.jl"
 authors:
@@ -29,3 +29,15 @@ references:
     end: 655
     doi: "10.1080/15459620802310770"
     year: 2008
+  - type: article
+    authors:
+      - family-names: Stull
+        given-names: Roland
+    title: "Wet-Bulb Temperature from Relative Humidity and Air Temperature"
+    journal: "Journal of Applied Meteorology and Climatology"
+    volume: 50
+    issue: 11
+    start: 2267
+    end: 2269
+    doi: "10.1175/JAMC-D-11-0143.1"
+    year: 2011

@@ -10,8 +10,9 @@ match it.
 
 HeatStress v0.1.0 is registered in Julia General and published as a focused
 Liljegren-first release. Current work maintains that released surface while
-secondary indices, deeper validation and profile-led optimisation remain
-post-v0.1 work.
+secondary measures, their validation and profile-led optimisation are
+post-v0.1 work. The current v0.2 focus is a small independently sourced
+secondary-measure slice.
 
 The v0.1.0 release surface is limited to the coherent core already supporting
 the Liljegren model:
@@ -22,9 +23,9 @@ the Liljegren model:
 - serial allocating, preallocated and threaded batch APIs, including
   diagnostics.
 
-Stull, Bernard, humidex, heat index and other secondary indices are
-post-v0.1 functionality. Their implementation, fixtures and formula variants
-remain planned work; they do not block registration.
+Measured-component WBGT, NWS heat index, Stull wet bulb and humidex are the
+selected v0.2 scope. Bernard/simplified WBGT, apparent/effective temperature,
+discomfort index and UTCI remain deferred.
 
 Existing reproducible Julia scalar/batch benchmarks, threading evidence and
 the completed readability refactor are sufficient performance evidence for the
@@ -53,12 +54,13 @@ reproducible, correctness-gated report in this repository.
 | 006 | [Root solving and diagnostics](./006-root-solving-and-diagnostics/) | Complete | 005 Physical kernels |
 | 007 | [Liljegren scalar model](./007-liljegren-scalar-model/) | Complete | 004 Solar geometry and psychrometrics; 005 Physical kernels; 006 Root solving and diagnostics |
 | 008 | [Batch interfaces and threading](./008-batch-interfaces-and-threading/) | Complete | 007 Liljegren scalar model |
-| 009 | [Other heat indices](./009-other-heat-indices/) | Planned | Post-v0.1 feature unit; its released formulas require their own 010 validation coverage |
-| 010 | [Scientific fixtures and validation](./010-scientific-fixtures-and-validation/) | In progress | v0.1 requires only its Liljegren/core slice; secondary-index validation is post-v0.1 |
+| 009 | [Secondary heat measures](./009-other-heat-indices/) | Complete | Selected v0.2 formulas require their own 010 validation coverage |
+| 010 | [Scientific fixtures and validation](./010-scientific-fixtures-and-validation/) | Complete | Liljegren/core and selected v0.2 secondary-measure validation |
 | 011 | [Liljegren performance benchmarking](./011-performance-quality-and-ci/) | In progress | v0.1 requires only its publication gate; comparison/optimisation tier is post-v0.1 |
 | 012 | [Documentation and release readiness](./012-documentation-release-and-registration/) | Complete | 000–008 release-scope evidence; Liljegren slice of 010; publication gate of 011; 014 |
 | 013 | [Final scientific audit and release authorisation](./013-final-scientific-audit/) | Complete | 012 and all declared v0.1 release-scope evidence |
 | 014 | [Readability refactor](./014-readability-refactor/) | Complete | Preserves completed 007–008 behaviour; v0.1 readiness input |
+| 015 | [v0.2 scientific audit](./015-v020-scientific-audit/) | In progress | Completed 009 and 010 v0.2 slice; frozen v0.2 candidate |
 
 The completed v0.1.0 path was `000–008 → Liljegren/core slice of 010 →
 publication gate of 011 → 012 → focused 013 audit → tag, release and General
@@ -66,8 +68,9 @@ registration`.
 The source and contracts completed in 007, 008 and 014 are stable foundations;
 this roadmap does not reopen their scientific implementation.
 
-Post-v0.1 work is `009 + remaining 010`, followed by deeper 011 profiling,
-cross-language comparisons and optimisation only where profiling justifies it.
+The current v0.2 path is `009 + remaining 010 → v0.2 documentation and
+candidate checks → 015`. Deeper 011 profiling, cross-language comparisons and
+optimisation remain optional and proceed only where profiling justifies them.
 Julia follows pre-1.0 versioning: later feature and API growth is released in
 appropriately scoped `0.x` versions.
 

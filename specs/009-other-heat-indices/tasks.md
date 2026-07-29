@@ -1,22 +1,31 @@
-# Other heat indices: execution checklist
+# Secondary heat measures: execution checklist
 
 ## Status
 
-- [x] Planned
+- [ ] Planned
 - [ ] In progress
-- [ ] Complete
+- [x] Complete
 
 ## Tasks
 
-- [ ] Complete the formula-selection table and finalise the v0.1 index set/names.
-- [ ] Implement each selected index only after its source row is complete.
-- [ ] Document formula source and applicability for every export.
-- [ ] Test edge/domain cases and Float32/Float64 behavior.
-- [ ] Validate all index fixtures through 010.
-- [ ] Run the acceptance checks in `quickstart.md`.
-- [ ] Record test, benchmark or validation evidence and commit SHA below.
+- [x] Select the v0.2 formulas, public names, native inputs and domain policy.
+- [x] Record every selected formula and policy in the provenance registry.
+- [x] Implement and export the five selected scalar APIs.
+- [x] Add formula, branch, domain, type, broadcast and missing tests.
+- [x] Validate independent simple-index fixtures through spec 010.
+- [x] Document sources, units, applicability and limitations.
+- [x] Run the acceptance checks in `quickstart.md`.
+- [x] Record validation evidence and candidate commit handoff below.
 
 ## Evidence
 
-- Evidence: pending
-- Commit: pending
+- Evidence: `test/test_secondary_indices.jl` passes 85 assertions covering
+  equations, NWS branches/boundaries, domains, Float32/Float64, promotion,
+  broadcasting and missing propagation. The full and four-thread suites,
+  Aqua/JET quality suite, clean-depot suite, deterministic fixture check and
+  warning-free documentation build pass locally on Julia 1.10.11.
+- Scientific fixtures: `validation/fixtures/simple_indices.csv`, independently
+  regenerated at 256-bit precision by
+  `validation/generate_simple_indices.jl`; the scientific-validation corpus
+  passes 316 assertions.
+- Commit: exact candidate source commit is recorded by spec 015 after freeze.

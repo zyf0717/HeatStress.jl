@@ -1,11 +1,12 @@
 # HeatStress.jl
 
-HeatStress.jl is an independent MIT-licensed Julia implementation of the
-Liljegren outdoor wet-bulb globe temperature (WBGT) model. Version 0.1.0 is a
-focused release: solar geometry, psychrometric helpers, scalar and diagnostic
-Liljegren calls, and allocating, preallocated, and threaded aligned batches.
-Stull, Bernard, humidex, heat index, and other secondary indices are not part
-of this release.
+HeatStress.jl is an independent MIT-licensed Julia package for heat-stress
+measures. It implements the Liljegren outdoor wet-bulb globe temperature
+(WBGT) model, measured-component WBGT, the US National Weather Service heat
+index, the Stull wet-bulb approximation, and Environment and Climate Change
+Canada humidex. Liljegren supports scalar and diagnostic calls plus allocating,
+preallocated, and threaded aligned batches; the direct formulas are scalar and
+broadcast naturally.
 
 ## Installation
 
@@ -33,6 +34,15 @@ result = liljegren_wbgt(
 result.wbgt_c
 ```
 
+For direct measures:
+
+```julia
+wbgt_with_solar_load(24.0, 35.0, 30.0)
+heat_index_nws(32.0, 70.0)
+wet_bulb_temperature_stull(30.0, 70.0)
+humidex(30.0, 20.0)
+```
+
 For row-level input policy and root-solving information, call
 `diagnose_liljegren` instead. It retains a valid component if the other solve
 fails; complete WBGT is `missing` unless both components pass residual checks.
@@ -58,11 +68,19 @@ solar method, radiation partitioning, instrument parameters, and solver
 policies—do not assume equivalence with another WBGT implementation unless
 these are aligned.
 
+Measured-component WBGT assumes representative instrument readings. NWS heat
+index represents shaded conditions and omits wind, radiation, and workload.
+The Stull approximation is a standard-pressure empirical fit with a restricted
+temperature/humidity domain. Humidex is an environmental index, not an
+individual physiological response or exposure limit.
+
 ## Provenance, validation, and citation
 
 The implementation is expressed independently from published literature; its
-primary scientific source is Liljegren et al. (2008), DOI
-10.1080/15459620802310770. Equation and policy provenance lives in
+primary model source is Liljegren et al. (2008), DOI
+10.1080/15459620802310770. Secondary-measure authorities include OSHA, NWS,
+Stull (2011), and Environment and Climate Change Canada. Equation and policy
+provenance lives in
 [`validation/sources.toml`](validation/sources.toml), while committed offline
 fixtures validate the released surface. Familiarity with HeatStressR informed
 advisory comparison interest only; it is not an implementation source or

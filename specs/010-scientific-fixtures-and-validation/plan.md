@@ -3,15 +3,15 @@
 ## Dependency gate
 
 001 Package scaffold. The v0.1 completion slice requires the released core
-through 008; full unit completion additionally requires the later secondary
-indices in 009.
+through 008; full unit completion additionally requires the selected v0.2
+secondary measures in 009.
 
 ## Design
 
 Build deterministic offline fixtures with provenance metadata,
 high-precision/or analytic authorities and a validation harness that reports
 worst differences. First close the Liljegren/core slice for v0.1; append
-secondary-index families only when their formulas and release scope are fixed.
+secondary-measure families only when their formulas and release scope are fixed.
 
 ## Sequence
 
@@ -21,7 +21,7 @@ secondary-index families only when their formulas and release scope are fixed.
    coverage without changing released behaviour.
 3. Record deterministic generation/authority metadata and comparison reporting.
 4. Freeze the v0.1 validation evidence for the focused audit.
-5. Add secondary-index fixture families only in their post-v0.1 feature PRs.
+5. Add the selected v0.2 simple-index fixture family independently.
 
 ## Completion rule
 

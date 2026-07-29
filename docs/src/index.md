@@ -1,13 +1,15 @@
 # HeatStress.jl
 
-HeatStress.jl is an independent MIT-licensed Julia implementation of the
-Liljegren outdoor WBGT model.
+HeatStress.jl is an independent MIT-licensed Julia package for the Liljegren
+outdoor WBGT model and selected direct heat measures.
 
-The implemented public model is Liljegren outdoor WBGT. It supports scalar,
-allocating batch, preallocated batch, and diagnostic batch calls. Inputs,
-numerical policies, and result diagnostics are documented explicitly; the
-remaining heat-index implementations are not public until their formula
-selection and validation specifications are complete.
+Liljegren supports scalar, allocating batch, preallocated batch, and diagnostic
+batch calls. Measured-component WBGT, NWS heat index, Stull wet-bulb
+temperature, and humidex are scalar formulas designed for ordinary
+broadcasting. Inputs, applicability, numerical policies, and limitations are
+documented explicitly.
 
-Start with the [public API](api.md), then review [inputs and policies](inputs.md),
-the [Liljegren pipeline](liljegren.md), and [numerical behaviour](numerical-behaviour.md).
+Start with the [public API](api.md), then review
+[secondary measures](secondary-measures.md), [inputs and policies](inputs.md),
+the [Liljegren pipeline](liljegren.md), and
+[numerical behaviour](numerical-behaviour.md).

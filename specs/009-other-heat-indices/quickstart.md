@@ -1,4 +1,4 @@
-# Other heat indices: quickstart
+# Secondary heat measures: quickstart
 
 ## Workflow
 
@@ -9,5 +9,7 @@
 
 ## Validation
 
-- Run direct-formula fixtures and boundary tests.
-- Confirm every export has a traceable citation and tolerance.
+- Run `julia --project=. -e 'using Pkg; Pkg.test()'`.
+- Run the independent simple-index generator in check mode.
+- Build documentation with `checkdocs = :exports`.
+- Confirm every export has a traceable citation, domain and tolerance.

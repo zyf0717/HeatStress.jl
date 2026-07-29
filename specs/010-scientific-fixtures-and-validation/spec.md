@@ -82,11 +82,13 @@ Columns include all inputs, WBGT, Tg, Tnwb, authority level, source identifier, 
 
 Construct and document invalid-input, unbracketed, non-finite and residual-rejection cases. Do not remove failed rows from fixtures.
 
-### `simple_indices.csv` (post-v0.1)
+### `simple_indices.csv` (v0.2)
 
-When secondary indices are selected and released, include their exact branch
-boundaries and source identifiers. This fixture family is not required for the
-Liljegren-only v0.1.0 release.
+Cover the spec 009 measured WBGT equations, NWS heat-index branch families,
+Stull wet-bulb approximation and ECCC humidex. Store formula identifiers,
+normalized nullable inputs, expected values, authority levels, source
+identifiers and per-row tolerances. Generate expected values independently
+without importing `HeatStress`.
 
 ## Release-scoped validation
 
@@ -109,10 +111,18 @@ Existing independent Liljegren fixtures and regression tests are stable input
 to this work. Close only any evidence, coverage or provenance gap found in the
 declared release surface.
 
-### Deferred after v0.1.0
+### v0.2 validation slice
 
-- fixtures and validation harness extensions for secondary indices;
-- validation for future formula variants or APIs not in the release scope;
+- independent selected-formula fixtures and provenance;
+- exact NWS branch and adjustment boundaries in direct tests;
+- scalar/broadcast equivalence, missing propagation and Float32/Float64;
+- formula-specific domain rejection and tolerances;
+- worst-row and source-identifier mismatch reporting.
+
+### Deferred beyond v0.2.0
+
+- validation for future formula variants or APIs not in the selected release
+  scope, including UTCI;
 - any fixture family whose formula-selection gate remains unresolved.
 
 Do not require validation for unimplemented or unreleased APIs before General
@@ -191,7 +201,7 @@ Fixture changes require:
 - expected values are traceable to literature, analytic identities or high-precision calculation;
 - fixtures include failures and domain boundaries;
 - every function in the declared release surface has independent scientific
-  coverage;
+  coverage, including the selected v0.2 secondary measures;
 - CI failures identify the worst row and source identifier.
 
 ## Suggested commit
