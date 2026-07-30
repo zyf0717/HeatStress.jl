@@ -16,7 +16,7 @@
 - [x] Document numerical precision and units.
 - [x] Run the acceptance checks in `quickstart.md`.
 - [x] Benchmark fixed-coordinate, repeated-coordinate and unique-coordinate batch workloads.
-- [x] Record test and validation evidence below; commit SHA remains pending.
+- [x] Record test and validation evidence and commit SHAs below.
 
 ## Evidence
 
@@ -29,4 +29,5 @@
   --project=benchmark -e 'include("benchmark/solar_geometry_e2e.jl");
   main(10000)'` passed scalar/batch equivalence for fixed, grouped and unique
   coordinates (0.0019 s smoke measurements on `znver3`).
-- Commit: pending v0.1 readiness commit
+- Commits: `b87ba0a` implements the sourced solar and psychrometric kernels;
+  `c315048` records the release-scoped validation and benchmark evidence.

@@ -15,7 +15,8 @@ before timing. Use this as the v0.1 non-regression reference.
 
 Keep any HeatStressR adapter and raw cross-language output outside the
 distributed repository. A reported twofold HeatStressR observation remains a
-private advisory finding until reproduced under the Tier 2 correctness gate.
+private advisory finding until reproduced under a future specification's
+correctness gate.
 
 ## Sequence
 
@@ -28,16 +29,20 @@ private advisory finding until reproduced under the Tier 2 correctness gate.
 4. Record host-scoped evidence for spec 012 and do not schedule optimisation
    work without a blocker.
 
-### Post-v0.1
+### Deferred follow-up
+
+If deliberately scheduled under a new numbered specification:
 
 1. Profile the fused baseline and identify material bottlenecks.
 2. If justified, test parallel prepared-zenith or grouped-key reuse with full
    end-to-end serial/threaded measurements.
-3. Verify HeatStressR v2.1.6, build the private public-API adapter and pass the
-   correctness gate before any ratio is reported.
+3. Select a reviewed HeatStressR version, pin its exact commit and dependency
+   environment, build the private public-API adapter and pass the correctness
+   gate before any ratio is reported.
 4. Retain only measured improvements and update later `0.x` release evidence.
 
 ## Completion rule
 
-The v0.1 publication gate may close independently. Full unit completion waits
-for any later Tier 2 work deliberately accepted into scope.
+This unit is complete when the v0.1 publication gate and its evidence are
+complete. Deferred comparison or optimisation work does not keep this unit
+open; accepting that work requires a new numbered specification.

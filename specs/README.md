@@ -31,9 +31,11 @@ Existing reproducible Julia scalar/batch benchmarks, threading evidence and
 the completed readability refactor are sufficient performance evidence for the
 initial release. Further optimisation or a complete HeatStressR comparison is
 not a publication gate unless a correctness, stability or usability blocker is
-found. Maintainer observations of a roughly twofold advantage over optimised
-HeatStressR v2.1.6 remain advisory and must not become a public claim without a
-reproducible, correctness-gated report in this repository.
+found. Historical maintainer observations of a roughly twofold advantage over
+a pinned optimised HeatStressR v2.1.6 checkout remain advisory and must not
+become a public claim without a reproducible, correctness-gated report. Future
+comparisons may use any reviewed HeatStressR version but must pin and record its
+exact commit and dependency environment.
 
 ## Status legend
 
@@ -58,11 +60,12 @@ reproducible, correctness-gated report in this repository.
 | 008 | [Batch interfaces and threading](./008-batch-interfaces-and-threading/) | Complete | 007 Liljegren scalar model |
 | 009 | [Secondary heat measures](./009-other-heat-indices/) | Complete | Selected v0.2 formulas require their own 010 validation coverage |
 | 010 | [Scientific fixtures and validation](./010-scientific-fixtures-and-validation/) | Complete | Liljegren/core and selected v0.2 secondary-measure validation |
-| 011 | [Liljegren performance benchmarking](./011-performance-quality-and-ci/) | In progress | v0.1 requires only its publication gate; comparison/optimisation tier is post-v0.1 |
+| 011 | [Liljegren performance benchmarking](./011-performance-quality-and-ci/) | Complete | Completed v0.1 publication gate; deferred comparison/optimisation requires a new specification |
 | 012 | [Documentation and release readiness](./012-documentation-release-and-registration/) | Complete | 000–008 release-scope evidence; Liljegren slice of 010; publication gate of 011; 014 |
 | 013 | [Final scientific audit and release authorisation](./013-final-scientific-audit/) | Complete | 012 and all declared v0.1 release-scope evidence |
 | 014 | [Readability refactor](./014-readability-refactor/) | Complete | Preserves completed 007–008 behaviour; v0.1 readiness input |
 | 015 | [v0.2 scientific audit](./015-v020-scientific-audit/) | Complete | Completed 009 and 010 v0.2 slice; PR CI and authorised squash merge gate |
+| 016 | [Scientific validation hardening](./016-scientific-validation-hardening/) | Complete | Additive post-v0.2 numerical-conformance evidence; preserves released APIs and audit records |
 
 The completed v0.1.0 path was `000–008 → Liljegren/core slice of 010 →
 publication gate of 011 → 012 → focused 013 audit → tag, release and General
@@ -72,10 +75,10 @@ this roadmap does not reopen their scientific implementation.
 
 The completed v0.2.0 path was `009 + remaining 010 → v0.2 documentation and
 candidate checks → 015 audit package → required PR CI → authorised squash
-merge`. Deeper 011 profiling, cross-language comparisons and optimisation
-remain optional and proceed only where profiling justifies them. Julia follows
-pre-1.0 versioning: later feature and API growth is released in appropriately
-scoped `0.x` versions.
+merge`. Deeper profiling, cross-language comparisons and optimisation remain
+optional and require a future numbered specification if scheduled. Julia
+follows pre-1.0 versioning: later feature and API growth is released in
+appropriately scoped `0.x` versions.
 
 Release tagging and General registration are post-audit actions. Unit 012
 established readiness and unit 013 preserves the completed v0.1.0 audit record.
@@ -110,7 +113,7 @@ relevant numbered unit.
 | 5 | 013 | focused final audit and candidate sign-off |
 | 6 | release | tag, release and register v0.1.0 after audit authorisation |
 | 7 | 009 and remaining 010 | secondary indices and their independent validation for later `0.x` releases |
-| 8 | 011 (post-publication tier) | profile-led optimisation and optional reproducible cross-language comparison |
+| 8 | future performance unit | profile-led optimisation and optional reproducible cross-language comparison, only if explicitly scheduled |
 
 Each PR must identify the acceptance criteria it closes, include relevant
 tests, update specification evidence, report commands actually run and avoid

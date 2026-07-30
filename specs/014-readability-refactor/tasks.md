@@ -18,9 +18,10 @@
 ## Evidence
 
 - Placeholder audit: `find src -type f -empty` returned no source files.
-  Every current `include(...)` target contains an implementation. Secondary
-  indices remain internal because spec 009 is unresolved; no non-empty source
-  was removed.
+  Every `include(...)` target at the audited revision contained an
+  implementation. Secondary indices were still internal at that revision
+  because spec 009 had not yet completed; no non-empty source was removed.
+  Spec 009 subsequently completed and released its selected APIs in v0.2.0.
 - `julia --project=. -e 'using Pkg; Pkg.test()'` passed: 620 assertions.
 - `HEATSTRESS_QUALITY=1 julia --project=. -e 'using Pkg; Pkg.test()'` passed:
   full suite, Aqua, and JET.

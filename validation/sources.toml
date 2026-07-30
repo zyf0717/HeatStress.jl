@@ -24,6 +24,25 @@ generation_method = "Declared input and numerical-policy invariants."
 sources = ["osha_wbgt", "nws_heat_index", "stull_2011", "eccc_humidex"]
 generation_method = "Independent 256-bit direct evaluation of the selected equations without importing HeatStress."
 
+[fixture_families.numerical_conformance_v3]
+sources = [
+    "liljegren_2008",
+    "hall_2022",
+    "nrel_spa",
+    "nrel_spa_pvlib_0152",
+    "spencer_1971",
+    "fao56",
+    "bird_stewart_lightfoot_2002",
+    "kannuluik_carman_1951",
+    "oke_1987",
+    "osha_wbgt",
+    "nws_heat_index",
+    "stull_2011",
+    "eccc_humidex",
+    "package_contract",
+]
+generation_method = "Additive fixture-set-v3: deterministic pairwise/three-way case selection and standalone 256-bit equation evaluation without importing HeatStress; external NREL-SPA rows remain independently computed authorities."
+
 [registry]
 item_key_format = "lowercase_snake_case"
 item_table_format = "items.<item_key>"

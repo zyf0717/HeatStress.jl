@@ -36,11 +36,13 @@
   analytic psychrometric/physical rows, standalone 256-bit Liljegren component
   references, failure classifications, residual acceptance, Float32 convergence
   and scalar/fixed/grouped/unique threaded batch equivalence.
-- Commit: pending validation commit
+- v0.1 commit: `c315048` records and releases the completed Liljegren/core
+  validation corpus.
 - v0.2 evidence: `validation/fixtures/simple_indices.csv` contains 12 analytic,
   published-example and high-precision rows with source identifiers and
   formula-specific tolerances. `validation/generate_simple_indices.jl --check`
   passes without importing `HeatStress`; the scientific-validation corpus
   passes 316 assertions and reports the worst secondary-measure row/source.
 - v0.2 handoff: spec 015 identifies the exact candidate through the final
-  checked audit PR head and its squash merge.
+  checked audit PR head and its squash merge; `a53cf6b` is the approved squash
+  commit containing the completed secondary-measure validation.

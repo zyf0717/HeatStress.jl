@@ -4,8 +4,9 @@
 
 Maintain reproducible performance evidence for released Liljegren paths. The
 initial `v0.1.0` gate establishes that the existing implementation is usable,
-stable and non-regressing; a complete HeatStressR comparison and further
-optimisation are post-publication work.
+stable and non-regressing. A complete HeatStressR comparison and further
+optimisation are optional future work and are not acceptance criteria for this
+unit.
 
 ## Tier 1: v0.1.0 publication gate
 
@@ -28,19 +29,23 @@ preallocated serial batch rows had a 4.328 s median and four-thread batch had a
 publication baseline, not a universal promise or a public cross-language
 comparison.
 
-Current maintainer observation indicates the Julia implementation may be about
-twice as fast as optimised HeatStressR v2.1.6. It is advisory only: do not make
-that ratio a README, documentation or release claim until a reproducible,
-correctness-gated report supporting the exact workload and ratio is committed.
+A historical maintainer observation against a pinned HeatStressR v2.1.6
+checkout indicates the Julia implementation may be about twice as fast. It is
+advisory only: do not make that ratio a README, documentation or release claim
+until a reproducible, correctness-gated report supporting the exact workload
+and ratio is committed.
 
 Do not delay v0.1.0 for optimisation unless profiling or review finds a
 correctness, stability or usability blocker.
 
-## Tier 2: post-publication comparison and optimisation
+## Deferred comparison and optimisation contract
 
-After v0.1.0, retain the following work as optional, profile-led tasks:
+The following work is not accepted into the current delivery scope. If it is
+scheduled, create a new numbered specification and preserve these constraints:
 
-1. verify the local HeatStressR v2.1.6 checkout and record both revisions;
+1. select any reviewed HeatStressR version, pin it to an exact commit, and
+   record its package version, commit, R version, dependency environment and
+   dirty state alongside the HeatStress.jl revision;
 2. create an ignored public-API black-box adapter and correctness-gated scalar,
    serial batch and matched-concurrency comparison matrix;
 3. cover fixed-station, grouped-location and unique-triplet workloads at the
@@ -55,6 +60,12 @@ copy or translate its source, benchmark scripts, fixtures, comments or
 structure. Adapters and raw comparison output remain in ignored
 `local-comparison/` workspace. Agreement with another implementation is
 advisory and never overrides the scientific hierarchy in spec 000.
+
+HeatStressR remains under active development, so no particular HeatStressR
+release is permanently normative or required. A comparison report is valid
+only for the exact pinned commit and recorded environment used to produce it;
+floating branches or unrecorded dependency resolution are not acceptable
+comparison inputs.
 
 ## Benchmark contract
 
@@ -71,7 +82,7 @@ identical inputs and check WBGT/component equality before timing.
 Do not enforce wall-clock thresholds in shared CI. A benchmark smoke test
 checks output equivalence only.
 
-Tier 2 cross-language runs additionally require identical deterministic
+Future cross-language runs additionally require identical deterministic
 datasets, declared output tolerances, warmed implementations, matching row
 counts, recorded R/Julia runtime details and correctness comparison before any
 speed ratio is reported. Include worker startup/orchestration performed within
@@ -87,10 +98,10 @@ solar geometry → meteorological preparation → component solves → output wr
 ```
 
 Prepared-zenith experiments, grouped repeated-key reuse, residual-overhead
-reduction, inlining, SIMD and advanced batch solving are Tier 2 only. Measure
-one-thread and multi-thread end-to-end time, allocations, numerical
-equivalence and scaling before retaining any of them. Do not use `@fastmath` in
-the production scientific path.
+reduction, inlining, SIMD and advanced batch solving are deferred follow-up
+only. Measure one-thread and multi-thread end-to-end time, allocations,
+numerical equivalence and scaling before retaining any of them. Do not use
+`@fastmath` in the production scientific path.
 
 ## Allocation and quality policy
 
@@ -107,8 +118,6 @@ CI.
 
 ## Acceptance criteria
 
-### v0.1.0 publication gate
-
 - reproducible Julia scalar and batch harnesses exist and record metadata;
 - readability-refactor results are numerically equivalent to the baseline and
   have no material benchmark regression;
@@ -119,7 +128,9 @@ CI.
   no unsupported HeatStressR ratio claim;
 - package remains correct with bounds checks enabled.
 
-### Post-v0.1 completion
+## Deferred-work success conditions
+
+Any future comparison or optimisation specification must require:
 
 - correctness-gated HeatStressR scalar, serial batch and parallel comparisons
   cover the selected fixed, grouped and unique workloads;
@@ -130,4 +141,3 @@ CI.
 ## Suggested commits
 
 - `bench: establish Liljegren v0.1 publication baseline`
-- `perf: profile and optimise post-v0.1 Liljegren paths`

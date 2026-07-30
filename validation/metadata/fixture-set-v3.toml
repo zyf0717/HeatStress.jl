@@ -1,0 +1,42 @@
+schema_version = 3
+fixture_set = "numerical-conformance-v3"
+generator = "validation/generate_fixture_set_v3.jl"
+generator_revision = "v1"
+julia_version = "1.10"
+precision_bits = 256
+timezone = "UTC"
+random_seed = 0
+liljegren_reference_rows = 64
+selection = "deterministic greedy pairwise then three-way coverage"
+
+[files.validation_cases_liljegren-v3_toml]
+path = "validation/cases/liljegren-v3.toml"
+sha256 = "3cc9ce4704f499c8d91fb097e76f2d943980a39e335856b5d3388e606a392dc4"
+
+[files.validation_fixtures_v3_liljegren_components_csv]
+path = "validation/fixtures/v3/liljegren_components.csv"
+sha256 = "14e654af88813c1958a919b08cf91b8827d7db9c248a0f59b9859985ba865b4e"
+
+[files.validation_fixtures_v3_liljegren_failures_csv]
+path = "validation/fixtures/v3/liljegren_failures.csv"
+sha256 = "c598971dee4e7fac895b8ff429071d49b9dc86c9f1c2643090f847d4fac1588e"
+
+[files.validation_fixtures_v3_liljegren_reference_csv]
+path = "validation/fixtures/v3/liljegren_reference.csv"
+sha256 = "92f20b3b850620315ac67a392b20ccad2f269069423f8108bc361762752907f8"
+
+[files.validation_fixtures_v3_physical_kernels_csv]
+path = "validation/fixtures/v3/physical_kernels.csv"
+sha256 = "c2feea0cb050b7a385704a3fb7e2a6ed1627a3eef006eeea515bf7b5a19212a9"
+
+[files.validation_fixtures_v3_psychrometrics_csv]
+path = "validation/fixtures/v3/psychrometrics.csv"
+sha256 = "dbc49254384f4767a7a214da744057cbbf1aa8f7d8eadf115e36b7b42e891163"
+
+[files.validation_fixtures_v3_secondary_indices_csv]
+path = "validation/fixtures/v3/secondary_indices.csv"
+sha256 = "b50d1c7bb78353e1df2c337556d5e5b5e9d8c6b1d45f36b6e94ea64bd4a3f69f"
+
+[files.validation_fixtures_v3_solar_geometry_csv]
+path = "validation/fixtures/v3/solar_geometry.csv"
+sha256 = "47ef70b9f2cec5eb9d198588c1f4748ddc76e5e482034cad6bc65bd5f2bdea98"

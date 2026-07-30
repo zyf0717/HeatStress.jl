@@ -52,7 +52,10 @@ const WICK_LENGTH_M = 0.0254
 
 Verify exact values against cited publications before committing. If authoritative sources disagree, record the discrepancy in `docs/src/provenance.md`, select one explicitly and add a sensitivity or compatibility note; do not silently normalise it.
 
-[NEEDS CLARIFICATION: Complete the constant provenance inventory and verify every exact value, including defaults, before implementing `src/constants.jl`.]
+Resolution: the constant/default inventory and exact-value review were
+completed before release. Selected authorities and discrepancies are recorded
+in `docs/src/provenance.md`; implementation and release-readiness evidence are
+recorded in `tasks.md`.
 
 ## Validation rules
 
