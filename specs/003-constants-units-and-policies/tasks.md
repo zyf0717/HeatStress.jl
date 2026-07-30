@@ -26,4 +26,6 @@
   `test/test_liljegren_batch.jl` asserts input/output/alias preflight failures
   leave all caller outputs unchanged. Full tests, quality checks and docs passed
   on 2026-07-25.
-- Commit: pending v0.1 readiness commit
+- Commits: `add549c` implements the constants and input policies; `b87ba0a`
+  integrates the sourced solar path; `876be03` completes scalar validation;
+  `c315048` records v0.1 release-readiness evidence.

@@ -1,0 +1,16 @@
+id,time,longitude_deg,latitude_deg,expected_zenith_deg,authority,source_id,atol_deg,rtol
+equinox_bengaluru,2024-03-20T06:00:00,77.5946,12.9716,19.147918790,high_precision,nrel_spa_pvlib_0152,2.0,0
+equinox_san_francisco,2024-03-20T18:00:00,-122.4194,37.7749,48.995453294,high_precision,nrel_spa_pvlib_0152,2.0,0
+summer_sydney,2024-06-21T00:00:00,151.2093,-33.8688,63.703966103,high_precision,nrel_spa_pvlib_0152,2.0,0
+summer_iceland,2024-06-21T18:00:00,-21.9426,64.1466,59.297467755,high_precision,nrel_spa_pvlib_0152,2.0,0
+southern_high_latitude,2024-12-21T12:00:00,-68.3030,-54.8019,58.387150165,high_precision,nrel_spa_pvlib_0152,2.0,0
+winter_new_york,2024-12-21T18:00:00,-74.0060,40.7128,65.939036083,high_precision,nrel_spa_pvlib_0152,2.0,0
+leap_before,2024-02-28T12:00:00,0,0,8.640472030,high_precision,nrel_spa_pvlib_0152,2.0,0
+leap_day,2024-02-29T12:00:00,0,0,8.271657146,high_precision,nrel_spa_pvlib_0152,2.0,0
+leap_after,2024-03-01T12:00:00,0,0,7.901472412,high_precision,nrel_spa_pvlib_0152,2.0,0
+common_before,2023-02-28T12:00:00,0,0,8.551524062,high_precision,nrel_spa_pvlib_0152,2.0,0
+common_after,2023-03-01T12:00:00,0,0,8.182292524,high_precision,nrel_spa_pvlib_0152,2.0,0
+horizon_below,2024-03-20T06:00:00,0,0,91.848178282,high_precision,nrel_spa_pvlib_0152,2.0,0
+horizon_near,2024-03-20T06:05:00,0,0,90.597922272,high_precision,nrel_spa_pvlib_0152,2.0,0
+horizon_above,2024-09-22T06:00:00,0,0,88.155898267,high_precision,nrel_spa_pvlib_0152,2.0,0
+horizon_evening,2024-09-22T18:00:00,0,0,91.893040070,high_precision,nrel_spa_pvlib_0152,2.0,0

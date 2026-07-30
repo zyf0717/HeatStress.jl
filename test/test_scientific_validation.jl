@@ -48,10 +48,11 @@ function _assert_diagnostic_batch_matches(batch, scalar, threaded::Bool)
     _assert_component_batch_matches(batch.natural_wet_bulb, getproperty.(scalar, :natural_wet_bulb))
 end
 
-function _maximum_error(label, errors, identifiers)
+function _maximum_error(label, errors, rows)
     maximum_error, index = findmax(errors)
     if maximum_error > 0
-        @info "scientific validation maximum difference" family = label id = identifiers[index] error = maximum_error
+        row = rows[index]
+        @info "scientific validation maximum difference" family = label id = row.id error = maximum_error inputs = NamedTuple(row)
     end
     return maximum_error
 end
@@ -65,8 +66,11 @@ end
             abs(solar_zenith(DateTime(row.time), row.longitude_deg, row.latitude_deg) - row.expected_zenith_deg)
             for row in solar_rows
         ]
-        @test _maximum_error("solar geometry", solar_errors, getproperty.(solar_rows, :id)) <=
-              maximum(getproperty.(solar_rows, :atol_deg))
+        _maximum_error("solar geometry", solar_errors, solar_rows)
+        @test all(
+            error <= row.atol_deg
+            for (error, row) in zip(solar_errors, solar_rows)
+        )
 
         for row in _fixture("psychrometrics.csv")
             @test saturation_vapour_pressure_hpa(row.air_temperature_c) ≈ row.expected_saturation_hpa rtol = row.rtol
@@ -114,7 +118,7 @@ end
             end
         end
         errors = abs.(values .- getproperty.(rows, :expected_value))
-        _maximum_error("secondary measures", errors, getproperty.(rows, :id))
+        _maximum_error("secondary measures", errors, rows)
         @test all(
             error <= row.atol + row.rtol * abs(row.expected_value)
             for (error, row) in zip(errors, rows)

@@ -5,10 +5,11 @@
 - Julia performance and threading documentation.
 - BenchmarkTools and JET documentation.
 - Correctness evidence from the Liljegren slice of 010.
-- R timing and parallel-runtime documentation only when a post-v0.1
+- R timing and parallel-runtime documentation only when a future
   cross-language comparison is explicitly scheduled.
-- HeatStressR v2.1.6 public documentation only for that optional API
-  invocation; its source and benchmark implementation are not design inputs.
+- Public documentation for the exact HeatStressR version selected for an
+  optional comparison; its version, commit and dependency environment must be
+  pinned, and its source and benchmark implementation are not design inputs.
 
 The authoritative detail and citations remain in `spec.md`; software implementations are not scientific authorities.
 
@@ -23,7 +24,7 @@ The authoritative detail and citations remain in `spec.md`; software implementat
 - Set conservative cross-version allocation thresholds.
 - Decide profiling evidence required for solar preprocessing or advanced solver work.
 - Select cross-implementation tolerances and matched concurrency only for a
-  post-v0.1 comparison claim.
+  future comparison claim.
 
 ## Current harness decision
 

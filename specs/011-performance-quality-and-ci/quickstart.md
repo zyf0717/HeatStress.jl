@@ -11,9 +11,10 @@
 5. Record exact commands, host/runtime metadata and any regression assessment
    in `tasks.md`.
 
-## Post-v0.1 comparison validation
+## Deferred comparison protocol
 
-Only when a cross-language claim or optimisation is proposed: verify
-HeatStressR version/revisions, generate identical inputs, pass declared
-correctness comparisons, then time scalar/serial/parallel paths. Keep raw
-adapters and results out of the repository.
+Only under a new numbered specification: select any reviewed HeatStressR
+version, pin and record its exact commit, R version and dependency environment,
+generate identical inputs, pass declared correctness comparisons, then time
+scalar/serial/parallel paths. Keep raw adapters and results out of the
+repository.

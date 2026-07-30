@@ -1,6 +1,9 @@
 name: CI
 
 on:
+  push:
+    branches:
+      - main
   pull_request:
   workflow_dispatch:
 
@@ -38,13 +41,34 @@ jobs:
         with:
           version: '1'
       - name: Test
-        run: julia --project=. -e 'using Pkg; Pkg.instantiate(); Pkg.test()'
+        run: julia --project=. -e 'using Pkg; Pkg.instantiate(); Pkg.test(coverage=true)'
+      - name: Recompute fixture set v3
+        run: julia --project=validation/high_precision validation/generate_fixture_set_v3.jl --check
+      - name: Process coverage
+        run: julia --project=test -e 'using Pkg; Pkg.instantiate(); using Coverage; coverage = process_folder("src"); LCOV.writefile("lcov.info", coverage)'
+      - uses: actions/upload-artifact@v4
+        with:
+          name: lcov-current-linux
+          path: lcov.info
       - name: Build documentation
         run: julia --project=docs -e 'using Pkg; Pkg.develop(path="."); Pkg.instantiate()' && julia --project=docs docs/make.jl
 
   windows:
     name: Windows
     runs-on: windows-latest
+    env:
+      JULIA_NUM_THREADS: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: julia-actions/setup-julia@v2
+        with:
+          version: '1'
+      - name: Test
+        run: julia --project=. -e 'using Pkg; Pkg.instantiate(); Pkg.test()'
+
+  macos:
+    name: macOS
+    runs-on: macos-latest
     env:
       JULIA_NUM_THREADS: '1'
     steps:

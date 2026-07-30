@@ -1,0 +1,11 @@
+id,kind,expected_input_status,expected_failure_reason,authority,source_id,atol,rtol
+missing_meteorology,public,MissingMeteorology,NotAttempted,invariant,package_contract,0,0
+missing_time,public,MissingTime,NotAttempted,invariant,package_contract,0,0
+invalid_dew_point,public,InvalidDewPoint,NotAttempted,invariant,package_contract,0,0
+invalid_domain,public,InvalidDomain,NotAttempted,invariant,package_contract,0,0
+unbracketed,solver,InputAccepted,Unbracketed,invariant,package_contract,0,0
+nonfinite_residual,solver,InputAccepted,NonFiniteResidual,invariant,package_contract,0,0
+residual_validation_failed,solver,InputAccepted,ResidualValidationFailed,invariant,package_contract,0,0
+iteration_limit,solver,InputAccepted,IterationLimit,invariant,package_contract,0,0
+not_attempted,solver,InvalidDomain,NotAttempted,invariant,package_contract,0,0
+no_failure,solver,InputAccepted,NoFailure,invariant,package_contract,0,0

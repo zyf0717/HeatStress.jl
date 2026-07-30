@@ -1,0 +1,4 @@
+# Validation digests and byte-comparison checks require canonical LF bytes.
+/validation/cases/** text eol=lf
+/validation/fixtures/** text eol=lf
+/validation/metadata/** text eol=lf

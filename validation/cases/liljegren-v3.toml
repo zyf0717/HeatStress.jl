@@ -1,0 +1,899 @@
+schema_version = 1
+selection = "deterministic greedy pairwise then three-way coverage"
+rows = 64
+
+[[cases]]
+id = "liljegren_v3_001"
+factor_indices = [0, 0, 0, 0, 0, 0, 0]
+geometry = "equatorial_noon"
+air_temperature_c = "-30.0"
+dew_point_c = "-30.0"
+wind_speed_m_s = "0.0"
+solar_radiation_w_m2 = "0.0"
+time = "2024-03-20T12:00:00"
+longitude_deg = "0.0"
+latitude_deg = "0.0"
+pressure_hpa = "700.0"
+direct_fraction = "0.0"
+
+[[cases]]
+id = "liljegren_v3_002"
+factor_indices = [0, 1, 1, 1, 1, 1, 1]
+geometry = "equatorial_night"
+air_temperature_c = "-30.0"
+dew_point_c = "-32.0"
+wind_speed_m_s = "0.1300000000000000000000000000000000000000000000000000000000000000000000000000006"
+solar_radiation_w_m2 = "200.0"
+time = "2024-03-20T00:00:00"
+longitude_deg = "0.0"
+latitude_deg = "0.0"
+pressure_hpa = "850.0"
+direct_fraction = "0.330000000000000000000000000000000000000000000000000000000000000000000000000001"
+
+[[cases]]
+id = "liljegren_v3_003"
+factor_indices = [0, 2, 2, 2, 2, 2, 2]
+geometry = "midlatitude_low_sun"
+air_temperature_c = "-30.0"
+dew_point_c = "-40.0"
+wind_speed_m_s = "1.0"
+solar_radiation_w_m2 = "800.0"
+time = "2024-12-21T15:00:00"
+longitude_deg = "0.0"
+latitude_deg = "45.0"
+pressure_hpa = "1010.0"
+direct_fraction = "0.669999999999999999999999999999999999999999999999999999999999999999999999999999"
+
+[[cases]]
+id = "liljegren_v3_004"
+factor_indices = [0, 3, 3, 3, 3, 3, 3]
+geometry = "highlatitude_summer"
+air_temperature_c = "-30.0"
+dew_point_c = "-40.0"
+wind_speed_m_s = "10.0"
+solar_radiation_w_m2 = "1200.0"
+time = "2024-06-21T18:00:00"
+longitude_deg = "-21.9425999999999999999999999999999999999999999999999999999999999999999999999999"
+latitude_deg = "64.14660000000000000000000000000000000000000000000000000000000000000000000000029"
+pressure_hpa = "1100.0"
+direct_fraction = "1.0"
+
+[[cases]]
+id = "liljegren_v3_005"
+factor_indices = [1, 0, 0, 1, 1, 2, 3]
+geometry = "highlatitude_summer"
+air_temperature_c = "0.0"
+dew_point_c = "0.0"
+wind_speed_m_s = "0.0"
+solar_radiation_w_m2 = "200.0"
+time = "2024-06-21T18:00:00"
+longitude_deg = "-21.9425999999999999999999999999999999999999999999999999999999999999999999999999"
+latitude_deg = "64.14660000000000000000000000000000000000000000000000000000000000000000000000029"
+pressure_hpa = "850.0"
+direct_fraction = "0.669999999999999999999999999999999999999999999999999999999999999999999999999999"
+
+[[cases]]
+id = "liljegren_v3_006"
+factor_indices = [1, 1, 1, 0, 0, 3, 2]
+geometry = "midlatitude_low_sun"
+air_temperature_c = "0.0"
+dew_point_c = "-2.0"
+wind_speed_m_s = "0.1300000000000000000000000000000000000000000000000000000000000000000000000000006"
+solar_radiation_w_m2 = "0.0"
+time = "2024-12-21T15:00:00"
+longitude_deg = "0.0"
+latitude_deg = "45.0"
+pressure_hpa = "700.0"
+direct_fraction = "1.0"
+
+[[cases]]
+id = "liljegren_v3_007"
+factor_indices = [1, 2, 2, 3, 3, 0, 1]
+geometry = "equatorial_night"
+air_temperature_c = "0.0"
+dew_point_c = "-10.0"
+wind_speed_m_s = "1.0"
+solar_radiation_w_m2 = "1200.0"
+time = "2024-03-20T00:00:00"
+longitude_deg = "0.0"
+latitude_deg = "0.0"
+pressure_hpa = "1100.0"
+direct_fraction = "0.0"
+
+[[cases]]
+id = "liljegren_v3_008"
+factor_indices = [1, 3, 3, 2, 2, 1, 0]
+geometry = "equatorial_noon"
+air_temperature_c = "0.0"
+dew_point_c = "-40.0"
+wind_speed_m_s = "10.0"
+solar_radiation_w_m2 = "800.0"
+time = "2024-03-20T12:00:00"
+longitude_deg = "0.0"
+latitude_deg = "0.0"
+pressure_hpa = "1010.0"
+direct_fraction = "0.330000000000000000000000000000000000000000000000000000000000000000000000000001"
+
+[[cases]]
+id = "liljegren_v3_009"
+factor_indices = [2, 0, 0, 2, 2, 3, 1]
+geometry = "equatorial_night"
+air_temperature_c = "25.0"
+dew_point_c = "25.0"
+wind_speed_m_s = "0.0"
+solar_radiation_w_m2 = "800.0"
+time = "2024-03-20T00:00:00"
+longitude_deg = "0.0"
+latitude_deg = "0.0"
+pressure_hpa = "1010.0"
+direct_fraction = "1.0"
+
+[[cases]]
+id = "liljegren_v3_010"
+factor_indices = [2, 1, 1, 3, 3, 2, 0]
+geometry = "equatorial_noon"
+air_temperature_c = "25.0"
+dew_point_c = "23.0"
+wind_speed_m_s = "0.1300000000000000000000000000000000000000000000000000000000000000000000000000006"
+solar_radiation_w_m2 = "1200.0"
+time = "2024-03-20T12:00:00"
+longitude_deg = "0.0"
+latitude_deg = "0.0"
+pressure_hpa = "1100.0"
+direct_fraction = "0.669999999999999999999999999999999999999999999999999999999999999999999999999999"
+
+[[cases]]
+id = "liljegren_v3_011"
+factor_indices = [2, 2, 2, 0, 0, 1, 3]
+geometry = "highlatitude_summer"
+air_temperature_c = "25.0"
+dew_point_c = "15.0"
+wind_speed_m_s = "1.0"
+solar_radiation_w_m2 = "0.0"
+time = "2024-06-21T18:00:00"
+longitude_deg = "-21.9425999999999999999999999999999999999999999999999999999999999999999999999999"
+latitude_deg = "64.14660000000000000000000000000000000000000000000000000000000000000000000000029"
+pressure_hpa = "700.0"
+direct_fraction = "0.330000000000000000000000000000000000000000000000000000000000000000000000000001"
+
+[[cases]]
+id = "liljegren_v3_012"
+factor_indices = [2, 3, 3, 1, 1, 0, 2]
+geometry = "midlatitude_low_sun"
+air_temperature_c = "25.0"
+dew_point_c = "-40.0"
+wind_speed_m_s = "10.0"
+solar_radiation_w_m2 = "200.0"
+time = "2024-12-21T15:00:00"
+longitude_deg = "0.0"
+latitude_deg = "45.0"
+pressure_hpa = "850.0"
+direct_fraction = "0.0"
+
+[[cases]]
+id = "liljegren_v3_013"
+factor_indices = [3, 0, 0, 3, 3, 1, 2]
+geometry = "midlatitude_low_sun"
+air_temperature_c = "50.0"
+dew_point_c = "50.0"
+wind_speed_m_s = "0.0"
+solar_radiation_w_m2 = "1200.0"
+time = "2024-12-21T15:00:00"
+longitude_deg = "0.0"
+latitude_deg = "45.0"
+pressure_hpa = "1100.0"
+direct_fraction = "0.330000000000000000000000000000000000000000000000000000000000000000000000000001"
+
+[[cases]]
+id = "liljegren_v3_014"
+factor_indices = [3, 1, 1, 2, 2, 0, 3]
+geometry = "highlatitude_summer"
+air_temperature_c = "50.0"
+dew_point_c = "48.0"
+wind_speed_m_s = "0.1300000000000000000000000000000000000000000000000000000000000000000000000000006"
+solar_radiation_w_m2 = "800.0"
+time = "2024-06-21T18:00:00"
+longitude_deg = "-21.9425999999999999999999999999999999999999999999999999999999999999999999999999"
+latitude_deg = "64.14660000000000000000000000000000000000000000000000000000000000000000000000029"
+pressure_hpa = "1010.0"
+direct_fraction = "0.0"
+
+[[cases]]
+id = "liljegren_v3_015"
+factor_indices = [3, 2, 2, 1, 1, 3, 0]
+geometry = "equatorial_noon"
+air_temperature_c = "50.0"
+dew_point_c = "40.0"
+wind_speed_m_s = "1.0"
+solar_radiation_w_m2 = "200.0"
+time = "2024-03-20T12:00:00"
+longitude_deg = "0.0"
+latitude_deg = "0.0"
+pressure_hpa = "850.0"
+direct_fraction = "1.0"
+
+[[cases]]
+id = "liljegren_v3_016"
+factor_indices = [3, 3, 3, 0, 0, 2, 1]
+geometry = "equatorial_night"
+air_temperature_c = "50.0"
+dew_point_c = "-40.0"
+wind_speed_m_s = "10.0"
+solar_radiation_w_m2 = "0.0"
+time = "2024-03-20T00:00:00"
+longitude_deg = "0.0"
+latitude_deg = "0.0"
+pressure_hpa = "700.0"
+direct_fraction = "0.669999999999999999999999999999999999999999999999999999999999999999999999999999"
+
+[[cases]]
+id = "liljegren_v3_017"
+factor_indices = [0, 0, 1, 0, 1, 0, 0]
+geometry = "equatorial_noon"
+air_temperature_c = "-30.0"
+dew_point_c = "-30.0"
+wind_speed_m_s = "0.1300000000000000000000000000000000000000000000000000000000000000000000000000006"
+solar_radiation_w_m2 = "0.0"
+time = "2024-03-20T12:00:00"
+longitude_deg = "0.0"
+latitude_deg = "0.0"
+pressure_hpa = "850.0"
+direct_fraction = "0.0"
+
+[[cases]]
+id = "liljegren_v3_018"
+factor_indices = [0, 0, 2, 0, 2, 0, 0]
+geometry = "equatorial_noon"
+air_temperature_c = "-30.0"
+dew_point_c = "-30.0"
+wind_speed_m_s = "1.0"
+solar_radiation_w_m2 = "0.0"
+time = "2024-03-20T12:00:00"
+longitude_deg = "0.0"
+latitude_deg = "0.0"
+pressure_hpa = "1010.0"
+direct_fraction = "0.0"
+
+[[cases]]
+id = "liljegren_v3_019"
+factor_indices = [0, 0, 3, 0, 3, 0, 0]
+geometry = "equatorial_noon"
+air_temperature_c = "-30.0"
+dew_point_c = "-30.0"
+wind_speed_m_s = "10.0"
+solar_radiation_w_m2 = "0.0"
+time = "2024-03-20T12:00:00"
+longitude_deg = "0.0"
+latitude_deg = "0.0"
+pressure_hpa = "1100.0"
+direct_fraction = "0.0"
+
+[[cases]]
+id = "liljegren_v3_020"
+factor_indices = [0, 1, 0, 1, 0, 0, 0]
+geometry = "equatorial_noon"
+air_temperature_c = "-30.0"
+dew_point_c = "-32.0"
+wind_speed_m_s = "0.0"
+solar_radiation_w_m2 = "200.0"
+time = "2024-03-20T12:00:00"
+longitude_deg = "0.0"
+latitude_deg = "0.0"
+pressure_hpa = "700.0"
+direct_fraction = "0.0"
+
+[[cases]]
+id = "liljegren_v3_021"
+factor_indices = [0, 1, 2, 1, 2, 0, 0]
+geometry = "equatorial_noon"
+air_temperature_c = "-30.0"
+dew_point_c = "-32.0"
+wind_speed_m_s = "1.0"
+solar_radiation_w_m2 = "200.0"
+time = "2024-03-20T12:00:00"
+longitude_deg = "0.0"
+latitude_deg = "0.0"
+pressure_hpa = "1010.0"
+direct_fraction = "0.0"
+
+[[cases]]
+id = "liljegren_v3_022"
+factor_indices = [0, 1, 3, 1, 3, 0, 0]
+geometry = "equatorial_noon"
+air_temperature_c = "-30.0"
+dew_point_c = "-32.0"
+wind_speed_m_s = "10.0"
+solar_radiation_w_m2 = "200.0"
+time = "2024-03-20T12:00:00"
+longitude_deg = "0.0"
+latitude_deg = "0.0"
+pressure_hpa = "1100.0"
+direct_fraction = "0.0"
+
+[[cases]]
+id = "liljegren_v3_023"
+factor_indices = [0, 2, 0, 2, 0, 0, 0]
+geometry = "equatorial_noon"
+air_temperature_c = "-30.0"
+dew_point_c = "-40.0"
+wind_speed_m_s = "0.0"
+solar_radiation_w_m2 = "800.0"
+time = "2024-03-20T12:00:00"
+longitude_deg = "0.0"
+latitude_deg = "0.0"
+pressure_hpa = "700.0"
+direct_fraction = "0.0"
+
+[[cases]]
+id = "liljegren_v3_024"
+factor_indices = [0, 2, 1, 2, 1, 0, 0]
+geometry = "equatorial_noon"
+air_temperature_c = "-30.0"
+dew_point_c = "-40.0"
+wind_speed_m_s = "0.1300000000000000000000000000000000000000000000000000000000000000000000000000006"
+solar_radiation_w_m2 = "800.0"
+time = "2024-03-20T12:00:00"
+longitude_deg = "0.0"
+latitude_deg = "0.0"
+pressure_hpa = "850.0"
+direct_fraction = "0.0"
+
+[[cases]]
+id = "liljegren_v3_025"
+factor_indices = [0, 2, 3, 2, 3, 0, 0]
+geometry = "equatorial_noon"
+air_temperature_c = "-30.0"
+dew_point_c = "-40.0"
+wind_speed_m_s = "10.0"
+solar_radiation_w_m2 = "800.0"
+time = "2024-03-20T12:00:00"
+longitude_deg = "0.0"
+latitude_deg = "0.0"
+pressure_hpa = "1100.0"
+direct_fraction = "0.0"
+
+[[cases]]
+id = "liljegren_v3_026"
+factor_indices = [0, 3, 0, 3, 0, 0, 0]
+geometry = "equatorial_noon"
+air_temperature_c = "-30.0"
+dew_point_c = "-40.0"
+wind_speed_m_s = "0.0"
+solar_radiation_w_m2 = "1200.0"
+time = "2024-03-20T12:00:00"
+longitude_deg = "0.0"
+latitude_deg = "0.0"
+pressure_hpa = "700.0"
+direct_fraction = "0.0"
+
+[[cases]]
+id = "liljegren_v3_027"
+factor_indices = [0, 3, 1, 3, 1, 0, 0]
+geometry = "equatorial_noon"
+air_temperature_c = "-30.0"
+dew_point_c = "-40.0"
+wind_speed_m_s = "0.1300000000000000000000000000000000000000000000000000000000000000000000000000006"
+solar_radiation_w_m2 = "1200.0"
+time = "2024-03-20T12:00:00"
+longitude_deg = "0.0"
+latitude_deg = "0.0"
+pressure_hpa = "850.0"
+direct_fraction = "0.0"
+
+[[cases]]
+id = "liljegren_v3_028"
+factor_indices = [0, 3, 2, 3, 2, 0, 0]
+geometry = "equatorial_noon"
+air_temperature_c = "-30.0"
+dew_point_c = "-40.0"
+wind_speed_m_s = "1.0"
+solar_radiation_w_m2 = "1200.0"
+time = "2024-03-20T12:00:00"
+longitude_deg = "0.0"
+latitude_deg = "0.0"
+pressure_hpa = "1010.0"
+direct_fraction = "0.0"
+
+[[cases]]
+id = "liljegren_v3_029"
+factor_indices = [1, 0, 1, 2, 0, 1, 1]
+geometry = "equatorial_night"
+air_temperature_c = "0.0"
+dew_point_c = "0.0"
+wind_speed_m_s = "0.1300000000000000000000000000000000000000000000000000000000000000000000000000006"
+solar_radiation_w_m2 = "800.0"
+time = "2024-03-20T00:00:00"
+longitude_deg = "0.0"
+latitude_deg = "0.0"
+pressure_hpa = "700.0"
+direct_fraction = "0.330000000000000000000000000000000000000000000000000000000000000000000000000001"
+
+[[cases]]
+id = "liljegren_v3_030"
+factor_indices = [1, 0, 3, 3, 2, 2, 2]
+geometry = "midlatitude_low_sun"
+air_temperature_c = "0.0"
+dew_point_c = "0.0"
+wind_speed_m_s = "10.0"
+solar_radiation_w_m2 = "1200.0"
+time = "2024-12-21T15:00:00"
+longitude_deg = "0.0"
+latitude_deg = "45.0"
+pressure_hpa = "1010.0"
+direct_fraction = "0.669999999999999999999999999999999999999999999999999999999999999999999999999999"
+
+[[cases]]
+id = "liljegren_v3_031"
+factor_indices = [1, 1, 0, 0, 3, 1, 3]
+geometry = "highlatitude_summer"
+air_temperature_c = "0.0"
+dew_point_c = "-2.0"
+wind_speed_m_s = "0.0"
+solar_radiation_w_m2 = "0.0"
+time = "2024-06-21T18:00:00"
+longitude_deg = "-21.9425999999999999999999999999999999999999999999999999999999999999999999999999"
+latitude_deg = "64.14660000000000000000000000000000000000000000000000000000000000000000000000029"
+pressure_hpa = "1100.0"
+direct_fraction = "0.330000000000000000000000000000000000000000000000000000000000000000000000000001"
+
+[[cases]]
+id = "liljegren_v3_032"
+factor_indices = [1, 2, 1, 1, 2, 3, 3]
+geometry = "highlatitude_summer"
+air_temperature_c = "0.0"
+dew_point_c = "-10.0"
+wind_speed_m_s = "0.1300000000000000000000000000000000000000000000000000000000000000000000000000006"
+solar_radiation_w_m2 = "200.0"
+time = "2024-06-21T18:00:00"
+longitude_deg = "-21.9425999999999999999999999999999999999999999999999999999999999999999999999999"
+latitude_deg = "64.14660000000000000000000000000000000000000000000000000000000000000000000000029"
+pressure_hpa = "1010.0"
+direct_fraction = "1.0"
+
+[[cases]]
+id = "liljegren_v3_033"
+factor_indices = [1, 3, 2, 0, 1, 3, 1]
+geometry = "equatorial_night"
+air_temperature_c = "0.0"
+dew_point_c = "-40.0"
+wind_speed_m_s = "1.0"
+solar_radiation_w_m2 = "0.0"
+time = "2024-03-20T00:00:00"
+longitude_deg = "0.0"
+latitude_deg = "0.0"
+pressure_hpa = "850.0"
+direct_fraction = "1.0"
+
+[[cases]]
+id = "liljegren_v3_034"
+factor_indices = [2, 0, 2, 1, 3, 2, 1]
+geometry = "equatorial_night"
+air_temperature_c = "25.0"
+dew_point_c = "25.0"
+wind_speed_m_s = "1.0"
+solar_radiation_w_m2 = "200.0"
+time = "2024-03-20T00:00:00"
+longitude_deg = "0.0"
+latitude_deg = "0.0"
+pressure_hpa = "1100.0"
+direct_fraction = "0.669999999999999999999999999999999999999999999999999999999999999999999999999999"
+
+[[cases]]
+id = "liljegren_v3_035"
+factor_indices = [2, 1, 2, 2, 1, 1, 2]
+geometry = "midlatitude_low_sun"
+air_temperature_c = "25.0"
+dew_point_c = "23.0"
+wind_speed_m_s = "1.0"
+solar_radiation_w_m2 = "800.0"
+time = "2024-12-21T15:00:00"
+longitude_deg = "0.0"
+latitude_deg = "45.0"
+pressure_hpa = "850.0"
+direct_fraction = "0.330000000000000000000000000000000000000000000000000000000000000000000000000001"
+
+[[cases]]
+id = "liljegren_v3_036"
+factor_indices = [2, 2, 0, 0, 1, 2, 2]
+geometry = "midlatitude_low_sun"
+air_temperature_c = "25.0"
+dew_point_c = "15.0"
+wind_speed_m_s = "0.0"
+solar_radiation_w_m2 = "0.0"
+time = "2024-12-21T15:00:00"
+longitude_deg = "0.0"
+latitude_deg = "45.0"
+pressure_hpa = "850.0"
+direct_fraction = "0.669999999999999999999999999999999999999999999999999999999999999999999999999999"
+
+[[cases]]
+id = "liljegren_v3_037"
+factor_indices = [3, 0, 2, 3, 0, 3, 3]
+geometry = "highlatitude_summer"
+air_temperature_c = "50.0"
+dew_point_c = "50.0"
+wind_speed_m_s = "1.0"
+solar_radiation_w_m2 = "1200.0"
+time = "2024-06-21T18:00:00"
+longitude_deg = "-21.9425999999999999999999999999999999999999999999999999999999999999999999999999"
+latitude_deg = "64.14660000000000000000000000000000000000000000000000000000000000000000000000029"
+pressure_hpa = "700.0"
+direct_fraction = "1.0"
+
+[[cases]]
+id = "liljegren_v3_038"
+factor_indices = [3, 3, 1, 2, 3, 3, 2]
+geometry = "midlatitude_low_sun"
+air_temperature_c = "50.0"
+dew_point_c = "-40.0"
+wind_speed_m_s = "0.1300000000000000000000000000000000000000000000000000000000000000000000000000006"
+solar_radiation_w_m2 = "800.0"
+time = "2024-12-21T15:00:00"
+longitude_deg = "0.0"
+latitude_deg = "45.0"
+pressure_hpa = "1100.0"
+direct_fraction = "1.0"
+
+[[cases]]
+id = "liljegren_v3_039"
+factor_indices = [2, 1, 3, 2, 0, 2, 3]
+geometry = "highlatitude_summer"
+air_temperature_c = "25.0"
+dew_point_c = "23.0"
+wind_speed_m_s = "10.0"
+solar_radiation_w_m2 = "800.0"
+time = "2024-06-21T18:00:00"
+longitude_deg = "-21.9425999999999999999999999999999999999999999999999999999999999999999999999999"
+latitude_deg = "64.14660000000000000000000000000000000000000000000000000000000000000000000000029"
+pressure_hpa = "700.0"
+direct_fraction = "0.669999999999999999999999999999999999999999999999999999999999999999999999999999"
+
+[[cases]]
+id = "liljegren_v3_040"
+factor_indices = [2, 2, 3, 3, 2, 1, 1]
+geometry = "equatorial_night"
+air_temperature_c = "25.0"
+dew_point_c = "15.0"
+wind_speed_m_s = "10.0"
+solar_radiation_w_m2 = "1200.0"
+time = "2024-03-20T00:00:00"
+longitude_deg = "0.0"
+latitude_deg = "0.0"
+pressure_hpa = "1010.0"
+direct_fraction = "0.330000000000000000000000000000000000000000000000000000000000000000000000000001"
+
+[[cases]]
+id = "liljegren_v3_041"
+factor_indices = [3, 1, 0, 3, 1, 2, 1]
+geometry = "equatorial_night"
+air_temperature_c = "50.0"
+dew_point_c = "48.0"
+wind_speed_m_s = "0.0"
+solar_radiation_w_m2 = "1200.0"
+time = "2024-03-20T00:00:00"
+longitude_deg = "0.0"
+latitude_deg = "0.0"
+pressure_hpa = "850.0"
+direct_fraction = "0.669999999999999999999999999999999999999999999999999999999999999999999999999999"
+
+[[cases]]
+id = "liljegren_v3_042"
+factor_indices = [2, 3, 1, 0, 2, 2, 3]
+geometry = "highlatitude_summer"
+air_temperature_c = "25.0"
+dew_point_c = "-40.0"
+wind_speed_m_s = "0.1300000000000000000000000000000000000000000000000000000000000000000000000000006"
+solar_radiation_w_m2 = "0.0"
+time = "2024-06-21T18:00:00"
+longitude_deg = "-21.9425999999999999999999999999999999999999999999999999999999999999999999999999"
+latitude_deg = "64.14660000000000000000000000000000000000000000000000000000000000000000000000029"
+pressure_hpa = "1010.0"
+direct_fraction = "0.669999999999999999999999999999999999999999999999999999999999999999999999999999"
+
+[[cases]]
+id = "liljegren_v3_043"
+factor_indices = [3, 2, 1, 1, 0, 2, 2]
+geometry = "midlatitude_low_sun"
+air_temperature_c = "50.0"
+dew_point_c = "40.0"
+wind_speed_m_s = "0.1300000000000000000000000000000000000000000000000000000000000000000000000000006"
+solar_radiation_w_m2 = "200.0"
+time = "2024-12-21T15:00:00"
+longitude_deg = "0.0"
+latitude_deg = "45.0"
+pressure_hpa = "700.0"
+direct_fraction = "0.669999999999999999999999999999999999999999999999999999999999999999999999999999"
+
+[[cases]]
+id = "liljegren_v3_044"
+factor_indices = [3, 0, 3, 0, 1, 1, 3]
+geometry = "highlatitude_summer"
+air_temperature_c = "50.0"
+dew_point_c = "50.0"
+wind_speed_m_s = "10.0"
+solar_radiation_w_m2 = "0.0"
+time = "2024-06-21T18:00:00"
+longitude_deg = "-21.9425999999999999999999999999999999999999999999999999999999999999999999999999"
+latitude_deg = "64.14660000000000000000000000000000000000000000000000000000000000000000000000029"
+pressure_hpa = "850.0"
+direct_fraction = "0.330000000000000000000000000000000000000000000000000000000000000000000000000001"
+
+[[cases]]
+id = "liljegren_v3_045"
+factor_indices = [3, 3, 0, 1, 2, 1, 1]
+geometry = "equatorial_night"
+air_temperature_c = "50.0"
+dew_point_c = "-40.0"
+wind_speed_m_s = "0.0"
+solar_radiation_w_m2 = "200.0"
+time = "2024-03-20T00:00:00"
+longitude_deg = "0.0"
+latitude_deg = "0.0"
+pressure_hpa = "1010.0"
+direct_fraction = "0.330000000000000000000000000000000000000000000000000000000000000000000000000001"
+
+[[cases]]
+id = "liljegren_v3_046"
+factor_indices = [2, 0, 1, 3, 1, 3, 2]
+geometry = "midlatitude_low_sun"
+air_temperature_c = "25.0"
+dew_point_c = "25.0"
+wind_speed_m_s = "0.1300000000000000000000000000000000000000000000000000000000000000000000000000006"
+solar_radiation_w_m2 = "1200.0"
+time = "2024-12-21T15:00:00"
+longitude_deg = "0.0"
+latitude_deg = "45.0"
+pressure_hpa = "850.0"
+direct_fraction = "1.0"
+
+[[cases]]
+id = "liljegren_v3_047"
+factor_indices = [3, 1, 3, 0, 2, 3, 2]
+geometry = "midlatitude_low_sun"
+air_temperature_c = "50.0"
+dew_point_c = "48.0"
+wind_speed_m_s = "10.0"
+solar_radiation_w_m2 = "0.0"
+time = "2024-12-21T15:00:00"
+longitude_deg = "0.0"
+latitude_deg = "45.0"
+pressure_hpa = "1010.0"
+direct_fraction = "1.0"
+
+[[cases]]
+id = "liljegren_v3_048"
+factor_indices = [1, 3, 2, 1, 0, 0, 3]
+geometry = "highlatitude_summer"
+air_temperature_c = "0.0"
+dew_point_c = "-40.0"
+wind_speed_m_s = "1.0"
+solar_radiation_w_m2 = "200.0"
+time = "2024-06-21T18:00:00"
+longitude_deg = "-21.9425999999999999999999999999999999999999999999999999999999999999999999999999"
+latitude_deg = "64.14660000000000000000000000000000000000000000000000000000000000000000000000029"
+pressure_hpa = "700.0"
+direct_fraction = "0.0"
+
+[[cases]]
+id = "liljegren_v3_049"
+factor_indices = [0, 2, 0, 0, 3, 3, 1]
+geometry = "equatorial_night"
+air_temperature_c = "-30.0"
+dew_point_c = "-40.0"
+wind_speed_m_s = "0.0"
+solar_radiation_w_m2 = "0.0"
+time = "2024-03-20T00:00:00"
+longitude_deg = "0.0"
+latitude_deg = "0.0"
+pressure_hpa = "1100.0"
+direct_fraction = "1.0"
+
+[[cases]]
+id = "liljegren_v3_050"
+factor_indices = [2, 0, 3, 1, 0, 3, 0]
+geometry = "equatorial_noon"
+air_temperature_c = "25.0"
+dew_point_c = "25.0"
+wind_speed_m_s = "10.0"
+solar_radiation_w_m2 = "200.0"
+time = "2024-03-20T12:00:00"
+longitude_deg = "0.0"
+latitude_deg = "0.0"
+pressure_hpa = "700.0"
+direct_fraction = "1.0"
+
+[[cases]]
+id = "liljegren_v3_051"
+factor_indices = [0, 3, 2, 0, 3, 1, 2]
+geometry = "midlatitude_low_sun"
+air_temperature_c = "-30.0"
+dew_point_c = "-40.0"
+wind_speed_m_s = "1.0"
+solar_radiation_w_m2 = "0.0"
+time = "2024-12-21T15:00:00"
+longitude_deg = "0.0"
+latitude_deg = "45.0"
+pressure_hpa = "1100.0"
+direct_fraction = "0.330000000000000000000000000000000000000000000000000000000000000000000000000001"
+
+[[cases]]
+id = "liljegren_v3_052"
+factor_indices = [1, 1, 2, 2, 3, 3, 0]
+geometry = "equatorial_noon"
+air_temperature_c = "0.0"
+dew_point_c = "-2.0"
+wind_speed_m_s = "1.0"
+solar_radiation_w_m2 = "800.0"
+time = "2024-03-20T12:00:00"
+longitude_deg = "0.0"
+latitude_deg = "0.0"
+pressure_hpa = "1100.0"
+direct_fraction = "1.0"
+
+[[cases]]
+id = "liljegren_v3_053"
+factor_indices = [1, 2, 3, 1, 3, 1, 2]
+geometry = "midlatitude_low_sun"
+air_temperature_c = "0.0"
+dew_point_c = "-10.0"
+wind_speed_m_s = "10.0"
+solar_radiation_w_m2 = "200.0"
+time = "2024-12-21T15:00:00"
+longitude_deg = "0.0"
+latitude_deg = "45.0"
+pressure_hpa = "1100.0"
+direct_fraction = "0.330000000000000000000000000000000000000000000000000000000000000000000000000001"
+
+[[cases]]
+id = "liljegren_v3_054"
+factor_indices = [0, 3, 0, 2, 1, 2, 3]
+geometry = "highlatitude_summer"
+air_temperature_c = "-30.0"
+dew_point_c = "-40.0"
+wind_speed_m_s = "0.0"
+solar_radiation_w_m2 = "800.0"
+time = "2024-06-21T18:00:00"
+longitude_deg = "-21.9425999999999999999999999999999999999999999999999999999999999999999999999999"
+latitude_deg = "64.14660000000000000000000000000000000000000000000000000000000000000000000000029"
+pressure_hpa = "850.0"
+direct_fraction = "0.669999999999999999999999999999999999999999999999999999999999999999999999999999"
+
+[[cases]]
+id = "liljegren_v3_055"
+factor_indices = [1, 1, 3, 2, 1, 0, 1]
+geometry = "equatorial_night"
+air_temperature_c = "0.0"
+dew_point_c = "-2.0"
+wind_speed_m_s = "10.0"
+solar_radiation_w_m2 = "800.0"
+time = "2024-03-20T00:00:00"
+longitude_deg = "0.0"
+latitude_deg = "0.0"
+pressure_hpa = "850.0"
+direct_fraction = "0.0"
+
+[[cases]]
+id = "liljegren_v3_056"
+factor_indices = [1, 2, 0, 3, 1, 1, 0]
+geometry = "equatorial_noon"
+air_temperature_c = "0.0"
+dew_point_c = "-10.0"
+wind_speed_m_s = "0.0"
+solar_radiation_w_m2 = "1200.0"
+time = "2024-03-20T12:00:00"
+longitude_deg = "0.0"
+latitude_deg = "0.0"
+pressure_hpa = "850.0"
+direct_fraction = "0.330000000000000000000000000000000000000000000000000000000000000000000000000001"
+
+[[cases]]
+id = "liljegren_v3_057"
+factor_indices = [0, 0, 1, 3, 2, 1, 3]
+geometry = "highlatitude_summer"
+air_temperature_c = "-30.0"
+dew_point_c = "-30.0"
+wind_speed_m_s = "0.1300000000000000000000000000000000000000000000000000000000000000000000000000006"
+solar_radiation_w_m2 = "1200.0"
+time = "2024-06-21T18:00:00"
+longitude_deg = "-21.9425999999999999999999999999999999999999999999999999999999999999999999999999"
+latitude_deg = "64.14660000000000000000000000000000000000000000000000000000000000000000000000029"
+pressure_hpa = "1010.0"
+direct_fraction = "0.330000000000000000000000000000000000000000000000000000000000000000000000000001"
+
+[[cases]]
+id = "liljegren_v3_058"
+factor_indices = [2, 2, 0, 1, 3, 0, 3]
+geometry = "highlatitude_summer"
+air_temperature_c = "25.0"
+dew_point_c = "15.0"
+wind_speed_m_s = "0.0"
+solar_radiation_w_m2 = "200.0"
+time = "2024-06-21T18:00:00"
+longitude_deg = "-21.9425999999999999999999999999999999999999999999999999999999999999999999999999"
+latitude_deg = "64.14660000000000000000000000000000000000000000000000000000000000000000000000029"
+pressure_hpa = "1100.0"
+direct_fraction = "0.0"
+
+[[cases]]
+id = "liljegren_v3_059"
+factor_indices = [2, 3, 1, 3, 0, 0, 1]
+geometry = "equatorial_night"
+air_temperature_c = "25.0"
+dew_point_c = "-40.0"
+wind_speed_m_s = "0.1300000000000000000000000000000000000000000000000000000000000000000000000000006"
+solar_radiation_w_m2 = "1200.0"
+time = "2024-03-20T00:00:00"
+longitude_deg = "0.0"
+latitude_deg = "0.0"
+pressure_hpa = "700.0"
+direct_fraction = "0.0"
+
+[[cases]]
+id = "liljegren_v3_060"
+factor_indices = [3, 0, 2, 2, 0, 0, 2]
+geometry = "midlatitude_low_sun"
+air_temperature_c = "50.0"
+dew_point_c = "50.0"
+wind_speed_m_s = "1.0"
+solar_radiation_w_m2 = "800.0"
+time = "2024-12-21T15:00:00"
+longitude_deg = "0.0"
+latitude_deg = "45.0"
+pressure_hpa = "700.0"
+direct_fraction = "0.0"
+
+[[cases]]
+id = "liljegren_v3_061"
+factor_indices = [0, 1, 3, 3, 0, 1, 2]
+geometry = "midlatitude_low_sun"
+air_temperature_c = "-30.0"
+dew_point_c = "-32.0"
+wind_speed_m_s = "10.0"
+solar_radiation_w_m2 = "1200.0"
+time = "2024-12-21T15:00:00"
+longitude_deg = "0.0"
+latitude_deg = "45.0"
+pressure_hpa = "700.0"
+direct_fraction = "0.330000000000000000000000000000000000000000000000000000000000000000000000000001"
+
+[[cases]]
+id = "liljegren_v3_062"
+factor_indices = [3, 2, 0, 0, 2, 0, 0]
+geometry = "equatorial_noon"
+air_temperature_c = "50.0"
+dew_point_c = "40.0"
+wind_speed_m_s = "0.0"
+solar_radiation_w_m2 = "0.0"
+time = "2024-03-20T12:00:00"
+longitude_deg = "0.0"
+latitude_deg = "0.0"
+pressure_hpa = "1010.0"
+direct_fraction = "0.0"
+
+[[cases]]
+id = "liljegren_v3_063"
+factor_indices = [1, 1, 2, 0, 2, 2, 1]
+geometry = "equatorial_night"
+air_temperature_c = "0.0"
+dew_point_c = "-2.0"
+wind_speed_m_s = "1.0"
+solar_radiation_w_m2 = "0.0"
+time = "2024-03-20T00:00:00"
+longitude_deg = "0.0"
+latitude_deg = "0.0"
+pressure_hpa = "1010.0"
+direct_fraction = "0.669999999999999999999999999999999999999999999999999999999999999999999999999999"
+
+[[cases]]
+id = "liljegren_v3_064"
+factor_indices = [1, 3, 1, 1, 3, 2, 0]
+geometry = "equatorial_noon"
+air_temperature_c = "0.0"
+dew_point_c = "-40.0"
+wind_speed_m_s = "0.1300000000000000000000000000000000000000000000000000000000000000000000000000006"
+solar_radiation_w_m2 = "200.0"
+time = "2024-03-20T12:00:00"
+longitude_deg = "0.0"
+latitude_deg = "0.0"
+pressure_hpa = "1100.0"
+direct_fraction = "0.669999999999999999999999999999999999999999999999999999999999999999999999999999"

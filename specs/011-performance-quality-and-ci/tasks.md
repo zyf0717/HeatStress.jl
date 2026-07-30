@@ -3,8 +3,8 @@
 ## Status
 
 - [ ] Planned
-- [x] In progress
-- [ ] Complete
+- [ ] In progress
+- [x] Complete
 
 ## v0.1 publication gate
 
@@ -21,19 +21,17 @@
   host-specific documentation statement.
 - [x] Run the publication-gate acceptance checks in `quickstart.md`.
 
-## Post-v0.1 comparison and optimisation
+## Deferred comparison and optimisation
 
-- [ ] Verify the local HeatStressR checkout is v2.1.6 and record both
-  repositories' commits and dirty states.
-- [ ] Create the ignored public-API comparison adapter and deterministic
-  fixed/grouped/unique datasets.
-- [ ] Declare cross-implementation tolerances and pass the correctness gate
-  before timing or publishing a ratio.
-- [ ] Benchmark corresponding HeatStressR scalar, batch and parallel paths at
-  selected row sizes and matched concurrency.
-- [ ] Profile before prepared-zenith, grouped-key, allocation or solver
-  optimisation; retain only measured improvements.
-- [ ] Record full Tier 2 evidence and any future public performance claim.
+These items are not accepted tasks for this completed unit. A future numbered
+specification must explicitly scope them before work begins:
+
+- select and pin a reviewed HeatStressR version and both runtime environments;
+- build an ignored public-API adapter and deterministic comparison datasets;
+- pass declared correctness tolerances before timing or publishing a ratio;
+- benchmark matched scalar, batch and parallel workloads;
+- profile before proposing production optimisation;
+- record reproducible evidence for any public performance claim.
 
 ## Evidence
 
@@ -50,10 +48,11 @@
 - Scalar local reports: `benchmark/results/scalar-e2e-current.toml` and
   `benchmark/results/scalar-e2e-value-mode.toml`; raw results are local
   baseline evidence only.
-- Maintainer-reported HeatStressR finding: the current Julia implementation is
-  approximately twice as fast as optimised HeatStressR v2.1.6. No reproducible,
-  correctness-gated committed report supports an exact ratio, so this must not
-  appear in public documentation or release claims.
+- Historical maintainer-reported HeatStressR finding: the Julia implementation
+  was approximately twice as fast as a pinned optimised HeatStressR v2.1.6
+  checkout. No reproducible, correctness-gated committed report supports an
+  exact ratio, so this must not appear in public documentation or release
+  claims.
 - Commit: `8abe0df` (`refactor: share typed Liljegren row execution`) establishes
   the spec-008 baseline; `c6ff0cf` makes every mode use the same concrete input
   arrays; `aab195c` adds the scalar end-to-end harness.
@@ -68,3 +67,6 @@
 - Quality/smoke: `HEATSTRESS_QUALITY=1 julia --project=. -e 'using Pkg;
   Pkg.test()'` and `julia --threads=4 --project=benchmark
   benchmark/batch_e2e.jl --rows=10000 --samples=1` passed on 2026-07-25.
+- Completion decision: the publication gate is fully evidenced. Optional
+  comparison and optimisation work was not accepted into this unit and must
+  use a new numbered specification if scheduled.

@@ -24,4 +24,5 @@
   and zero-allocation residual calls. The physical rows in
   `validation/fixtures/physical_kernels.csv` are independently evaluated from
   cited equations; full tests and quality checks passed on 2026-07-25.
-- Commit: pending v0.1 readiness commit; initial implementation `955aaed`.
+- Commits: `f028d8f` is the reachable implementation commit; `c315048`
+  records the release-scoped validation and quality evidence.
