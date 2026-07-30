@@ -769,7 +769,7 @@ function metadata(generated)
     println(io, "liljegren_reference_rows = $REFERENCE_ROWS")
     println(io, "selection = \"deterministic greedy pairwise then three-way coverage\"")
     for (path, contents) in entries
-        relative = relpath(path, REPOSITORY_ROOT)
+        relative = replace(relpath(path, REPOSITORY_ROOT), '\\' => '/')
         key = replace(replace(relative, '/' => '_'), '.' => '_')
         println(io)
         println(io, "[files.$key]")
