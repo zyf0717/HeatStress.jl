@@ -50,10 +50,9 @@ function _liljegren_row_from_zenith(
     air_temperature_c::Union{Missing,Real},
     dew_point_c::Union{Missing,Real},
     wind_speed_m_s::Union{Missing,Real},
-    solar_radiation_w_m2::Union{Missing,Real},
+    irradiance::_ResolvedIrradiance{T},
     solar_zenith_rad::Real,
     pressure_hpa::Union{Missing,Real},
-    direct_fraction::Union{Missing,Real},
     config::LiljegrenConfig{T},
     mode::_ScalarResultMode,
 ) where {T<:AbstractFloat}
@@ -61,17 +60,35 @@ function _liljegren_row_from_zenith(
         air_temperature_c,
         dew_point_c,
         wind_speed_m_s,
-        solar_radiation_w_m2;
+        irradiance.ghi_w_m2;
         pressure_hpa,
-        direct_fraction,
+        direct_fraction = irradiance.direct_fraction,
         config,
         float_type = T,
     )
-    basic isa _InputPreparationFailure && return _input_failure_result(T, mode, basic.status, config)
-    prepared = _apply_solar_policy(basic, solar_zenith_rad)
-    prepared isa _InputPreparationFailure && return _input_failure_result(T, mode, prepared.status, config)
+    basic isa _InputPreparationFailure &&
+        return _input_failure_result(
+            T, mode, basic.status, config, irradiance.diagnostics,
+        )
+    radiation_clamped = irradiance.diagnostics.ghi_clamped ||
+                        irradiance.diagnostics.dni_clamped ||
+                        irradiance.diagnostics.dhi_clamped
+    prepared = _apply_solar_policy(
+        basic,
+        solar_zenith_rad,
+        irradiance.diagnostics;
+        geometry_mismatch = irradiance.geometry_mismatch,
+        radiation_clamped,
+    )
+    prepared isa _InputPreparationFailure &&
+        return _input_failure_result(
+            T, mode, prepared.status, config, irradiance.diagnostics,
+        )
     data = _solve_prepared_liljegren(prepared, config)
-    data isa _InputPreparationFailure && return _input_failure_result(T, mode, data.status, config)
+    data isa _InputPreparationFailure &&
+        return _input_failure_result(
+            T, mode, data.status, config, irradiance.diagnostics,
+        )
     return _materialize_result(prepared, data, config, mode)
 end
 
@@ -79,22 +96,40 @@ function _liljegren_row_from_time(
     air_temperature_c::Union{Missing,Real},
     dew_point_c::Union{Missing,Real},
     wind_speed_m_s::Union{Missing,Real},
-    solar_radiation_w_m2::Union{Missing,Real},
     time::Union{Missing,DateTime,ZonedDateTime},
     longitude_deg::Real,
     latitude_deg::Real,
     pressure_hpa::Union{Missing,Real},
-    direct_fraction::Union{Missing,Real},
+    ghi_w_m2,
+    dni_w_m2,
+    dhi_w_m2,
+    partition::RadiationPartitionPolicy,
     config::LiljegrenConfig{T},
     mode::_ScalarResultMode,
 ) where {T<:AbstractFloat}
-    ismissing(time) && return _input_failure_result(T, mode, MissingTime, config)
+    ismissing(time) &&
+        return _input_failure_result(
+            T, mode, MissingTime, config,
+            _empty_irradiance_diagnostics(T, partition),
+        )
     isfinite(longitude_deg) && -180 <= longitude_deg <= 180 &&
         isfinite(latitude_deg) && -90 <= latitude_deg <= 90 ||
-        return _input_failure_result(T, mode, InvalidDomain, config)
+        return _input_failure_result(
+            T, mode, InvalidDomain, config,
+            _empty_irradiance_diagnostics(T, partition),
+        )
     solar_zenith_rad = convert(T, deg2rad(solar_zenith(time, longitude_deg, latitude_deg)))
+    utc_time = _utc_datetime(time)
+    irradiance = _resolve_irradiance(
+        ghi_w_m2, dni_w_m2, dhi_w_m2, partition, utc_time,
+        solar_zenith_rad, config,
+    )
+    irradiance isa _IrradianceResolutionFailure &&
+        return _input_failure_result(
+            T, mode, InvalidDomain, config, irradiance.diagnostics,
+        )
     return _liljegren_row_from_zenith(
-        air_temperature_c, dew_point_c, wind_speed_m_s, solar_radiation_w_m2, solar_zenith_rad,
-        pressure_hpa, direct_fraction, config, mode,
+        air_temperature_c, dew_point_c, wind_speed_m_s, irradiance,
+        solar_zenith_rad, pressure_hpa, config, mode,
     )
 end

@@ -11,10 +11,12 @@ WBGT = 0.7 T_{nwb} + 0.2 T_g + 0.1 T_a.
 ## Preparation
 
 The scalar boundary fixes a common floating type and converts the supplied
-configuration. Meteorology is validated and normalised before any solve:
-dew-point policy is applied, negative wind/radiation are flagged and clamped,
-and the timestamp/coordinates provide solar zenith. `DateTime` is UTC;
-`ZonedDateTime` is converted to its UTC instant.
+configuration. Timestamp and coordinates provide solar zenith, then the
+available GHI/DNI/DHI components are reconciled. Measured component identities
+take precedence; underdetermined inputs use the selected partition policy, and
+no-input daytime rows use clear-sky GHI. Meteorology is then validated and
+normalised before either solve. `DateTime` is UTC; `ZonedDateTime` is converted
+to its UTC instant.
 
 ## Component balances
 
@@ -30,7 +32,8 @@ A rejected input produces unattempted component diagnostics. A failed
 component stays `missing`, while a successful independent component is
 retained. WBGT itself is available only when both components have accepted
 roots. `diagnose_liljegren` exposes input adjustments, solver brackets,
-candidate roots, validation residuals, and failure reasons.
+candidate roots, validation residuals, failure reasons, and nested irradiance
+provenance. A closure mismatch rejects the row before component solving.
 
 The package implementation is independently expressed from published
 literature; see [Scientific provenance](@ref) for source policy.

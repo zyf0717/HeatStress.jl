@@ -252,7 +252,7 @@ end
     @testset "64-case Liljegren reference matrix" begin
         rows = _v3_fixture("liljegren_reference.csv")
         diagnostics = map(rows) do row
-            diagnose_liljegren(
+            _compat_diagnose_liljegren(
                 row.air_temperature_c,
                 row.dew_point_c,
                 row.wind_speed_m_s,
@@ -303,7 +303,7 @@ end
         expected_globe = getproperty.(getproperty.(diagnostics, :result), :globe_temperature_c)
 
         for threaded in (false, true)
-            batch = liljegren_wbgt_batch(
+            batch = _compat_liljegren_wbgt_batch(
                 air, dew, wind, radiation, time, longitude, latitude;
                 pressure_hpa = pressure,
                 direct_fraction = direct,
@@ -312,7 +312,7 @@ end
             @test batch.wbgt_c == expected_wbgt
             @test batch.natural_wet_bulb_c == expected_wet
             @test batch.globe_temperature_c == expected_globe
-            diagnostic_batch = diagnose_liljegren_batch(
+            diagnostic_batch = _compat_diagnose_liljegren_batch(
                 air, dew, wind, radiation, time, longitude, latitude;
                 pressure_hpa = pressure,
                 direct_fraction = direct,
@@ -327,7 +327,7 @@ end
             Vector{Union{Missing,Float64}}(undef, length(rows)),
             Vector{Union{Missing,Float64}}(undef, length(rows)),
         )
-        preallocated = liljegren_wbgt!(
+        preallocated = _compat_liljegren_wbgt!(
             outputs...,
             air, dew, wind, radiation, time, longitude, latitude;
             pressure_hpa = pressure,
@@ -340,7 +340,7 @@ end
         tighter = LiljegrenConfig(
             solver = SolverConfig(root_tolerance_k = 1e-7, residual_tolerance_k = 1e-5),
         )
-        tighter_values = liljegren_wbgt_batch(
+        tighter_values = _compat_liljegren_wbgt_batch(
             air, dew, wind, radiation, time, longitude, latitude;
             pressure_hpa = pressure,
             direct_fraction = direct,
@@ -352,7 +352,7 @@ end
             solver = SolverConfig(root_tolerance_k = 1f-6, residual_tolerance_k = 1f-4),
             dew_point_tolerance_c = 1f-4,
         )
-        diagnostics32 = diagnose_liljegren_batch(
+        diagnostics32 = _compat_diagnose_liljegren_batch(
             Float32.(air), Float32.(dew), Float32.(wind), Float32.(radiation),
             time, Float32.(longitude), Float32.(latitude);
             pressure_hpa = Float32.(pressure),
@@ -409,20 +409,20 @@ end
             30.0, 20.0, 1.0, 800.0, DateTime(2024, 6, 21, 12), 0.0, 0.0,
         )
         public_cases = Dict(
-            "missing_meteorology" => diagnose_liljegren(
+            "missing_meteorology" => _compat_diagnose_liljegren(
                 missing, ordinary[2:end]...; pressure_hpa = 1010.0, direct_fraction = 0.7,
             ),
-            "missing_time" => diagnose_liljegren(
+            "missing_time" => _compat_diagnose_liljegren(
                 ordinary[1:4]..., missing, ordinary[6:7]...;
                 pressure_hpa = 1010.0, direct_fraction = 0.7,
             ),
-            "invalid_dew_point" => diagnose_liljegren(
+            "invalid_dew_point" => _compat_diagnose_liljegren(
                 20.0, 25.0, ordinary[3:end]...;
                 pressure_hpa = 1010.0,
                 direct_fraction = 0.7,
                 config = LiljegrenConfig(dew_point_policy = RejectInvalidDewPoint),
             ),
-            "invalid_domain" => diagnose_liljegren(
+            "invalid_domain" => _compat_diagnose_liljegren(
                 ordinary...; pressure_hpa = 0.0, direct_fraction = 0.7,
             ),
         )
@@ -463,7 +463,7 @@ end
     @testset "256 deterministic accepted-domain properties" begin
         inputs = _v3_property_inputs(256)
         scalar = [
-            diagnose_liljegren(
+            _compat_diagnose_liljegren(
                 inputs.air[index], inputs.dew[index], inputs.wind[index],
                 inputs.radiation[index], inputs.time[index],
                 inputs.longitude[index], inputs.latitude[index];
@@ -472,14 +472,14 @@ end
             )
             for index in eachindex(inputs.air)
         ]
-        serial = diagnose_liljegren_batch(
+        serial = _compat_diagnose_liljegren_batch(
             inputs.air, inputs.dew, inputs.wind, inputs.radiation, inputs.time,
             inputs.longitude, inputs.latitude;
             pressure_hpa = inputs.pressure,
             direct_fraction = inputs.direct,
             threaded = false,
         )
-        threaded = diagnose_liljegren_batch(
+        threaded = _compat_diagnose_liljegren_batch(
             inputs.air, inputs.dew, inputs.wind, inputs.radiation, inputs.time,
             inputs.longitude, inputs.latitude;
             pressure_hpa = inputs.pressure,
@@ -497,7 +497,7 @@ end
             Vector{Union{Missing,Float64}}(undef, length(inputs.air)),
             Vector{Union{Missing,Float64}}(undef, length(inputs.air)),
         )
-        preallocated = liljegren_wbgt!(
+        preallocated = _compat_liljegren_wbgt!(
             value_outputs...,
             inputs.air, inputs.dew, inputs.wind, inputs.radiation, inputs.time,
             inputs.longitude, inputs.latitude;
@@ -508,7 +508,7 @@ end
         @test preallocated.natural_wet_bulb_c == serial.result.natural_wet_bulb_c
         @test preallocated.globe_temperature_c == serial.result.globe_temperature_c
 
-        tighter = liljegren_wbgt_batch(
+        tighter = _compat_liljegren_wbgt_batch(
             inputs.air, inputs.dew, inputs.wind, inputs.radiation, inputs.time,
             inputs.longitude, inputs.latitude;
             pressure_hpa = inputs.pressure,
@@ -529,7 +529,7 @@ end
         end
 
         permutation = reverse(eachindex(inputs.air))
-        permuted = liljegren_wbgt_batch(
+        permuted = _compat_liljegren_wbgt_batch(
             inputs.air[permutation], inputs.dew[permutation],
             inputs.wind[permutation], inputs.radiation[permutation],
             inputs.time[permutation], inputs.longitude[permutation],

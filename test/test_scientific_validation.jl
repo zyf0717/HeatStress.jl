@@ -128,7 +128,7 @@ end
     @testset "Liljegren high-precision references and residuals" begin
         rows = collect(_fixture("liljegren_reference.csv"))
         reference_diagnostics = [
-            diagnose_liljegren(
+            _compat_diagnose_liljegren(
                 row.air_temperature_c, row.dew_point_c, row.wind_speed_m_s,
                 row.solar_radiation_w_m2, DateTime(row.time), row.longitude_deg, row.latitude_deg;
                 pressure_hpa = row.pressure_hpa, direct_fraction = row.direct_fraction,
@@ -154,7 +154,7 @@ end
         direct = getproperty.(rows, :direct_fraction)
         for (mode, (longitude, latitude)) in pairs(_coordinate_modes(rows))
             scalar = [
-                diagnose_liljegren(
+                _compat_diagnose_liljegren(
                     air[index], dew[index], wind[index], radiation[index], time[index],
                     longitude isa AbstractVector ? longitude[index] : longitude,
                     latitude isa AbstractVector ? latitude[index] : latitude;
@@ -162,14 +162,14 @@ end
                 ) for index in eachindex(air)
             ]
             for threaded in (false, true)
-                value = liljegren_wbgt_batch(
+                value = _compat_liljegren_wbgt_batch(
                     air, dew, wind, radiation, time, longitude, latitude;
                     pressure_hpa = pressure, direct_fraction = direct, threaded,
                 )
                 @test value.wbgt_c == getproperty.(getproperty.(scalar, :result), :wbgt_c)
                 @test value.natural_wet_bulb_c == getproperty.(getproperty.(scalar, :result), :natural_wet_bulb_c)
                 @test value.globe_temperature_c == getproperty.(getproperty.(scalar, :result), :globe_temperature_c)
-                diagnostic = diagnose_liljegren_batch(
+                diagnostic = _compat_diagnose_liljegren_batch(
                     air, dew, wind, radiation, time, longitude, latitude;
                     pressure_hpa = pressure, direct_fraction = direct, threaded,
                 )
@@ -178,14 +178,14 @@ end
         end
 
         config32 = LiljegrenConfig(solver = SolverConfig(root_tolerance_k = 1f-6, residual_tolerance_k = 1f-4), dew_point_tolerance_c = 1f-4)
-        float32 = liljegren_wbgt_batch(Float32.(air), Float32.(dew), Float32.(wind), Float32.(radiation), time, 0f0, 0f0; pressure_hpa = Float32.(pressure), direct_fraction = Float32.(direct), config = config32)
+        float32 = _compat_liljegren_wbgt_batch(Float32.(air), Float32.(dew), Float32.(wind), Float32.(radiation), time, 0f0, 0f0; pressure_hpa = Float32.(pressure), direct_fraction = Float32.(direct), config = config32)
         reference_values = getproperty.(getproperty.(reference_diagnostics, :result), :wbgt_c)
         @test all(abs.(Float64.(float32.wbgt_c) .- Float64.(reference_values)) .<= 2e-3)
     end
 
     @testset "failure fixtures" begin
         for row in _fixture("liljegren_failures.csv")
-            diagnostic = diagnose_liljegren(
+            diagnostic = _compat_diagnose_liljegren(
                 row.air_temperature_c, row.dew_point_c, row.wind_speed_m_s,
                 row.solar_radiation_w_m2, DateTime(row.time), row.longitude_deg, row.latitude_deg;
                 pressure_hpa = row.pressure_hpa, direct_fraction = row.direct_fraction,

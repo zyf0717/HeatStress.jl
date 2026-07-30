@@ -40,3 +40,14 @@ const WICK_LENGTH_M = 0.0254
 # the package has no direct-normal irradiance input to constrain them.  Diffuse
 # forcing remains active.  This is not a physical night-time threshold.
 const MINIMUM_DIRECT_SOLAR_ELEVATION_RAD = π / 180
+
+# Kasten and Czeplak (1980) very-simple clear-sky GHI model, W m^-2.
+const KASTEN_CZEPLAK_GHI_SLOPE_W_M2 = 910.0
+const KASTEN_CZEPLAK_GHI_INTERCEPT_W_M2 = 30.0
+
+# Liljegren et al. (2008) irradiance partition and FAO-56 equation 23.
+const LILJEGREN_SOLAR_CONSTANT_W_M2 = 1367.0
+const LILJEGREN_CLEARNESS_MAX = 0.85
+const LILJEGREN_DIRECT_FRACTION_MAX = 0.9
+const DEFAULT_IRRADIANCE_CLOSURE_ATOL_W_M2 = 20.0
+const DEFAULT_IRRADIANCE_CLOSURE_KT_TOLERANCE = 0.03

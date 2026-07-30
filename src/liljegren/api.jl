@@ -11,36 +11,53 @@
         convert(T, config.surface_albedo),
         convert(T, config.globe_diameter_m),
         convert(T, config.minimum_wind_speed_m_s),
+        convert(T, config.irradiance_closure_atol_w_m2),
+        convert(T, config.irradiance_closure_kt_tolerance),
     )
 end
 
+@inline _scalar_float_type(::Type{Nothing}) = Union{}
 @inline _scalar_float_type(::Type{Missing}) = Union{}
 @inline _scalar_float_type(::Type{T}) where {T<:Real} = typeof(float(zero(T)))
 
-@noinline function _reject_public_pressure_hpa(function_object, arguments...)
+@inline _partition_float_type(::LiljegrenClearnessFraction) = Union{}
+@inline _partition_float_type(policy::FixedDirectFraction{<:Real}) =
+    _scalar_float_type(typeof(policy.value))
+
+@noinline function _reject_public_argument(function_object, arguments...)
     throw(MethodError(function_object, arguments))
+end
+
+function _validate_scalar_partition(policy::RadiationPartitionPolicy)
+    policy isa LiljegrenClearnessFraction && return policy
+    policy isa FixedDirectFraction{<:Real} && return policy
+    throw(ArgumentError("scalar partition must contain one fixed Real value or use LiljegrenClearnessFraction()"))
 end
 
 @inline function _scalar_input_type(
     air_temperature_c,
     dew_point_c,
     wind_speed_m_s,
-    solar_radiation_w_m2,
+    ghi_w_m2,
+    dni_w_m2,
+    dhi_w_m2,
     pressure_hpa,
-    direct_fraction,
     longitude_deg,
     latitude_deg,
+    partition::RadiationPartitionPolicy,
     config::LiljegrenConfig,
 )
     return promote_type(
         _scalar_float_type(typeof(air_temperature_c)),
         _scalar_float_type(typeof(dew_point_c)),
         _scalar_float_type(typeof(wind_speed_m_s)),
-        _scalar_float_type(typeof(solar_radiation_w_m2)),
+        _scalar_float_type(typeof(ghi_w_m2)),
+        _scalar_float_type(typeof(dni_w_m2)),
+        _scalar_float_type(typeof(dhi_w_m2)),
         _scalar_float_type(typeof(pressure_hpa)),
-        _scalar_float_type(typeof(direct_fraction)),
         _scalar_float_type(typeof(longitude_deg)),
         _scalar_float_type(typeof(latitude_deg)),
+        _partition_float_type(partition),
         _scalar_float_type(typeof(config.dew_point_tolerance_c)),
     )
 end
@@ -49,58 +66,67 @@ function _liljegren_scalar(
     air_temperature_c::Union{Missing,Real},
     dew_point_c::Union{Missing,Real},
     wind_speed_m_s::Union{Missing,Real},
-    solar_radiation_w_m2::Union{Missing,Real},
     time::Union{Missing,DateTime,ZonedDateTime},
     longitude_deg::Real,
     latitude_deg::Real;
+    ghi_w_m2::Union{Nothing,Missing,Real} = nothing,
+    dni_w_m2::Union{Nothing,Missing,Real} = nothing,
+    dhi_w_m2::Union{Nothing,Missing,Real} = nothing,
+    partition::RadiationPartitionPolicy = FixedDirectFraction(),
     pressure_hpa::Union{Missing,Real} = DEFAULT_PRESSURE_HPA,
-    direct_fraction::Union{Missing,Real},
     config::LiljegrenConfig = LiljegrenConfig(),
     mode::_ScalarResultMode = _DiagnosticMode(),
 )
+    partition = _validate_scalar_partition(partition)
     input_type = _scalar_input_type(
-        air_temperature_c, dew_point_c, wind_speed_m_s, solar_radiation_w_m2,
-        pressure_hpa, direct_fraction, longitude_deg, latitude_deg, config,
+        air_temperature_c, dew_point_c, wind_speed_m_s,
+        ghi_w_m2, dni_w_m2, dhi_w_m2, pressure_hpa,
+        longitude_deg, latitude_deg, partition, config,
     )
     typed_config = _config_as_type(input_type, config)
     row_result = _liljegren_row_from_time(
-        air_temperature_c, dew_point_c, wind_speed_m_s, solar_radiation_w_m2,
-        time, longitude_deg, latitude_deg, pressure_hpa, direct_fraction, typed_config, mode,
+        air_temperature_c, dew_point_c, wind_speed_m_s,
+        time, longitude_deg, latitude_deg, pressure_hpa,
+        ghi_w_m2, dni_w_m2, dhi_w_m2, partition, typed_config, mode,
     )
     return _scalar_public_result(input_type, row_result, mode)
 end
 
 """
     diagnose_liljegren(air_temperature_c, dew_point_c, wind_speed_m_s,
-                       solar_radiation_w_m2, time, longitude_deg, latitude_deg;
-                       pressure_hpa=1010, direct_fraction, config=LiljegrenConfig())
+                       time, longitude_deg, latitude_deg;
+                       ghi_w_m2=nothing, dni_w_m2=nothing, dhi_w_m2=nothing,
+                       partition=FixedDirectFraction(0.8),
+                       pressure_hpa=1010, config=LiljegrenConfig())
 
-Return a `DiagnosticWBGTResult` for the scalar Liljegren outdoor WBGT model.
-Temperatures are °C, wind is m/s, radiation is W/m², pressure is hPa, and
-`direct_fraction` is direct divided by total radiation. `DateTime` is UTC;
-`ZonedDateTime` is converted to its UTC instant.
+Return a diagnostic scalar Liljegren result. Irradiance components are W/m²:
+GHI and DHI are horizontal, while DNI is normal to the solar beam. With no
+components supplied, clear-sky GHI is estimated from time and location.
 """
 function diagnose_liljegren(
     air_temperature_c::Union{Missing,Real},
     dew_point_c::Union{Missing,Real},
     wind_speed_m_s::Union{Missing,Real},
-    solar_radiation_w_m2::Union{Missing,Real},
     time::Union{Missing,DateTime,ZonedDateTime},
     longitude_deg::Real,
     latitude_deg::Real;
+    ghi_w_m2::Union{Nothing,Missing,Real} = nothing,
+    dni_w_m2::Union{Nothing,Missing,Real} = nothing,
+    dhi_w_m2::Union{Nothing,Missing,Real} = nothing,
+    partition::RadiationPartitionPolicy = FixedDirectFraction(),
     pressure_hpa = DEFAULT_PRESSURE_HPA,
-    direct_fraction::Union{Missing,Real},
     config::LiljegrenConfig = LiljegrenConfig(),
 )
-    pressure_hpa isa Union{Missing,Real} || _reject_public_pressure_hpa(
+    pressure_hpa isa Union{Missing,Real} || _reject_public_argument(
         diagnose_liljegren,
-        air_temperature_c, dew_point_c, wind_speed_m_s, solar_radiation_w_m2,
-        time, longitude_deg, latitude_deg,
+        air_temperature_c, dew_point_c, wind_speed_m_s, time,
+        longitude_deg, latitude_deg,
     )
     return _liljegren_scalar(
-        air_temperature_c, dew_point_c, wind_speed_m_s, solar_radiation_w_m2,
+        air_temperature_c, dew_point_c, wind_speed_m_s,
         time, longitude_deg, latitude_deg;
-        pressure_hpa, direct_fraction, config, mode = _DiagnosticMode(),
+        ghi_w_m2, dni_w_m2, dhi_w_m2, partition,
+        pressure_hpa, config, mode = _DiagnosticMode(),
     )
 end
 
@@ -109,23 +135,26 @@ function liljegren_wbgt(
     air_temperature_c::Union{Missing,Real},
     dew_point_c::Union{Missing,Real},
     wind_speed_m_s::Union{Missing,Real},
-    solar_radiation_w_m2::Union{Missing,Real},
     time::Union{Missing,DateTime,ZonedDateTime},
     longitude_deg::Real,
     latitude_deg::Real;
+    ghi_w_m2::Union{Nothing,Missing,Real} = nothing,
+    dni_w_m2::Union{Nothing,Missing,Real} = nothing,
+    dhi_w_m2::Union{Nothing,Missing,Real} = nothing,
+    partition::RadiationPartitionPolicy = FixedDirectFraction(),
     pressure_hpa = DEFAULT_PRESSURE_HPA,
-    direct_fraction::Union{Missing,Real},
     config::LiljegrenConfig = LiljegrenConfig(),
 )
-    pressure_hpa isa Union{Missing,Real} || _reject_public_pressure_hpa(
+    pressure_hpa isa Union{Missing,Real} || _reject_public_argument(
         liljegren_wbgt,
-        air_temperature_c, dew_point_c, wind_speed_m_s, solar_radiation_w_m2,
-        time, longitude_deg, latitude_deg,
+        air_temperature_c, dew_point_c, wind_speed_m_s, time,
+        longitude_deg, latitude_deg,
     )
     return _liljegren_scalar(
-        air_temperature_c, dew_point_c, wind_speed_m_s, solar_radiation_w_m2,
+        air_temperature_c, dew_point_c, wind_speed_m_s,
         time, longitude_deg, latitude_deg;
-        pressure_hpa, direct_fraction, config, mode = _ValueMode(),
+        ghi_w_m2, dni_w_m2, dhi_w_m2, partition,
+        pressure_hpa, config, mode = _ValueMode(),
     )
 end
 
@@ -134,49 +163,51 @@ function globe_temperature(
     air_temperature_c::Union{Missing,Real},
     dew_point_c::Union{Missing,Real},
     wind_speed_m_s::Union{Missing,Real},
-    solar_radiation_w_m2::Union{Missing,Real},
     time::Union{Missing,DateTime,ZonedDateTime},
     longitude_deg::Real,
     latitude_deg::Real;
+    ghi_w_m2::Union{Nothing,Missing,Real} = nothing,
+    dni_w_m2::Union{Nothing,Missing,Real} = nothing,
+    dhi_w_m2::Union{Nothing,Missing,Real} = nothing,
+    partition::RadiationPartitionPolicy = FixedDirectFraction(),
     pressure_hpa = DEFAULT_PRESSURE_HPA,
-    direct_fraction::Union{Missing,Real},
     config::LiljegrenConfig = LiljegrenConfig(),
 )
-    pressure_hpa isa Union{Missing,Real} || _reject_public_pressure_hpa(
+    pressure_hpa isa Union{Missing,Real} || _reject_public_argument(
         globe_temperature,
-        air_temperature_c, dew_point_c, wind_speed_m_s, solar_radiation_w_m2,
-        time, longitude_deg, latitude_deg,
+        air_temperature_c, dew_point_c, wind_speed_m_s, time,
+        longitude_deg, latitude_deg,
     )
-    result = _liljegren_scalar(
-        air_temperature_c, dew_point_c, wind_speed_m_s, solar_radiation_w_m2,
+    return liljegren_wbgt(
+        air_temperature_c, dew_point_c, wind_speed_m_s,
         time, longitude_deg, latitude_deg;
-        pressure_hpa, direct_fraction, config, mode = _ValueMode(),
-    )
-    return result.globe_temperature_c
+        ghi_w_m2, dni_w_m2, dhi_w_m2, partition, pressure_hpa, config,
+    ).globe_temperature_c
 end
 
-"""Return scalar Liljegren natural wet-bulb temperature in °C, or `missing` on failure."""
+"""Return scalar Liljegren natural wet-bulb temperature in °C, or `missing`."""
 function natural_wet_bulb_temperature(
     air_temperature_c::Union{Missing,Real},
     dew_point_c::Union{Missing,Real},
     wind_speed_m_s::Union{Missing,Real},
-    solar_radiation_w_m2::Union{Missing,Real},
     time::Union{Missing,DateTime,ZonedDateTime},
     longitude_deg::Real,
     latitude_deg::Real;
+    ghi_w_m2::Union{Nothing,Missing,Real} = nothing,
+    dni_w_m2::Union{Nothing,Missing,Real} = nothing,
+    dhi_w_m2::Union{Nothing,Missing,Real} = nothing,
+    partition::RadiationPartitionPolicy = FixedDirectFraction(),
     pressure_hpa = DEFAULT_PRESSURE_HPA,
-    direct_fraction::Union{Missing,Real},
     config::LiljegrenConfig = LiljegrenConfig(),
 )
-    pressure_hpa isa Union{Missing,Real} || _reject_public_pressure_hpa(
+    pressure_hpa isa Union{Missing,Real} || _reject_public_argument(
         natural_wet_bulb_temperature,
-        air_temperature_c, dew_point_c, wind_speed_m_s, solar_radiation_w_m2,
-        time, longitude_deg, latitude_deg,
+        air_temperature_c, dew_point_c, wind_speed_m_s, time,
+        longitude_deg, latitude_deg,
     )
-    result = _liljegren_scalar(
-        air_temperature_c, dew_point_c, wind_speed_m_s, solar_radiation_w_m2,
+    return liljegren_wbgt(
+        air_temperature_c, dew_point_c, wind_speed_m_s,
         time, longitude_deg, latitude_deg;
-        pressure_hpa, direct_fraction, config, mode = _ValueMode(),
-    )
-    return result.natural_wet_bulb_c
+        ghi_w_m2, dni_w_m2, dhi_w_m2, partition, pressure_hpa, config,
+    ).natural_wet_bulb_c
 end

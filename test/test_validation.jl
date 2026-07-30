@@ -22,7 +22,33 @@ end
 function _prepared_for_test(; solar_zenith_rad = 0.5, kwargs...)
     basic = _basic_for_test(; kwargs...)
     basic isa HeatStress._InputPreparationFailure && return basic
-    return HeatStress._apply_solar_policy(basic, solar_zenith_rad)
+    return HeatStress._apply_solar_policy(
+        basic, solar_zenith_rad, _irradiance_for_test(basic),
+    )
+end
+
+function _irradiance_for_test(basic::HeatStress._BasicMeteorology{T}) where {T}
+    return IrradianceDiagnostics{T}(
+        basic.solar_radiation_w_m2,
+        missing,
+        missing,
+        basic.direct_fraction,
+        missing,
+        true,
+        false,
+        false,
+        false,
+        true,
+        true,
+        basic.solar_radiation_clamped,
+        false,
+        false,
+        false,
+        missing,
+        missing,
+        false,
+        :fixed,
+    )
 end
 
 @testset "constants and input policies" begin
@@ -91,9 +117,10 @@ end
         @test _basic_for_test(direct_fraction = missing).status === MissingMeteorology
         @test _basic_for_test(air_temperature_c = missing).status === MissingMeteorology
         basic = _basic_for_test()
-        @test HeatStress._apply_solar_policy(basic, Inf).status === InvalidDomain
-        @test HeatStress._apply_solar_policy(basic, -0.1).status === InvalidDomain
-        @test HeatStress._apply_solar_policy(basic, 2pi).status === InvalidDomain
+        irradiance = _irradiance_for_test(basic)
+        @test HeatStress._apply_solar_policy(basic, Inf, irradiance).status === InvalidDomain
+        @test HeatStress._apply_solar_policy(basic, -0.1, irradiance).status === InvalidDomain
+        @test HeatStress._apply_solar_policy(basic, 2pi, irradiance).status === InvalidDomain
     end
 
     @testset "dew-point policies and tolerance" begin
@@ -196,9 +223,10 @@ end
                 pressure_hpa = T(1010),
                 direct_fraction = T(0.8),
             )
-            dawn = HeatStress._apply_solar_policy(basic, prevfloat(T(pi / 2)))
-            horizon = HeatStress._apply_solar_policy(basic, T(pi / 2))
-            night = HeatStress._apply_solar_policy(basic, nextfloat(T(pi / 2)))
+            irradiance = _irradiance_for_test(basic)
+            dawn = HeatStress._apply_solar_policy(basic, prevfloat(T(pi / 2)), irradiance)
+            horizon = HeatStress._apply_solar_policy(basic, T(pi / 2), irradiance)
+            night = HeatStress._apply_solar_policy(basic, nextfloat(T(pi / 2)), irradiance)
             @test dawn.solar_radiation_w_m2 == T(600)
             @test !dawn.solar_geometry_mismatch
             @test dawn.direct_solar_clipped
@@ -235,7 +263,9 @@ end
             direct_fraction = 0.8f0,
             config = config32,
         )
-        prepared32 = @inferred Prepared32 HeatStress._apply_solar_policy(basic32, 0.5f0)
+        prepared32 = @inferred Prepared32 HeatStress._apply_solar_policy(
+            basic32, 0.5f0, _irradiance_for_test(basic32),
+        )
         @test prepared32 isa HeatStress._PreparedMeteorology{Float32}
         @test prepared32.air_temperature_k == 298.15f0
 
@@ -249,7 +279,9 @@ end
             pressure_hpa = 1010.0,
             direct_fraction = 0.8,
         )
-        prepared64 = @inferred Prepared64 HeatStress._apply_solar_policy(basic64, 0.5)
+        prepared64 = @inferred Prepared64 HeatStress._apply_solar_policy(
+            basic64, 0.5, _irradiance_for_test(basic64),
+        )
         @test prepared64 isa HeatStress._PreparedMeteorology{Float64}
 
         @test_throws ArgumentError HeatStress._validate_batch_lengths([1.0, 2.0], [1.0])

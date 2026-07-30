@@ -56,12 +56,12 @@ function process_scalar_e2e(inputs::Vector{ScalarInput}, count::Int = length(inp
             input.air_temperature_c,
             input.dew_point_c,
             input.wind_speed_m_s,
-            input.solar_radiation_w_m2,
             input.time,
             input.longitude_deg,
             input.latitude_deg;
+            ghi_w_m2 = input.solar_radiation_w_m2,
             pressure_hpa = input.pressure_hpa,
-            direct_fraction = input.direct_fraction,
+            partition = FixedDirectFraction(input.direct_fraction),
         )
     end
     return results

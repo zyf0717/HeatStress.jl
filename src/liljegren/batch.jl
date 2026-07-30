@@ -1,22 +1,33 @@
+@inline _at(::Nothing, ::Int) = nothing
 @inline _at(value::Real, ::Int) = value
 @inline _at(::Missing, ::Int) = missing
-@inline _at(values::AbstractVector, row::Int) = @inbounds values[firstindex(values) + row - 1]
+@inline _at(values::AbstractVector, row::Int) =
+    @inbounds values[firstindex(values) + row - 1]
 
+@inline _batch_value_type(::Type{Nothing}) = Union{}
 @inline _batch_value_type(::Type{Missing}) = Union{}
 @inline _batch_value_type(::Type{Union{}}) = Union{}
 @inline _batch_value_type(::Type{T}) where {T<:Real} = typeof(float(zero(T)))
 @inline _batch_value_type(::Type{<:AbstractVector{T}}) where {T} =
     _batch_value_type(Base.nonmissingtype(T))
 
-function _batch_float_type(inputs...; config::LiljegrenConfig)
+@inline _partition_values(::LiljegrenClearnessFraction) = nothing
+@inline _partition_values(policy::FixedDirectFraction) = policy.value
+@inline _partition_at(policy::LiljegrenClearnessFraction, ::Int) = policy
+@inline function _partition_at(policy::FixedDirectFraction, row::Int)
+    value = _at(policy.value, row)
+    return FixedDirectFraction{typeof(value)}(value)
+end
+
+function _batch_float_type(inputs...; partition::RadiationPartitionPolicy, config::LiljegrenConfig)
     return promote_type(
         (_batch_value_type(typeof(input)) for input in inputs)...,
+        _batch_value_type(typeof(_partition_values(partition))),
         typeof(config.dew_point_tolerance_c),
     )
 end
 
 function _batch_rows(primary::AbstractVector...)
-    isempty(primary) && return 0
     rows = length(first(primary))
     all(length(input) == rows for input in primary) ||
         throw(ArgumentError("primary meteorology and time arrays must have identical lengths"))
@@ -52,38 +63,62 @@ end
 
 function _validate_location_argument(value, rows::Int, name::Symbol)
     value isa Real && return nothing
-    value isa Missing && throw(ArgumentError("$name must be a non-missing Real scalar or vector"))
-    value isa AbstractVector || throw(ArgumentError("$name must be a non-missing Real scalar or vector"))
+    value isa AbstractVector ||
+        throw(ArgumentError("$name must be a non-missing Real scalar or vector"))
     return _validate_numeric_vector(value, rows, name; allow_missing = false)
 end
 
 function _validate_optional_numeric_argument(value, rows::Int, name::Symbol)
     value isa Union{Missing,Real} && return nothing
-    value isa AbstractVector || throw(ArgumentError("$name must be a Real or Missing scalar or vector"))
+    value isa AbstractVector ||
+        throw(ArgumentError("$name must be a Real or Missing scalar or vector"))
     return _validate_numeric_vector(value, rows, name; allow_missing = true)
+end
+
+function _validate_irradiance_argument(value, rows::Int, name::Symbol)
+    value isa Union{Nothing,Missing,Real} && return nothing
+    value isa AbstractVector ||
+        throw(ArgumentError("$name must be nothing, a Real/Missing scalar, or a vector"))
+    return _validate_numeric_vector(value, rows, name; allow_missing = true)
+end
+
+function _validate_partition(policy::RadiationPartitionPolicy, rows::Int)
+    policy isa LiljegrenClearnessFraction && return nothing
+    values = policy.value
+    values isa Real && return nothing
+    values isa AbstractVector ||
+        throw(ArgumentError("fixed direct fraction must be a Real scalar or vector"))
+    _validate_numeric_vector(values, rows, :direct_fraction; allow_missing = false)
+    all(value -> isfinite(value) && 0 <= value <= 1, values) ||
+        throw(ArgumentError("fixed direct-fraction values must be finite and in [0, 1]"))
+    return nothing
 end
 
 function _validate_batch_inputs(
     air::AbstractVector,
     dew::AbstractVector,
     wind::AbstractVector,
-    radiation::AbstractVector,
     time::AbstractVector,
     longitude,
     latitude;
+    ghi_w_m2,
+    dni_w_m2,
+    dhi_w_m2,
     pressure_hpa,
-    direct_fraction,
+    partition,
 )
-    rows = _batch_rows(air, dew, wind, radiation, time)
+    rows = _batch_rows(air, dew, wind, time)
     _validate_numeric_vector(air, rows, :air_temperature_c; allow_missing = true)
     _validate_numeric_vector(dew, rows, :dew_point_c; allow_missing = true)
     _validate_numeric_vector(wind, rows, :wind_speed_m_s; allow_missing = true)
-    _validate_numeric_vector(radiation, rows, :solar_radiation_w_m2; allow_missing = true)
     _validate_time_vector(time, rows, :time)
     _validate_location_argument(longitude, rows, :longitude_deg)
     _validate_location_argument(latitude, rows, :latitude_deg)
+    _validate_irradiance_argument(ghi_w_m2, rows, :ghi_w_m2)
+    _validate_irradiance_argument(dni_w_m2, rows, :dni_w_m2)
+    _validate_irradiance_argument(dhi_w_m2, rows, :dhi_w_m2)
     _validate_optional_numeric_argument(pressure_hpa, rows, :pressure_hpa)
-    _validate_optional_numeric_argument(direct_fraction, rows, :direct_fraction)
+    _validate_partition(partition, rows)
     return rows
 end
 
@@ -115,21 +150,24 @@ function _prepare_batch_inputs(
     air::AbstractVector,
     dew::AbstractVector,
     wind::AbstractVector,
-    radiation::AbstractVector,
     time::AbstractVector,
     longitude,
     latitude;
+    ghi_w_m2,
+    dni_w_m2,
+    dhi_w_m2,
     pressure_hpa,
-    direct_fraction,
+    partition::RadiationPartitionPolicy,
     config::LiljegrenConfig,
 )
     rows = _validate_batch_inputs(
-        air, dew, wind, radiation, time, longitude, latitude;
-        pressure_hpa, direct_fraction,
+        air, dew, wind, time, longitude, latitude;
+        ghi_w_m2, dni_w_m2, dhi_w_m2, pressure_hpa, partition,
     )
     T = _batch_float_type(
-        air, dew, wind, radiation, longitude, latitude, pressure_hpa, direct_fraction;
-        config,
+        air, dew, wind, ghi_w_m2, dni_w_m2, dhi_w_m2,
+        longitude, latitude, pressure_hpa;
+        partition, config,
     )
     return rows, T, _config_as_type(T, config)
 end
@@ -142,20 +180,23 @@ function _execute_value_batch!(
     air::AbstractVector,
     dew::AbstractVector,
     wind::AbstractVector,
-    radiation::AbstractVector,
     time::AbstractVector,
     longitude,
     latitude;
+    ghi_w_m2,
+    dni_w_m2,
+    dhi_w_m2,
     pressure_hpa,
-    direct_fraction,
+    partition,
     config::LiljegrenConfig{T},
     threaded::Bool,
 ) where {T<:AbstractFloat}
     function solve_row(row)
         values = _liljegren_row_from_time(
-            _at(air, row), _at(dew, row), _at(wind, row), _at(radiation, row), _at(time, row),
+            _at(air, row), _at(dew, row), _at(wind, row), _at(time, row),
             _at(longitude, row), _at(latitude, row), _at(pressure_hpa, row),
-            _at(direct_fraction, row), config, _ValueMode(),
+            _at(ghi_w_m2, row), _at(dni_w_m2, row), _at(dhi_w_m2, row),
+            _partition_at(partition, row), config, _ValueMode(),
         )
         @inbounds wbgt_out[firstindex(wbgt_out) + row - 1] =
             _component_or_missing(values.wbgt_c, values.wbgt_missing)
@@ -177,20 +218,14 @@ function _execute_value_batch!(
 end
 
 """
-    liljegren_wbgt!(wbgt_out, natural_wet_bulb_out, globe_temperature_out,
-                    air_temperature_c, dew_point_c, wind_speed_m_s,
-                    solar_radiation_w_m2, time, longitude_deg, latitude_deg;
-                    pressure_hpa=1010, direct_fraction, config=LiljegrenConfig(),
-                    threaded=false)
+    liljegren_wbgt!(outputs..., air, dew, wind, time, longitude, latitude;
+                    ghi_w_m2=nothing, dni_w_m2=nothing, dhi_w_m2=nothing,
+                    partition=FixedDirectFraction(0.8), pressure_hpa=1010,
+                    config=LiljegrenConfig(), threaded=false)
 
-Mutate preallocated WBGT/component outputs (°C) for ordinally aligned primary
-`AbstractVector` inputs. Meteorology, pressure and direct fraction may permit
-`missing`; time accepts `DateTime`, `ZonedDateTime` or `missing`; longitude and
-latitude are required non-missing real scalars or vectors. `DateTime` is UTC
-and `ZonedDateTime` is converted to its UTC instant. Outputs may have different
-axes, but must have equal lengths and accept `missing` and the promoted float
-type. All invalid inputs, output types and aliases are rejected before mutation.
-`threaded=true` uses available Julia threads; no processes are created.
+Mutate preallocated WBGT/component outputs for aligned primary arrays. Optional
+irradiance components and fixed fractions may be shared scalars or aligned
+vectors. Validation completes before any output is written.
 """
 function liljegren_wbgt!(
     wbgt_out::AbstractVector,
@@ -199,66 +234,71 @@ function liljegren_wbgt!(
     air::AbstractVector,
     dew::AbstractVector,
     wind::AbstractVector,
-    radiation::AbstractVector,
     time::AbstractVector,
     longitude,
     latitude;
+    ghi_w_m2 = nothing,
+    dni_w_m2 = nothing,
+    dhi_w_m2 = nothing,
+    partition::RadiationPartitionPolicy = FixedDirectFraction(),
     pressure_hpa = DEFAULT_PRESSURE_HPA,
-    direct_fraction,
     config::LiljegrenConfig = LiljegrenConfig(),
     threaded::Bool = false,
 )
     rows, T, typed_config = _prepare_batch_inputs(
-        air, dew, wind, radiation, time, longitude, latitude;
-        pressure_hpa, direct_fraction, config,
+        air, dew, wind, time, longitude, latitude;
+        ghi_w_m2, dni_w_m2, dhi_w_m2, pressure_hpa, partition, config,
     )
     _validate_batch_outputs(rows, T, wbgt_out, wet_out, globe_out)
     _validate_batch_aliases(
         (wbgt_out, wet_out, globe_out),
-        air, dew, wind, radiation, time, longitude, latitude, pressure_hpa, direct_fraction,
+        air, dew, wind, time, longitude, latitude, ghi_w_m2, dni_w_m2, dhi_w_m2,
+        pressure_hpa, _partition_values(partition),
     )
     _execute_value_batch!(
-        rows, wbgt_out, wet_out, globe_out, air, dew, wind, radiation, time, longitude, latitude;
-        pressure_hpa, direct_fraction, config = typed_config, threaded,
+        rows, wbgt_out, wet_out, globe_out, air, dew, wind, time, longitude, latitude;
+        ghi_w_m2, dni_w_m2, dhi_w_m2, pressure_hpa, partition,
+        config = typed_config, threaded,
     )
     return WBGTBatchResult{T}(wbgt_out, wet_out, globe_out)
 end
 
 """
-    liljegren_wbgt_batch(air_temperature_c, dew_point_c, wind_speed_m_s,
-                         solar_radiation_w_m2, time, longitude_deg, latitude_deg;
-                         pressure_hpa=1010, direct_fraction,
-                         config=LiljegrenConfig(), threaded=false)
+    liljegren_wbgt_batch(air, dew, wind, time, longitude, latitude;
+                         ghi_w_m2=nothing, dni_w_m2=nothing, dhi_w_m2=nothing,
+                         partition=FixedDirectFraction(0.8),
+                         pressure_hpa=1010, config=LiljegrenConfig(),
+                         threaded=false)
 
-Return ordinary 1-based `Vector{Union{Missing,T}}` WBGT/component outputs (°C)
-for ordinally aligned `AbstractVector` inputs. Input, coordinate, time,
-missingness and threading semantics match [`liljegren_wbgt!`](@ref). Value-only
-v0.1 emits no aggregate warnings; use [`diagnose_liljegren_batch`](@ref) for
-row-level input and solver diagnostics.
+Return aligned WBGT/component arrays. With no irradiance components, each
+daytime row uses estimated clear-sky GHI.
 """
 function liljegren_wbgt_batch(
     air::AbstractVector,
     dew::AbstractVector,
     wind::AbstractVector,
-    radiation::AbstractVector,
     time::AbstractVector,
     longitude,
     latitude;
+    ghi_w_m2 = nothing,
+    dni_w_m2 = nothing,
+    dhi_w_m2 = nothing,
+    partition::RadiationPartitionPolicy = FixedDirectFraction(),
     pressure_hpa = DEFAULT_PRESSURE_HPA,
-    direct_fraction,
     config::LiljegrenConfig = LiljegrenConfig(),
     threaded::Bool = false,
 )
     rows, T, typed_config = _prepare_batch_inputs(
-        air, dew, wind, radiation, time, longitude, latitude;
-        pressure_hpa, direct_fraction, config,
+        air, dew, wind, time, longitude, latitude;
+        ghi_w_m2, dni_w_m2, dhi_w_m2, pressure_hpa, partition, config,
     )
     wbgt = Vector{Union{Missing,T}}(undef, rows)
-    wet = Vector{Union{Missing,T}}(undef, rows)
-    globe = Vector{Union{Missing,T}}(undef, rows)
+    wet = similar(wbgt)
+    globe = similar(wbgt)
     _execute_value_batch!(
-        rows, wbgt, wet, globe, air, dew, wind, radiation, time, longitude, latitude;
-        pressure_hpa, direct_fraction, config = typed_config, threaded,
+        rows, wbgt, wet, globe, air, dew, wind, time, longitude, latitude;
+        ghi_w_m2, dni_w_m2, dhi_w_m2, pressure_hpa, partition,
+        config = typed_config, threaded,
     )
     return WBGTBatchResult{T}(wbgt, wet, globe)
 end
@@ -271,6 +311,18 @@ function _diagnostic_arrays(::Type{T}, rows::Int) where {T<:AbstractFloat}
         missing_values(), missing_values(), missing_values(), missing_values(), missing_values(),
     )
     return component(), component()
+end
+
+function _irradiance_diagnostic_arrays(::Type{T}, rows::Int) where {T<:AbstractFloat}
+    missing_values() = fill!(Vector{Union{Missing,T}}(undef, rows), missing)
+    return IrradianceDiagnosticsBatch{T}(
+        missing_values(), missing_values(), missing_values(), missing_values(), missing_values(),
+        fill(false, rows), fill(false, rows), fill(false, rows),
+        fill(false, rows), fill(false, rows), fill(false, rows),
+        fill(false, rows), fill(false, rows), fill(false, rows),
+        fill(false, rows), missing_values(), missing_values(), fill(false, rows),
+        fill(:unknown, rows),
+    )
 end
 
 function _store_component!(out::SolverDiagnosticsBatch, row::Int, value::SolverDiagnostics)
@@ -290,35 +342,52 @@ function _store_component!(out::SolverDiagnosticsBatch, row::Int, value::SolverD
     return nothing
 end
 
-"""
-    diagnose_liljegren_batch(air_temperature_c, dew_point_c, wind_speed_m_s,
-                             solar_radiation_w_m2, time, longitude_deg, latitude_deg;
-                             pressure_hpa=1010, direct_fraction,
-                             config=LiljegrenConfig(), threaded=false)
+function _store_irradiance!(
+    out::IrradianceDiagnosticsBatch,
+    row::Int,
+    value::IrradianceDiagnostics,
+)
+    @inbounds out.ghi_w_m2[row] = value.ghi_w_m2
+    @inbounds out.dni_w_m2[row] = value.dni_w_m2
+    @inbounds out.dhi_w_m2[row] = value.dhi_w_m2
+    @inbounds out.direct_fraction[row] = value.direct_fraction
+    @inbounds out.clear_sky_ghi_w_m2[row] = value.clear_sky_ghi_w_m2
+    @inbounds out.ghi_supplied[row] = value.ghi_supplied
+    @inbounds out.dni_supplied[row] = value.dni_supplied
+    @inbounds out.dhi_supplied[row] = value.dhi_supplied
+    @inbounds out.ghi_estimated[row] = value.ghi_estimated
+    @inbounds out.dni_estimated[row] = value.dni_estimated
+    @inbounds out.dhi_estimated[row] = value.dhi_estimated
+    @inbounds out.ghi_clamped[row] = value.ghi_clamped
+    @inbounds out.dni_clamped[row] = value.dni_clamped
+    @inbounds out.dhi_clamped[row] = value.dhi_clamped
+    @inbounds out.derived_component_adjusted[row] = value.derived_component_adjusted
+    @inbounds out.closure_residual_w_m2[row] = value.closure_residual_w_m2
+    @inbounds out.closure_tolerance_w_m2[row] = value.closure_tolerance_w_m2
+    @inbounds out.closure_mismatch[row] = value.closure_mismatch
+    @inbounds out.partition_policy[row] = value.partition_policy
+    return nothing
+end
 
-Return a structure-of-arrays `DiagnosticWBGTBatchResult` for ordinally aligned
-batch inputs. Its result components are °C; per-row flags and component solver
-fields preserve scalar diagnostics. `threaded` records whether parallel
-execution was requested and `threads_available` is `Threads.nthreads()`, not a
-count of participating threads. Input, coordinate and time semantics match
-[`liljegren_wbgt!`](@ref).
-"""
+"""Return structure-of-arrays diagnostics for the component-aware batch API."""
 function diagnose_liljegren_batch(
     air::AbstractVector,
     dew::AbstractVector,
     wind::AbstractVector,
-    radiation::AbstractVector,
     time::AbstractVector,
     longitude,
     latitude;
+    ghi_w_m2 = nothing,
+    dni_w_m2 = nothing,
+    dhi_w_m2 = nothing,
+    partition::RadiationPartitionPolicy = FixedDirectFraction(),
     pressure_hpa = DEFAULT_PRESSURE_HPA,
-    direct_fraction,
     config::LiljegrenConfig = LiljegrenConfig(),
     threaded::Bool = false,
 )
     rows, T, typed_config = _prepare_batch_inputs(
-        air, dew, wind, radiation, time, longitude, latitude;
-        pressure_hpa, direct_fraction, config,
+        air, dew, wind, time, longitude, latitude;
+        ghi_w_m2, dni_w_m2, dhi_w_m2, pressure_hpa, partition, config,
     )
     wbgt = Vector{Union{Missing,T}}(undef, rows)
     wet = similar(wbgt)
@@ -329,12 +398,14 @@ function diagnose_liljegren_batch(
     radiation_clamped = fill(false, rows)
     mismatch = fill(false, rows)
     clipped = fill(false, rows)
+    irradiance_diagnostics = _irradiance_diagnostic_arrays(T, rows)
     globe_diagnostics, wet_diagnostics = _diagnostic_arrays(T, rows)
     function diagnose_row(row)
         diagnostic = _liljegren_row_from_time(
-            _at(air, row), _at(dew, row), _at(wind, row), _at(radiation, row),
-            _at(time, row), _at(longitude, row), _at(latitude, row), _at(pressure_hpa, row),
-            _at(direct_fraction, row), typed_config, _DiagnosticMode(),
+            _at(air, row), _at(dew, row), _at(wind, row), _at(time, row),
+            _at(longitude, row), _at(latitude, row), _at(pressure_hpa, row),
+            _at(ghi_w_m2, row), _at(dni_w_m2, row), _at(dhi_w_m2, row),
+            _partition_at(partition, row), typed_config, _DiagnosticMode(),
         )
         @inbounds wbgt[row] = diagnostic.result.wbgt_c
         @inbounds wet[row] = diagnostic.result.natural_wet_bulb_c
@@ -345,6 +416,7 @@ function diagnose_liljegren_batch(
         @inbounds radiation_clamped[row] = diagnostic.solar_radiation_clamped
         @inbounds mismatch[row] = diagnostic.solar_geometry_mismatch
         @inbounds clipped[row] = diagnostic.direct_solar_clipped
+        _store_irradiance!(irradiance_diagnostics, row, diagnostic.irradiance)
         _store_component!(globe_diagnostics, row, diagnostic.globe)
         _store_component!(wet_diagnostics, row, diagnostic.natural_wet_bulb)
     end
@@ -359,7 +431,7 @@ function diagnose_liljegren_batch(
     end
     return DiagnosticWBGTBatchResult{T}(
         WBGTBatchResult{T}(wbgt, wet, globe), status, dew_adjusted, wind_clamped,
-        radiation_clamped, mismatch, clipped, globe_diagnostics, wet_diagnostics,
-        threaded, Threads.nthreads(), rows,
+        radiation_clamped, mismatch, clipped, irradiance_diagnostics,
+        globe_diagnostics, wet_diagnostics, threaded, Threads.nthreads(), rows,
     )
 end

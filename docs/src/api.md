@@ -26,12 +26,16 @@ for arrays. Their exact sources, domains, and limitations are documented in
 
 ```julia
 liljegren_wbgt(air_temperature_c, dew_point_c, wind_speed_m_s,
-                solar_radiation_w_m2, time, longitude_deg, latitude_deg;
-                pressure_hpa=1010, direct_fraction, config=LiljegrenConfig())
+                time, longitude_deg, latitude_deg;
+                ghi_w_m2=nothing, dni_w_m2=nothing, dhi_w_m2=nothing,
+                partition=FixedDirectFraction(0.8), pressure_hpa=1010,
+                config=LiljegrenConfig())
 
 diagnose_liljegren(air_temperature_c, dew_point_c, wind_speed_m_s,
-                   solar_radiation_w_m2, time, longitude_deg, latitude_deg;
-                   pressure_hpa=1010, direct_fraction, config=LiljegrenConfig())
+                   time, longitude_deg, latitude_deg;
+                   ghi_w_m2=nothing, dni_w_m2=nothing, dhi_w_m2=nothing,
+                   partition=FixedDirectFraction(0.8), pressure_hpa=1010,
+                   config=LiljegrenConfig())
 ```
 
 `liljegren_wbgt` returns `WBGTResult`; `diagnose_liljegren` returns
@@ -41,22 +45,25 @@ diagnose_liljegren(air_temperature_c, dew_point_c, wind_speed_m_s,
 ## Batch calls
 
 ```julia
-liljegren_wbgt_batch(air, dew, wind, radiation, time, longitude, latitude;
-                      pressure_hpa=1010, direct_fraction,
+liljegren_wbgt_batch(air, dew, wind, time, longitude, latitude;
+                      ghi_w_m2=nothing, dni_w_m2=nothing, dhi_w_m2=nothing,
+                      partition=FixedDirectFraction(0.8), pressure_hpa=1010,
                       config=LiljegrenConfig(), threaded=false)
 
-liljegren_wbgt!(wbgt_out, wet_out, globe_out, air, dew, wind, radiation,
-                 time, longitude, latitude; pressure_hpa=1010,
-                 direct_fraction, config=LiljegrenConfig(), threaded=false)
+liljegren_wbgt!(wbgt_out, wet_out, globe_out, air, dew, wind, time,
+                 longitude, latitude; ghi_w_m2=nothing, dni_w_m2=nothing,
+                 dhi_w_m2=nothing, partition=FixedDirectFraction(0.8),
+                 pressure_hpa=1010, config=LiljegrenConfig(), threaded=false)
 
-diagnose_liljegren_batch(air, dew, wind, radiation, time, longitude, latitude;
-                         pressure_hpa=1010, direct_fraction,
+diagnose_liljegren_batch(air, dew, wind, time, longitude, latitude;
+                         ghi_w_m2=nothing, dni_w_m2=nothing, dhi_w_m2=nothing,
+                         partition=FixedDirectFraction(0.8), pressure_hpa=1010,
                          config=LiljegrenConfig(), threaded=false)
 ```
 
-Batch rows are ordinally aligned. Longitude, latitude, pressure, and direct
-fraction may be shared scalars or row-aligned vectors as documented in
-[Units and input policies](@ref).
+Batch rows are ordinally aligned. Longitude, latitude, pressure, irradiance,
+and fixed direct fraction may be shared scalars or row-aligned vectors as
+documented in [Units and input policies](@ref).
 
 ## Types
 
@@ -65,3 +72,6 @@ contains physical and input-policy settings. `WBGTResult` and
 `WBGTBatchResult` contain values; `DiagnosticWBGTResult`,
 `DiagnosticWBGTBatchResult`, and `SolverDiagnostics` expose input and solver
 state. `DewPointPolicy`, `InputStatus`, and `FailureReason` are explicit enums.
+`RadiationPartitionPolicy`, `FixedDirectFraction`, and
+`LiljegrenClearnessFraction` control underdetermined radiation splits.
+`IrradianceDiagnostics` reports the resolved component state and provenance.

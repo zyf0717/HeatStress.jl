@@ -194,7 +194,27 @@ kind = "technical_report"
 authors = "Allen, R. G.; Pereira, L. S.; Raes, D.; Smith, M."
 title = "Crop Evapotranspiration: Guidelines for Computing Crop Water Requirements"
 year = 1998
-role = "Saturation vapour pressure equation"
+role = "Saturation vapour pressure equation and inverse relative Earth-Sun distance"
+
+[sources.kasten_czeplak_1980]
+kind = "journal_article"
+authors = "Kasten, F.; Czeplak, G."
+title = "Solar and terrestrial radiation dependent on the amount and type of cloud"
+journal = "Solar Energy"
+year = 1980
+volume = "24"
+issue = "2"
+pages = "177-189"
+doi = "10.1016/0038-092X(80)90391-6"
+role = "Very-simple clear-sky global horizontal irradiance relation"
+
+[sources.nrel_seri_qc]
+kind = "technical_report"
+authors = "Maxwell, E.; Wilcox, S.; Rymes, M."
+title = "Users Manual for SERI QC Software: Assessing the Quality of Solar Radiation Data"
+year = 1993
+report_number = "NREL/TP-463-5608"
+role = "Three-component irradiance closure and normalized consistency testing"
 
 [sources.package_contract]
 kind = "repository_specification"
