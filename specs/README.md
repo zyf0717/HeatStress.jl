@@ -37,6 +37,10 @@ become a public claim without a reproducible, correctness-gated report. Future
 comparisons may use any reviewed HeatStressR version but must pin and record its
 exact commit and dependency environment.
 
+Spec 017 completes the breaking v0.3 irradiance-component API supporting GHI,
+DNI and DHI reconstruction. Release remains blocked pending a separate final
+scientific audit.
+
 ## Status legend
 
 - `Planned` — requirements are captured; implementation has not met its acceptance criteria.
@@ -66,6 +70,7 @@ exact commit and dependency environment.
 | 014 | [Readability refactor](./014-readability-refactor/) | Complete | Preserves completed 007–008 behaviour; v0.1 readiness input |
 | 015 | [v0.2 scientific audit](./015-v020-scientific-audit/) | Complete | Completed 009 and 010 v0.2 slice; PR CI and authorised squash merge gate |
 | 016 | [Scientific validation hardening](./016-scientific-validation-hardening/) | Complete | Additive post-v0.2 numerical-conformance evidence; preserves released APIs and audit records |
+| 017 | [Irradiance component inputs](./017-irradiance-component-inputs/) | Complete | Breaking v0.3 radiation API; depends on completed 004, 007, 008 and 016 evidence |
 
 The completed v0.1.0 path was `000–008 → Liljegren/core slice of 010 →
 publication gate of 011 → 012 → focused 013 audit → tag, release and General

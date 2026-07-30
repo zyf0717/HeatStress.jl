@@ -1,5 +1,9 @@
 # Liljegren scalar model
 
+> The component-balance science remains authoritative here. Spec 017
+> supersedes only the public radiation boundary and its preparation step for
+> v0.3.
+
 ## Purpose
 
 Compose policies, solar geometry, psychrometrics, kernels and the root solver into the canonical scalar Liljegren implementation.

@@ -1,5 +1,9 @@
 # Public API and types
 
+> Historical contract: spec 017 supersedes the Liljegren radiation arguments
+> and diagnostic containers for v0.3. The non-radiation v0.1 surface remains
+> governed here.
+
 ## Purpose
 
 Define the stable Julia-facing vocabulary before formulas are implemented. Avoid copying R naming and return-container conventions.

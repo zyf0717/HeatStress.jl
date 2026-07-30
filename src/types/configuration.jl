@@ -40,6 +40,8 @@ struct LiljegrenConfig{T<:AbstractFloat}
     surface_albedo::T
     globe_diameter_m::T
     minimum_wind_speed_m_s::T
+    irradiance_closure_atol_w_m2::T
+    irradiance_closure_kt_tolerance::T
 
     function LiljegrenConfig{T}(
         solver::SolverConfig{T},
@@ -48,12 +50,23 @@ struct LiljegrenConfig{T<:AbstractFloat}
         surface_albedo::T,
         globe_diameter_m::T,
         minimum_wind_speed_m_s::T,
+        irradiance_closure_atol_w_m2::T,
+        irradiance_closure_kt_tolerance::T,
     ) where {T<:AbstractFloat}
         _require_finite_nonnegative(dew_point_tolerance_c, :dew_point_tolerance_c)
         isfinite(surface_albedo) && zero(T) <= surface_albedo <= one(T) ||
             throw(ArgumentError("surface_albedo must be finite and in [0, 1]"))
         _require_finite_positive(globe_diameter_m, :globe_diameter_m)
         _require_finite_nonnegative(minimum_wind_speed_m_s, :minimum_wind_speed_m_s)
+        _require_finite_nonnegative(
+            irradiance_closure_atol_w_m2,
+            :irradiance_closure_atol_w_m2,
+        )
+        isfinite(irradiance_closure_kt_tolerance) &&
+            zero(T) <= irradiance_closure_kt_tolerance <= one(T) ||
+            throw(ArgumentError(
+                "irradiance_closure_kt_tolerance must be finite and in [0, 1]",
+            ))
         return new{T}(
             solver,
             dew_point_policy,
@@ -61,6 +74,8 @@ struct LiljegrenConfig{T<:AbstractFloat}
             surface_albedo,
             globe_diameter_m,
             minimum_wind_speed_m_s,
+            irradiance_closure_atol_w_m2,
+            irradiance_closure_kt_tolerance,
         )
     end
 end
@@ -73,6 +88,10 @@ function LiljegrenConfig(
     surface_albedo::Real = typeof(solver.root_tolerance_k)(DEFAULT_SURFACE_ALBEDO),
     globe_diameter_m::Real = typeof(solver.root_tolerance_k)(DEFAULT_GLOBE_DIAMETER_M),
     minimum_wind_speed_m_s::Real = typeof(solver.root_tolerance_k)(DEFAULT_MINIMUM_WIND_SPEED_M_S),
+    irradiance_closure_atol_w_m2::Real =
+        typeof(solver.root_tolerance_k)(DEFAULT_IRRADIANCE_CLOSURE_ATOL_W_M2),
+    irradiance_closure_kt_tolerance::Real =
+        typeof(solver.root_tolerance_k)(DEFAULT_IRRADIANCE_CLOSURE_KT_TOLERANCE),
 )
     float_type = _common_float_type(
         solver.root_tolerance_k,
@@ -80,6 +99,8 @@ function LiljegrenConfig(
         surface_albedo,
         globe_diameter_m,
         minimum_wind_speed_m_s,
+        irradiance_closure_atol_w_m2,
+        irradiance_closure_kt_tolerance,
     )
     promoted_solver = SolverConfig{float_type}(
         convert(float_type, solver.root_tolerance_k),
@@ -93,5 +114,7 @@ function LiljegrenConfig(
         convert(float_type, surface_albedo),
         convert(float_type, globe_diameter_m),
         convert(float_type, minimum_wind_speed_m_s),
+        convert(float_type, irradiance_closure_atol_w_m2),
+        convert(float_type, irradiance_closure_kt_tolerance),
     )
 end

@@ -1,6 +1,6 @@
 # Units and input policies
 
-The v0.1 numeric API accepts air, dew-point and component temperatures in °C;
+The numeric API accepts air, dew-point and component temperatures in °C;
 pressure in hPa; wind speed in m/s; radiation in W/m²; and longitude/latitude
 in degrees. Thermodynamic kernels use K. Relative humidity is percent at public
 convenience boundaries and a fraction only in names ending `_fraction`. Solar
@@ -10,10 +10,16 @@ zenith is radians internally and degrees only when a public API says so.
 `globe_diameter_m`, and `minimum_wind_speed_m_s`. Its solver tolerances are K.
 
 Input preparation rejects non-finite scalar meteorology, invalid coordinates,
-non-positive pressure, and direct fractions outside `[0, 1]`. A batch boundary
-may represent a missing pressure as a row-level missing meteorology result.
-`direct_fraction` is explicit: solar geometry does not determine the
-direct/diffuse split, and v0.1 has no package fallback.
+non-positive pressure, fixed direct fractions outside `[0, 1]`, and redundant
+irradiance components that violate closure beyond the configured tolerance. A
+batch boundary may represent a missing pressure as a row-level missing
+meteorology result.
+
+GHI and DHI are horizontal; DNI is beam-normal. Supplied pairs resolve the
+third component through `GHI = DHI + DNI*cos(zenith)`. A GHI-only row uses the
+selected partition policy. The default `FixedDirectFraction(0.8)` preserves
+the package's modern-target assumption; `LiljegrenClearnessFraction()` enables
+the sourced empirical estimator. A no-input daytime row uses clear-sky GHI.
 
 Negative wind and solar radiation are clamped to zero and reported by diagnostic
 flags. Dew point above air temperature is reconciled within the configured
@@ -30,7 +36,7 @@ public-boundary normalization.
 
 `diagnose_liljegren` is the canonical scalar calculation; `liljegren_wbgt`,
 `globe_temperature`, and `natural_wet_bulb_temperature` discard parts of that
-same diagnostic result. `direct_fraction` is required. Complete WBGT is only
+same diagnostic result. Complete WBGT is only
 returned when both component roots pass their independent Kelvin-scale
 residual validation; a diagnostic preserves either valid component when the
 other fails.
@@ -56,10 +62,15 @@ InputStatus
 FailureReason
 SolverConfig
 LiljegrenConfig
+RadiationPartitionPolicy
+FixedDirectFraction
+LiljegrenClearnessFraction
 WBGTResult
+IrradianceDiagnostics
 SolverDiagnostics
 DiagnosticWBGTResult
 WBGTBatchResult
+IrradianceDiagnosticsBatch
 SolverDiagnosticsBatch
 DiagnosticWBGTBatchResult
 HeatStress.liljegren_wbgt_batch

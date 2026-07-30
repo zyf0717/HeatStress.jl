@@ -16,6 +16,24 @@ is linked to the source inventory in `validation/sources.toml` or marked
 as an original numerical or API design decision. Cross-implementation results
 are advisory validation evidence, never scientific authority.
 
+## Irradiance reconstruction
+
+- Liljegren et al. (2008), equations 13–14, supplies the optional
+  clearness-index direct-fraction relation.
+- Kasten and Czeplak (1980), DOI
+  https://doi.org/10.1016/0038-092X(80)90391-6, supplies the no-input
+  clear-sky GHI estimate.
+- FAO Irrigation and Drainage Paper 56, equation 23, supplies the inverse
+  relative Earth–Sun distance used for extraterrestrial horizontal
+  irradiance.
+- NREL SERI-QC supplies the three-component irradiance-closure framework. The
+  package's combined relative tolerance and 20 W/m² floor are an explicit
+  reconciliation policy.
+
+The fixed `0.8` default is a package assumption, not a universal constant.
+The `0.85` cap is confined to the opt-in clearness estimator; measured GHI is
+not capped against top-of-atmosphere irradiance.
+
 ## Secondary measures
 
 - Measured-component WBGT uses the equations published in the US Occupational

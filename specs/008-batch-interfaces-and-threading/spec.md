@@ -1,5 +1,9 @@
 # Batch interfaces and threading
 
+> Historical contract: spec 017 replaces the positional radiation and
+> `direct_fraction` batch arguments in v0.3 while preserving the orchestration,
+> preallocation, threading, and row-equivalence requirements defined here.
+
 ## Purpose
 
 Add high-throughput aligned-array interfaces around the canonical scalar model without assuming that a prior vectorised solver architecture is appropriate for Julia.

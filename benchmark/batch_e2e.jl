@@ -34,8 +34,8 @@ end
 function _scalar_row_loop!(wbgt, wet, globe, air, dew, wind, radiation, time)
     for row in eachindex(air)
         result = HeatStress.liljegren_wbgt(
-            air[row], dew[row], wind[row], radiation[row], time[row], -74.0060, 40.7128;
-            direct_fraction = 0.7,
+            air[row], dew[row], wind[row], time[row], -74.0060, 40.7128;
+            ghi_w_m2 = radiation[row], partition = FixedDirectFraction(0.7),
         )
         wbgt[row] = result.wbgt_c
         wet[row] = result.natural_wet_bulb_c
@@ -48,8 +48,8 @@ function _scalar_public_results(air, dew, wind, radiation, time)
     results = Vector{WBGTResult{Float64}}(undef, length(air))
     for row in eachindex(air)
         results[row] = HeatStress.liljegren_wbgt(
-            air[row], dew[row], wind[row], radiation[row], time[row], -74.0060, 40.7128;
-            direct_fraction = 0.7,
+            air[row], dew[row], wind[row], time[row], -74.0060, 40.7128;
+            ghi_w_m2 = radiation[row], partition = FixedDirectFraction(0.7),
         )
     end
     return results
@@ -92,9 +92,15 @@ function _measure(inputs, samples::Int, mode::Symbol)
     elseif mode === :preallocated_batch_serial || mode === :preallocated_batch_threaded
         outputs = _outputs(rows)
         threaded = mode === :preallocated_batch_threaded
-        () -> HeatStress.liljegren_wbgt!(outputs..., air, dew, wind, radiation, time, -74.0060, 40.7128; direct_fraction = 0.7, threaded)
+        () -> HeatStress.liljegren_wbgt!(
+            outputs..., air, dew, wind, time, -74.0060, 40.7128;
+            ghi_w_m2 = radiation, partition = FixedDirectFraction(0.7), threaded,
+        )
     elseif mode === :allocating_batch
-        () -> HeatStress.liljegren_wbgt_batch(air, dew, wind, radiation, time, -74.0060, 40.7128; direct_fraction = 0.7)
+        () -> HeatStress.liljegren_wbgt_batch(
+            air, dew, wind, time, -74.0060, 40.7128;
+            ghi_w_m2 = radiation, partition = FixedDirectFraction(0.7),
+        )
     else
         throw(ArgumentError("unknown benchmark mode: $mode"))
     end

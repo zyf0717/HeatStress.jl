@@ -18,7 +18,11 @@ struct _LiljegrenValue{T<:AbstractFloat}
     globe_temperature_missing::Bool
 end
 
-function _input_failure_diagnostic(status::InputStatus, config::LiljegrenConfig{T}) where {T<:AbstractFloat}
+function _input_failure_diagnostic(
+    status::InputStatus,
+    config::LiljegrenConfig{T},
+    irradiance::IrradianceDiagnostics{T} = _empty_irradiance_diagnostics(T),
+) where {T<:AbstractFloat}
     diagnostics = _not_attempted_diagnostics(config.solver)
     return DiagnosticWBGTResult{T}(
         WBGTResult{T}(missing, missing, missing),
@@ -28,6 +32,7 @@ function _input_failure_diagnostic(status::InputStatus, config::LiljegrenConfig{
         false,
         false,
         false,
+        irradiance,
         diagnostics,
         diagnostics,
     )
@@ -38,3 +43,21 @@ end
 
 @inline _input_failure_result(::Type{T}, ::_DiagnosticMode, status::InputStatus, config::LiljegrenConfig{T}) where {T<:AbstractFloat} =
     _input_failure_diagnostic(status, config)
+
+@inline _input_failure_result(
+    ::Type{T},
+    ::_ValueMode,
+    ::InputStatus,
+    ::LiljegrenConfig{T},
+    ::IrradianceDiagnostics{T},
+) where {T<:AbstractFloat} =
+    _LiljegrenValue{T}(zero(T), zero(T), zero(T), true, true, true)
+
+@inline _input_failure_result(
+    ::Type{T},
+    ::_DiagnosticMode,
+    status::InputStatus,
+    config::LiljegrenConfig{T},
+    irradiance::IrradianceDiagnostics{T},
+) where {T<:AbstractFloat} =
+    _input_failure_diagnostic(status, config, irradiance)

@@ -5,6 +5,7 @@ using TimeZones
 
 include("constants.jl")
 include("types/statuses.jl")
+include("types/irradiance.jl")
 include("types/configuration.jl")
 include("types/results.jl")
 include("types/diagnostics.jl")
@@ -12,6 +13,7 @@ include("policies.jl")
 include("validation.jl")
 include("psychrometrics.jl")
 include("solar_geometry.jl")
+include("irradiance.jl")
 include("heat_transfer.jl")
 include("indices/validation.jl")
 include("indices/measured_wbgt.jl")
@@ -41,6 +43,11 @@ export DewPointPolicy,
     MissingTime,
     InvalidDewPoint,
     InvalidDomain,
+    RadiationPartitionPolicy,
+    FixedDirectFraction,
+    LiljegrenClearnessFraction,
+    IrradianceDiagnostics,
+    IrradianceDiagnosticsBatch,
     FailureReason,
     NoFailure,
     NotAttempted,

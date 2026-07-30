@@ -29,6 +29,7 @@ struct _PreparedMeteorology{T<:AbstractFloat}
     solar_radiation_clamped::Bool
     solar_geometry_mismatch::Bool
     direct_solar_clipped::Bool
+    irradiance::IrradianceDiagnostics{T}
 end
 
 # Input-preparation failure represented without a numerical payload.
@@ -153,6 +154,9 @@ end
 function _apply_solar_policy(
     basic::_BasicMeteorology{T},
     solar_zenith_rad::Union{Missing,Real},
+    irradiance::IrradianceDiagnostics{T};
+    geometry_mismatch::Bool = false,
+    radiation_clamped::Bool = false,
 ) where {T<:AbstractFloat}
     ismissing(solar_zenith_rad) && return _InputPreparationFailure(InvalidDomain)
     zenith = convert(T, solar_zenith_rad)
@@ -160,7 +164,8 @@ function _apply_solar_policy(
         return _InputPreparationFailure(InvalidDomain)
 
     below_horizon = zenith >= T(pi / 2)
-    mismatch = basic.solar_radiation_w_m2 > zero(T) && below_horizon
+    mismatch = geometry_mismatch ||
+               (basic.solar_radiation_w_m2 > zero(T) && below_horizon)
     radiation = below_horizon ? zero(T) : basic.solar_radiation_w_m2
     _, _, _, direct_clipped = _direct_solar_geometry(zenith)
     direct_solar_clipped = radiation > zero(T) && basic.direct_fraction > zero(T) && direct_clipped
@@ -177,9 +182,10 @@ function _apply_solar_policy(
         basic.direct_fraction,
         basic.dew_point_adjusted,
         basic.wind_speed_clamped,
-        basic.solar_radiation_clamped,
+        basic.solar_radiation_clamped || radiation_clamped,
         mismatch,
         direct_solar_clipped,
+        irradiance,
     )
 end
 

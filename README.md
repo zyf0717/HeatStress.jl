@@ -28,8 +28,10 @@ use `ZonedDateTime` for an explicit local instant.
 using Dates, HeatStress
 
 result = liljegren_wbgt(
-    30.0, 20.0, 1.0, 800.0, DateTime(2024, 6, 21, 12), 0.0, 0.0;
-    pressure_hpa = 1010.0, direct_fraction = 0.7,
+    30.0, 20.0, 1.0, DateTime(2024, 6, 21, 12), 0.0, 0.0;
+    ghi_w_m2 = 800.0,
+    pressure_hpa = 1010.0,
+    partition = FixedDirectFraction(0.7),
 )
 result.wbgt_c
 ```
@@ -48,21 +50,31 @@ For row-level input policy and root-solving information, call
 fails; complete WBGT is `missing` unless both components pass residual checks.
 
 ```julia
-batch = liljegren_wbgt_batch(air, dew_point, wind, radiation, times, longitude, latitude;
-                              pressure_hpa = pressure, direct_fraction = direct,
-                              threaded = true)
+batch = liljegren_wbgt_batch(air, dew_point, wind, times, longitude, latitude;
+    ghi_w_m2 = ghi, dni_w_m2 = dni, dhi_w_m2 = dhi,
+    pressure_hpa = pressure,
+    partition = FixedDirectFraction(direct_fraction),
+    threaded = true,
+)
 ```
 
-`longitude`, `latitude`, `pressure_hpa`, and `direct_fraction` may be scalars
-or vectors aligned with the primary input vectors. Use `liljegren_wbgt!` when
-you own compatible output arrays and need to avoid replacement output arrays.
+Any combination of GHI, DNI, and DHI may be supplied, including none. Missing
+components are reconstructed from measured component identities where
+possible. With no components, daytime GHI uses the package's clear-sky
+estimate. The default partition is `FixedDirectFraction(0.8)`; use
+`LiljegrenClearnessFraction()` to opt into the clearness estimator.
+
+`longitude`, `latitude`, `pressure_hpa`, optional irradiance components, and a
+fixed direct-fraction value may be scalars or vectors aligned with the primary
+input vectors. Use `liljegren_wbgt!` for compatible preallocated outputs.
 
 ## Numerical behaviour and limitations
 
 The model rejects non-finite inputs, invalid coordinates, non-positive
-pressure, and direct fractions outside `[0, 1]`. Negative wind/radiation are
-clamped and recorded in diagnostics; supplied radiation is zeroed at/below the
-geometric horizon. The direct/diffuse radiation split is an explicit input.
+pressure, fixed direct fractions outside `[0, 1]`, and materially inconsistent
+redundant irradiance components. Negative wind/irradiance values are clamped
+and recorded in diagnostics; solar forcing is zeroed at/below the geometric
+horizon.
 Results depend on pressure, wind treatment, timestamp convention, selected
 solar method, radiation partitioning, instrument parameters, and solver
 policies—do not assume equivalence with another WBGT implementation unless

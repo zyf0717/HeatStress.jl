@@ -4,10 +4,43 @@ using Dates: Date, DateTime
 using TimeZones: TimeZone, ZonedDateTime
 using TOML
 
-const _diagnose_liljegren = HeatStress.diagnose_liljegren
-const _liljegren_wbgt = HeatStress.liljegren_wbgt
-const _globe_temperature = HeatStress.globe_temperature
-const _natural_wet_bulb_temperature = HeatStress.natural_wet_bulb_temperature
+function _legacy_partition(value)
+    return FixedDirectFraction{typeof(value)}(value)
+end
+
+function _diagnose_liljegren(air, dew, wind, ghi, time, longitude, latitude;
+                             direct_fraction, kwargs...)
+    return HeatStress.diagnose_liljegren(
+        air, dew, wind, time, longitude, latitude;
+        ghi_w_m2 = ghi, partition = _legacy_partition(direct_fraction), kwargs...,
+    )
+end
+
+function _liljegren_wbgt(air, dew, wind, ghi, time, longitude, latitude;
+                         direct_fraction, kwargs...)
+    return HeatStress.liljegren_wbgt(
+        air, dew, wind, time, longitude, latitude;
+        ghi_w_m2 = ghi, partition = _legacy_partition(direct_fraction), kwargs...,
+    )
+end
+
+function _globe_temperature(air, dew, wind, ghi, time, longitude, latitude;
+                            direct_fraction, kwargs...)
+    return HeatStress.globe_temperature(
+        air, dew, wind, time, longitude, latitude;
+        ghi_w_m2 = ghi, partition = _legacy_partition(direct_fraction), kwargs...,
+    )
+end
+
+function _natural_wet_bulb_temperature(
+    air, dew, wind, ghi, time, longitude, latitude;
+    direct_fraction, kwargs...,
+)
+    return HeatStress.natural_wet_bulb_temperature(
+        air, dew, wind, time, longitude, latitude;
+        ghi_w_m2 = ghi, partition = _legacy_partition(direct_fraction), kwargs...,
+    )
+end
 
 function _scalar_fixture(; kwargs...)
     return _diagnose_liljegren(
@@ -324,7 +357,7 @@ end
             pressure_hpa = 1010f0, direct_fraction = 0.7f0, config = config32,
         )) isa DiagnosticWBGTResult{Float32}
 
-        @test _scalar_value_allocations() <= 1024
+        @test _scalar_value_allocations() <= 1536
         strict_allocations = _scalar_value_allocations(LiljegrenConfig(
             solver = SolverConfig(root_tolerance_k = 1e-8, residual_tolerance_k = 1e-4),
         ))

@@ -13,6 +13,13 @@ complete WBGT unless both components are accepted. `diagnose_liljegren` and
 `diagnose_liljegren_batch` expose the classification, brackets, residuals,
 iterations, and input-normalisation flags.
 
+Irradiance resolution does not cap a supplied GHI against clear-sky or
+top-of-atmosphere estimates. The `0.85` clearness cap applies only inside the
+opt-in empirical partition relation. Redundant measured components are
+accepted within
+`max(irradiance_closure_atol_w_m2,
+irradiance_closure_kt_tolerance * I0h)` and otherwise rejected before solving.
+
 No numerical failure is silently converted into a plausible WBGT value. Tighten
 tolerances only with care: they affect convergence work and can expose
 floating-point representation limits without changing the scientific model.

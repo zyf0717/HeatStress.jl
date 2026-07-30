@@ -2,6 +2,11 @@
     @testset "completed Liljegren exports" begin
         exported_names = Set(names(HeatStress))
         expected_names = (
+            :RadiationPartitionPolicy,
+            :FixedDirectFraction,
+            :LiljegrenClearnessFraction,
+            :IrradianceDiagnostics,
+            :IrradianceDiagnosticsBatch,
             :globe_temperature,
             :natural_wet_bulb_temperature,
             :liljegren_wbgt,
@@ -17,6 +22,9 @@
         @test ClampDewPoint isa DewPointPolicy
         @test InputAccepted isa InputStatus
         @test NoFailure isa FailureReason
+        @test FixedDirectFraction() isa RadiationPartitionPolicy
+        @test FixedDirectFraction().value == 0.8
+        @test LiljegrenClearnessFraction() isa RadiationPartitionPolicy
     end
 
     @testset "configuration validation and promotion" begin
@@ -41,6 +49,11 @@
         @test_throws ArgumentError LiljegrenConfig(surface_albedo = 1.01)
         @test_throws ArgumentError LiljegrenConfig(globe_diameter_m = 0.0)
         @test_throws ArgumentError LiljegrenConfig(minimum_wind_speed_m_s = -0.01)
+        @test_throws ArgumentError LiljegrenConfig(irradiance_closure_atol_w_m2 = -1.0)
+        @test_throws ArgumentError LiljegrenConfig(irradiance_closure_kt_tolerance = -0.01)
+        @test_throws ArgumentError FixedDirectFraction(-0.1)
+        @test_throws ArgumentError FixedDirectFraction(1.1)
+        @test_throws ArgumentError FixedDirectFraction([0.8, 1.1])
     end
 
     @testset "result containers" begin
@@ -82,6 +95,27 @@
             1e-6,
             0.011,
         )
+        irradiance = IrradianceDiagnostics{Float64}(
+            missing,
+            missing,
+            missing,
+            missing,
+            missing,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            false,
+            missing,
+            missing,
+            false,
+            :fixed,
+        )
         diagnostic = @inferred DiagnosticWBGTResult{Float64}(
             WBGTResult(missing, missing, missing),
             MissingTime,
@@ -90,6 +124,7 @@
             false,
             false,
             false,
+            irradiance,
             not_attempted,
             not_attempted,
         )
