@@ -27,3 +27,29 @@ HeatStressR or another implementation.
 
 Contributions are submitted under the MIT License. Contributors must have the
 right to submit all code, test data, and documentation they provide.
+
+## Publishing an authorised release
+
+Publish only after the release PR passes its required checks on the final head
+and an authorised maintainer squash-merges it. Verify that `Project.toml` and
+`CITATION.cff` contain the same version, and record the squash commit SHA.
+
+This repository disables Julia Registrator commands in pull-request comments.
+Invoke Registrator in a comment on the squash commit instead; this also pins the
+registration to the reviewed tree. Include release notes in the initial command
+when they are available:
+
+```sh
+release_sha=<squash-commit-sha>
+gh api "repos/zyf0717/HeatStress.jl/commits/${release_sha}/comments" \
+  --method POST \
+  -f body=$'@JuliaRegistrator register\n\nRelease notes:\n\n<release notes>'
+```
+
+Wait for Registrator's General registry pull request to pass and merge. The
+registry merge prompts Julia TagBot through the configured
+`.github/workflows/TagBot.yml`; verify that the resulting version tag targets
+the recorded squash commit and that the matching GitHub release exists. If the
+automatic TagBot event does not run, dispatch the TagBot workflow manually from
+`main`. Do not create or move a release tag before the registry pull request is
+merged.

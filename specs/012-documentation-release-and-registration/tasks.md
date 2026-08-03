@@ -41,4 +41,8 @@
 - Registration evidence: Julia General accepted HeatStress v0.1.0 in
   `JuliaRegistries/General#162272`; TagBot did not publish the release, so the
   maintainer created the GitHub v0.1.0 release manually.
+- Workflow clarification (2026-08-03): repository configuration rejects
+  Registrator commands in pull-request comments. Release registration is
+  invoked on the authorised squash commit; after the General registry pull
+  request merges, maintainers verify TagBot's tag target and GitHub release.
 - Candidate/release commit: `c315048dc4ff9b0e1265114f7f6d7b5c9071095c`
