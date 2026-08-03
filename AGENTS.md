@@ -68,3 +68,9 @@ This repository is `HeatStress.jl`, an independent MIT-licensed Julia implementa
   squash-merges it. The successful CI and squash merge are the approval record;
   no follow-up audit commit is required. Any later source, fixture or
   scientific-contract change requires a new audit.
+* Trigger Julia Registrator from a comment on the authorised squash commit, not
+  from the merged pull request: this repository disables Registrator commands
+  in pull-request comments. After the General registry pull request merges,
+  verify TagBot creates the version tag at that commit and the GitHub release;
+  manually dispatch `.github/workflows/TagBot.yml` only if the automatic event
+  does not run.
