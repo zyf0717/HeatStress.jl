@@ -62,6 +62,7 @@ end
         prepared.solar_radiation_clamped,
         prepared.solar_geometry_mismatch,
         prepared.direct_solar_clipped,
+        prepared.wind_height,
         prepared.irradiance,
         globe,
         natural_wet_bulb,

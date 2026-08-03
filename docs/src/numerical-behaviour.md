@@ -13,6 +13,12 @@ complete WBGT unless both components are accepted. `diagnose_liljegren` and
 `diagnose_liljegren_batch` expose the classification, brackets, residuals,
 iterations, and input-normalisation flags.
 
+Wind diagnostics preserve three distinct stages: supplied wind, nonnegative
+wind converted to 2 m, and the post-floor wind consumed by both component
+balances. Negative-input clamping and minimum-floor application therefore
+remain independently observable. The no-adjustment default preserves the
+released numerical path.
+
 Irradiance resolution does not cap a supplied GHI against clear-sky or
 top-of-atmosphere estimates. The `0.85` clearness cap applies only inside the
 opt-in empirical partition relation. Redundant measured components are

@@ -8,9 +8,11 @@ include("types/statuses.jl")
 include("types/irradiance.jl")
 include("types/configuration.jl")
 include("types/results.jl")
+include("types/wind_height.jl")
 include("types/diagnostics.jl")
 include("policies.jl")
 include("validation.jl")
+include("wind_height.jl")
 include("psychrometrics.jl")
 include("solar_geometry.jl")
 include("irradiance.jl")
@@ -57,6 +59,21 @@ export DewPointPolicy,
     IterationLimit,
     SolverConfig,
     LiljegrenConfig,
+    WindHeightPolicy,
+    NoWindHeightAdjustment,
+    LiljegrenStabilityPowerLaw,
+    WindTerrain,
+    Rural,
+    Urban,
+    PasquillStabilityClass,
+    StabilityA,
+    StabilityB,
+    StabilityC,
+    StabilityD,
+    StabilityE,
+    StabilityF,
+    WindHeightDiagnostics,
+    WindHeightDiagnosticsBatch,
     WBGTResult,
     SolverDiagnostics,
     DiagnosticWBGTResult,
@@ -70,6 +87,8 @@ export DewPointPolicy,
     liljegren_wbgt_batch,
     liljegren_wbgt!,
     diagnose_liljegren_batch,
+    wind_speed_at_height,
+    diagnose_wind_speed_at_height,
     solar_zenith,
     solar_zenith_batch,
     saturation_vapour_pressure_hpa,

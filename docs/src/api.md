@@ -3,6 +3,25 @@
 The public surface covers Liljegren outdoor WBGT, selected direct heat
 measures, and their supporting helpers and types.
 
+## Wind-height preprocessing
+
+```julia
+wind_speed_at_height(speed_m_s, measurement_height_m;
+                     reference_height_m=2.0,
+                     policy=LiljegrenStabilityPowerLaw(), terrain=Rural(),
+                     stability_class=nothing, daytime=nothing,
+                     ghi_w_m2=nothing,
+                     vertical_temperature_difference_c=nothing,
+                     minimum_wind_speed_m_s=nothing)
+
+diagnose_wind_speed_at_height(speed_m_s, measurement_height_m; ...)
+```
+
+The value API returns reference-height wind. The diagnostic form also reports
+the supplied wind, selected stability class and exponent, pre-floor adjusted
+wind, post-floor effective wind, and adjustment flags. `StabilityA` through
+`StabilityF` can be supplied explicitly when classifier meteorology is absent.
+
 `solar_zenith`, `solar_zenith_batch`, `saturation_vapour_pressure_hpa`,
 `vapour_pressure`, and `relative_humidity_from_dewpoint` are also exported
 helpers. See [Inputs and policies](@ref) for their units and timestamp rules.
@@ -29,12 +48,20 @@ liljegren_wbgt(air_temperature_c, dew_point_c, wind_speed_m_s,
                 time, longitude_deg, latitude_deg;
                 ghi_w_m2=nothing, dni_w_m2=nothing, dhi_w_m2=nothing,
                 partition=FixedDirectFraction(0.8), pressure_hpa=1010,
+                wind_height_m=2.0,
+                wind_height_policy=NoWindHeightAdjustment(),
+                terrain=Rural(), stability_class=nothing,
+                vertical_temperature_difference_c=nothing,
                 config=LiljegrenConfig())
 
 diagnose_liljegren(air_temperature_c, dew_point_c, wind_speed_m_s,
                    time, longitude_deg, latitude_deg;
                    ghi_w_m2=nothing, dni_w_m2=nothing, dhi_w_m2=nothing,
                    partition=FixedDirectFraction(0.8), pressure_hpa=1010,
+                   wind_height_m=2.0,
+                   wind_height_policy=NoWindHeightAdjustment(),
+                   terrain=Rural(), stability_class=nothing,
+                   vertical_temperature_difference_c=nothing,
                    config=LiljegrenConfig())
 ```
 
@@ -62,7 +89,8 @@ diagnose_liljegren_batch(air, dew, wind, time, longitude, latitude;
 ```
 
 Batch rows are ordinally aligned. Longitude, latitude, pressure, irradiance,
-and fixed direct fraction may be shared scalars or row-aligned vectors as
+fixed direct fraction, wind height, terrain, stability class, and vertical
+temperature difference may be shared scalars or row-aligned vectors as
 documented in [Units and input policies](@ref).
 
 ## Types
@@ -75,3 +103,18 @@ state. `DewPointPolicy`, `InputStatus`, and `FailureReason` are explicit enums.
 `RadiationPartitionPolicy`, `FixedDirectFraction`, and
 `LiljegrenClearnessFraction` control underdetermined radiation splits.
 `IrradianceDiagnostics` reports the resolved component state and provenance.
+`WindHeightPolicy`, `WindTerrain`, and `PasquillStabilityClass` control wind
+conversion. `WindHeightDiagnostics` reports its complete scalar trace;
+`WindHeightDiagnosticsBatch` is the aligned structure-of-arrays form.
+
+```@docs
+WindHeightPolicy
+NoWindHeightAdjustment
+LiljegrenStabilityPowerLaw
+WindTerrain
+PasquillStabilityClass
+WindHeightDiagnostics
+WindHeightDiagnosticsBatch
+wind_speed_at_height
+diagnose_wind_speed_at_height
+```

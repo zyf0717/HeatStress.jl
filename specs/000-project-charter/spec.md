@@ -106,6 +106,9 @@ These results are advisory. Any discrepancy must be resolved against the literat
 - Unitful inputs, unless added as a package extension after core validation.
 - A specialised lockstep vector root solver unless profiling demonstrates a clear benefit.
 
+Wind-height adjustment was deferred from v0.1 and is subsequently delivered as
+the explicit, backward-compatible preprocessing capability owned by spec 018.
+
 ## Scientific conformance hierarchy
 
 When requirements conflict, apply this order:

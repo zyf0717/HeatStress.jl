@@ -21,8 +21,18 @@ by `DewPointPolicy`. Positive radiation at/below the geometric horizon is
 zeroed and flagged as a solar-geometry mismatch. Direct forcing is clipped in
 the one-degree near-horizon protection interval; diffuse forcing remains.
 
+Wind is treated as already measured at 2 m unless callers explicitly select
+`LiljegrenStabilityPowerLaw()` and supply `wind_height_m`. The power-law policy
+uses `Rural()` or `Urban()` exponents and either a supplied Pasquill class or
+the EPA SRDT classifier. Daytime classification uses resolved GHI; nighttime
+classification requires `vertical_temperature_difference_c`, defined as
+upper-level minus lower-level temperature. Height adjustment precedes the
+configured Liljegren minimum-wind floor. `vertical_temperature_difference_c`
+is row meteorology, not `LiljegrenConfig` state.
+
 Batch primary meteorology/time vectors are ordinally aligned. Coordinates,
-pressure, irradiance components, and fixed fraction may be shared scalars or
+pressure, irradiance components, fixed fraction, wind height, terrain,
+stability class, and vertical temperature difference may be shared scalars or
 row-aligned vectors. `missing` irradiance elements are reconstructed as absent.
 `liljegren_wbgt!` validates all inputs, output types/lengths, and aliases
 before writing any output.

@@ -1,6 +1,8 @@
 @inline _at(::Nothing, ::Int) = nothing
 @inline _at(value::Real, ::Int) = value
 @inline _at(::Missing, ::Int) = missing
+@inline _at(value::WindTerrain, ::Int) = value
+@inline _at(value::PasquillStabilityClass, ::Int) = value
 @inline _at(values::AbstractVector, row::Int) =
     @inbounds values[firstindex(values) + row - 1]
 
@@ -82,6 +84,27 @@ function _validate_irradiance_argument(value, rows::Int, name::Symbol)
     return _validate_numeric_vector(value, rows, name; allow_missing = true)
 end
 
+function _validate_terrain_argument(value, rows::Int)
+    value isa WindTerrain && return nothing
+    value isa AbstractVector ||
+        throw(ArgumentError("terrain must be a WindTerrain scalar or vector"))
+    length(value) == rows || throw(ArgumentError("terrain vector must have $rows elements"))
+    all(item -> item isa WindTerrain, value) ||
+        throw(ArgumentError("terrain vector must contain WindTerrain values"))
+    return nothing
+end
+
+function _validate_stability_argument(value, rows::Int)
+    value isa Union{Nothing,PasquillStabilityClass} && return nothing
+    value isa AbstractVector ||
+        throw(ArgumentError("stability_class must be nothing, a PasquillStabilityClass, or a vector"))
+    length(value) == rows ||
+        throw(ArgumentError("stability_class vector must have $rows elements"))
+    all(item -> item isa Union{Nothing,PasquillStabilityClass}, value) ||
+        throw(ArgumentError("stability_class vector must contain stability classes or nothing"))
+    return nothing
+end
+
 function _validate_partition(policy::RadiationPartitionPolicy, rows::Int)
     policy isa LiljegrenClearnessFraction && return nothing
     values = policy.value
@@ -106,6 +129,10 @@ function _validate_batch_inputs(
     dhi_w_m2,
     pressure_hpa,
     partition,
+    wind_height_m,
+    terrain,
+    stability_class,
+    vertical_temperature_difference_c,
 )
     rows = _batch_rows(air, dew, wind, time)
     _validate_numeric_vector(air, rows, :air_temperature_c; allow_missing = true)
@@ -118,6 +145,15 @@ function _validate_batch_inputs(
     _validate_irradiance_argument(dni_w_m2, rows, :dni_w_m2)
     _validate_irradiance_argument(dhi_w_m2, rows, :dhi_w_m2)
     _validate_optional_numeric_argument(pressure_hpa, rows, :pressure_hpa)
+    _validate_optional_numeric_argument(wind_height_m, rows, :wind_height_m)
+    _validate_terrain_argument(terrain, rows)
+    _validate_stability_argument(stability_class, rows)
+    isnothing(vertical_temperature_difference_c) ||
+        _validate_optional_numeric_argument(
+            vertical_temperature_difference_c,
+            rows,
+            :vertical_temperature_difference_c,
+        )
     _validate_partition(partition, rows)
     return rows
 end
@@ -158,15 +194,29 @@ function _prepare_batch_inputs(
     dhi_w_m2,
     pressure_hpa,
     partition::RadiationPartitionPolicy,
+    wind_height_m,
+    wind_height_policy::WindHeightPolicy,
+    terrain,
+    stability_class,
+    vertical_temperature_difference_c,
     config::LiljegrenConfig,
 )
+    _validate_wind_height_policy_inputs(
+        wind_height_policy,
+        stability_class,
+        vertical_temperature_difference_c,
+    )
     rows = _validate_batch_inputs(
         air, dew, wind, time, longitude, latitude;
         ghi_w_m2, dni_w_m2, dhi_w_m2, pressure_hpa, partition,
+        wind_height_m, terrain, stability_class,
+        vertical_temperature_difference_c,
     )
     T = _batch_float_type(
         air, dew, wind, ghi_w_m2, dni_w_m2, dhi_w_m2,
-        longitude, latitude, pressure_hpa;
+        longitude, latitude, pressure_hpa,
+        wind_height_policy isa NoWindHeightAdjustment ? nothing : wind_height_m,
+        wind_height_policy isa NoWindHeightAdjustment ? nothing : vertical_temperature_difference_c;
         partition, config,
     )
     return rows, T, _config_as_type(T, config)
@@ -188,6 +238,11 @@ function _execute_value_batch!(
     dhi_w_m2,
     pressure_hpa,
     partition,
+    wind_height_m,
+    wind_height_policy,
+    terrain,
+    stability_class,
+    vertical_temperature_difference_c,
     config::LiljegrenConfig{T},
     threaded::Bool,
 ) where {T<:AbstractFloat}
@@ -197,6 +252,8 @@ function _execute_value_batch!(
             _at(longitude, row), _at(latitude, row), _at(pressure_hpa, row),
             _at(ghi_w_m2, row), _at(dni_w_m2, row), _at(dhi_w_m2, row),
             _partition_at(partition, row), config, _ValueMode(),
+            _at(wind_height_m, row), wind_height_policy, _at(terrain, row),
+            _at(stability_class, row), _at(vertical_temperature_difference_c, row),
         )
         @inbounds wbgt_out[firstindex(wbgt_out) + row - 1] =
             _component_or_missing(values.wbgt_c, values.wbgt_missing)
@@ -242,22 +299,32 @@ function liljegren_wbgt!(
     dhi_w_m2 = nothing,
     partition::RadiationPartitionPolicy = FixedDirectFraction(),
     pressure_hpa = DEFAULT_PRESSURE_HPA,
+    wind_height_m = 2.0,
+    wind_height_policy::WindHeightPolicy = NoWindHeightAdjustment(),
+    terrain = Rural(),
+    stability_class = nothing,
+    vertical_temperature_difference_c = nothing,
     config::LiljegrenConfig = LiljegrenConfig(),
     threaded::Bool = false,
 )
     rows, T, typed_config = _prepare_batch_inputs(
         air, dew, wind, time, longitude, latitude;
-        ghi_w_m2, dni_w_m2, dhi_w_m2, pressure_hpa, partition, config,
+        ghi_w_m2, dni_w_m2, dhi_w_m2, pressure_hpa, partition,
+        wind_height_m, wind_height_policy, terrain, stability_class,
+        vertical_temperature_difference_c, config,
     )
     _validate_batch_outputs(rows, T, wbgt_out, wet_out, globe_out)
     _validate_batch_aliases(
         (wbgt_out, wet_out, globe_out),
         air, dew, wind, time, longitude, latitude, ghi_w_m2, dni_w_m2, dhi_w_m2,
-        pressure_hpa, _partition_values(partition),
+        pressure_hpa, wind_height_m, terrain, stability_class,
+        vertical_temperature_difference_c, _partition_values(partition),
     )
     _execute_value_batch!(
         rows, wbgt_out, wet_out, globe_out, air, dew, wind, time, longitude, latitude;
         ghi_w_m2, dni_w_m2, dhi_w_m2, pressure_hpa, partition,
+        wind_height_m, wind_height_policy, terrain, stability_class,
+        vertical_temperature_difference_c,
         config = typed_config, threaded,
     )
     return WBGTBatchResult{T}(wbgt_out, wet_out, globe_out)
@@ -285,12 +352,19 @@ function liljegren_wbgt_batch(
     dhi_w_m2 = nothing,
     partition::RadiationPartitionPolicy = FixedDirectFraction(),
     pressure_hpa = DEFAULT_PRESSURE_HPA,
+    wind_height_m = 2.0,
+    wind_height_policy::WindHeightPolicy = NoWindHeightAdjustment(),
+    terrain = Rural(),
+    stability_class = nothing,
+    vertical_temperature_difference_c = nothing,
     config::LiljegrenConfig = LiljegrenConfig(),
     threaded::Bool = false,
 )
     rows, T, typed_config = _prepare_batch_inputs(
         air, dew, wind, time, longitude, latitude;
-        ghi_w_m2, dni_w_m2, dhi_w_m2, pressure_hpa, partition, config,
+        ghi_w_m2, dni_w_m2, dhi_w_m2, pressure_hpa, partition,
+        wind_height_m, wind_height_policy, terrain, stability_class,
+        vertical_temperature_difference_c, config,
     )
     wbgt = Vector{Union{Missing,T}}(undef, rows)
     wet = similar(wbgt)
@@ -298,6 +372,8 @@ function liljegren_wbgt_batch(
     _execute_value_batch!(
         rows, wbgt, wet, globe, air, dew, wind, time, longitude, latitude;
         ghi_w_m2, dni_w_m2, dhi_w_m2, pressure_hpa, partition,
+        wind_height_m, wind_height_policy, terrain, stability_class,
+        vertical_temperature_difference_c,
         config = typed_config, threaded,
     )
     return WBGTBatchResult{T}(wbgt, wet, globe)
@@ -323,6 +399,41 @@ function _irradiance_diagnostic_arrays(::Type{T}, rows::Int) where {T<:AbstractF
         fill(false, rows), missing_values(), missing_values(), fill(false, rows),
         fill(:unknown, rows),
     )
+end
+
+function _wind_height_diagnostic_arrays(::Type{T}, rows::Int) where {T<:AbstractFloat}
+    missing_values() = fill!(Vector{Union{Missing,T}}(undef, rows), missing)
+    return WindHeightDiagnosticsBatch{T}(
+        missing_values(),
+        missing_values(),
+        missing_values(),
+        missing_values(),
+        missing_values(),
+        fill!(Vector{Union{Nothing,PasquillStabilityClass}}(undef, rows), nothing),
+        fill!(Vector{Union{Nothing,T}}(undef, rows), nothing),
+        fill(false, rows),
+        fill(false, rows),
+        fill(false, rows),
+    )
+end
+
+function _store_wind_height!(
+    out::WindHeightDiagnosticsBatch,
+    row::Int,
+    value::WindHeightDiagnostics,
+)
+    @inbounds out.supplied_wind_speed_m_s[row] = value.supplied_wind_speed_m_s
+    @inbounds out.measurement_height_m[row] = value.measurement_height_m
+    @inbounds out.reference_height_m[row] = value.reference_height_m
+    @inbounds out.wind_speed_at_reference_height_m_s[row] =
+        value.wind_speed_at_reference_height_m_s
+    @inbounds out.effective_wind_speed_m_s[row] = value.effective_wind_speed_m_s
+    @inbounds out.stability_class[row] = value.stability_class
+    @inbounds out.power_law_exponent[row] = value.power_law_exponent
+    @inbounds out.stability_class_supplied[row] = value.stability_class_supplied
+    @inbounds out.height_adjusted[row] = value.height_adjusted
+    @inbounds out.minimum_wind_floor_applied[row] = value.minimum_wind_floor_applied
+    return nothing
 end
 
 function _store_component!(out::SolverDiagnosticsBatch, row::Int, value::SolverDiagnostics)
@@ -382,12 +493,19 @@ function diagnose_liljegren_batch(
     dhi_w_m2 = nothing,
     partition::RadiationPartitionPolicy = FixedDirectFraction(),
     pressure_hpa = DEFAULT_PRESSURE_HPA,
+    wind_height_m = 2.0,
+    wind_height_policy::WindHeightPolicy = NoWindHeightAdjustment(),
+    terrain = Rural(),
+    stability_class = nothing,
+    vertical_temperature_difference_c = nothing,
     config::LiljegrenConfig = LiljegrenConfig(),
     threaded::Bool = false,
 )
     rows, T, typed_config = _prepare_batch_inputs(
         air, dew, wind, time, longitude, latitude;
-        ghi_w_m2, dni_w_m2, dhi_w_m2, pressure_hpa, partition, config,
+        ghi_w_m2, dni_w_m2, dhi_w_m2, pressure_hpa, partition,
+        wind_height_m, wind_height_policy, terrain, stability_class,
+        vertical_temperature_difference_c, config,
     )
     wbgt = Vector{Union{Missing,T}}(undef, rows)
     wet = similar(wbgt)
@@ -398,6 +516,7 @@ function diagnose_liljegren_batch(
     radiation_clamped = fill(false, rows)
     mismatch = fill(false, rows)
     clipped = fill(false, rows)
+    wind_height_diagnostics = _wind_height_diagnostic_arrays(T, rows)
     irradiance_diagnostics = _irradiance_diagnostic_arrays(T, rows)
     globe_diagnostics, wet_diagnostics = _diagnostic_arrays(T, rows)
     function diagnose_row(row)
@@ -406,6 +525,8 @@ function diagnose_liljegren_batch(
             _at(longitude, row), _at(latitude, row), _at(pressure_hpa, row),
             _at(ghi_w_m2, row), _at(dni_w_m2, row), _at(dhi_w_m2, row),
             _partition_at(partition, row), typed_config, _DiagnosticMode(),
+            _at(wind_height_m, row), wind_height_policy, _at(terrain, row),
+            _at(stability_class, row), _at(vertical_temperature_difference_c, row),
         )
         @inbounds wbgt[row] = diagnostic.result.wbgt_c
         @inbounds wet[row] = diagnostic.result.natural_wet_bulb_c
@@ -416,6 +537,7 @@ function diagnose_liljegren_batch(
         @inbounds radiation_clamped[row] = diagnostic.solar_radiation_clamped
         @inbounds mismatch[row] = diagnostic.solar_geometry_mismatch
         @inbounds clipped[row] = diagnostic.direct_solar_clipped
+        _store_wind_height!(wind_height_diagnostics, row, diagnostic.wind_height)
         _store_irradiance!(irradiance_diagnostics, row, diagnostic.irradiance)
         _store_component!(globe_diagnostics, row, diagnostic.globe)
         _store_component!(wet_diagnostics, row, diagnostic.natural_wet_bulb)
@@ -431,7 +553,8 @@ function diagnose_liljegren_batch(
     end
     return DiagnosticWBGTBatchResult{T}(
         WBGTBatchResult{T}(wbgt, wet, globe), status, dew_adjusted, wind_clamped,
-        radiation_clamped, mismatch, clipped, irradiance_diagnostics,
+        radiation_clamped, mismatch, clipped, wind_height_diagnostics,
+        irradiance_diagnostics,
         globe_diagnostics, wet_diagnostics, threaded, Threads.nthreads(), rows,
     )
 end

@@ -68,6 +68,7 @@ struct DiagnosticWBGTResult{T<:AbstractFloat}
     solar_radiation_clamped::Bool
     solar_geometry_mismatch::Bool
     direct_solar_clipped::Bool
+    wind_height::WindHeightDiagnostics{T}
     irradiance::IrradianceDiagnostics{T}
     globe::SolverDiagnostics{T}
     natural_wet_bulb::SolverDiagnostics{T}
@@ -80,6 +81,7 @@ struct DiagnosticWBGTResult{T<:AbstractFloat}
         solar_radiation_clamped::Bool,
         solar_geometry_mismatch::Bool,
         direct_solar_clipped::Bool,
+        wind_height::WindHeightDiagnostics{T},
         irradiance::IrradianceDiagnostics{T},
         globe::SolverDiagnostics{T},
         natural_wet_bulb::SolverDiagnostics{T},
@@ -92,6 +94,7 @@ struct DiagnosticWBGTResult{T<:AbstractFloat}
             solar_radiation_clamped,
             solar_geometry_mismatch,
             direct_solar_clipped,
+            wind_height,
             irradiance,
             globe,
             natural_wet_bulb,
@@ -153,6 +156,7 @@ struct DiagnosticWBGTBatchResult{T<:AbstractFloat}
     solar_radiation_clamped::Vector{Bool}
     solar_geometry_mismatch::Vector{Bool}
     direct_solar_clipped::Vector{Bool}
+    wind_height::WindHeightDiagnosticsBatch{T}
     irradiance::IrradianceDiagnosticsBatch{T}
     globe::SolverDiagnosticsBatch{T}
     natural_wet_bulb::SolverDiagnosticsBatch{T}
