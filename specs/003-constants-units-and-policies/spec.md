@@ -86,9 +86,10 @@ Implement two composable internal scalar functions:
    - apply the dewpoint policy;
    - retain the supplied non-negative wind for later component physics.
 
-   Scalar air and dew-point temperatures must be finite and lie within the
-   FAO-56 public psychrometric domain of -40 through 50 °C. Values outside it
-   are `InvalidDomain`, not deferred to physical kernels.
+   Scalar air and dew-point temperatures must be finite. The former package
+   policy requiring both values to lie within -40 through 50 °C is superseded
+   for the Liljegren pathway by spec 019; the standalone spec-004
+   psychrometric-helper contract is unchanged.
 
 2. `_apply_solar_policy(...)` must accept a validated solar zenith from the
    spec-004 kernel, reject zenith outside `[0, π]`, zero radiation at and below

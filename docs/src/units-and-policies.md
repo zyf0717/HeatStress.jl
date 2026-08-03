@@ -15,6 +15,11 @@ irradiance components that violate closure beyond the configured tolerance. A
 batch boundary may represent a missing pressure as a row-level missing
 meteorology result.
 
+For high-level Liljegren calculations, policy-resolved air and dew-point
+temperatures must convert to positive Kelvin, but no `[-40, 50] °C` interval is
+imposed. Derived vapour pressure and transport state are checked before either
+component solver. No temperature is clamped to the former interval.
+
 GHI and DHI are horizontal; DNI is beam-normal. Supplied pairs resolve the
 third component through `GHI = DHI + DNI*cos(zenith)`. A GHI-only row uses the
 selected partition policy. The default `FixedDirectFraction(0.8)` preserves
@@ -85,10 +90,12 @@ converted to UTC. Longitude is positive east and both coordinate inputs are
 degrees. Solar zenith is returned in degrees; values above 90° are below the
 geometric horizon. `Date` is intentionally unsupported.
 
-Psychrometric temperatures are Celsius and saturation/actual vapour pressures
-are hPa. Relative humidity arguments and results are percentages. Temperature
-inputs are limited to -40--50 °C; `vapour_pressure` also requires humidity in
-0--100 percent. Invalid inputs throw `ArgumentError`.
+Standalone psychrometric-helper temperatures are Celsius and
+saturation/actual vapour pressures are hPa. Relative humidity arguments and
+results are percentages. These helper inputs retain their released -40--50 °C
+contract; `vapour_pressure` also requires humidity in 0--100 percent. This
+helper contract is separate from high-level Liljegren input preparation.
+Invalid inputs throw `ArgumentError`.
 
 ```@docs
 HeatStress.solar_zenith

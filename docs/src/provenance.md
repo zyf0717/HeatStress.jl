@@ -16,6 +16,17 @@ is linked to the source inventory in `validation/sources.toml` or marked
 as an original numerical or API design decision. Cross-implementation results
 are advisory validation evidence, never scientific authority.
 
+## Liljegren temperature-domain policy
+
+The former high-level `[-40, 50] °C` air/dew-point rejection was an original
+package policy inherited from the standalone FAO-56 helper contract. It was
+not established as a Liljegren or FAO-56 scientific validity limit and is
+superseded by spec 019. The Liljegren pathway now attempts finite,
+Kelvin-positive inputs when derived psychrometric and transport state is
+physical; subsequent failures come from derived-state validation or component
+solvers. Calculation support outside the former interval is not evidence of
+validated accuracy in extreme conditions.
+
 ## Irradiance reconstruction
 
 - Liljegren et al. (2008), equations 13–14, supplies the optional

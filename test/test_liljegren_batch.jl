@@ -126,6 +126,24 @@ end
         @test isempty(empty.wbgt_c)
     end
 
+    @testset "extended temperature rows reach component solving" begin
+        diagnostic = _legacy_diagnose_batch(
+            [-50.0, 60.0],
+            [-55.0, 55.0],
+            [1.0, 1.0],
+            [800.0, 800.0],
+            fill(DateTime(2024, 6, 21, 12), 2),
+            0.0,
+            0.0;
+            direct_fraction = 0.7,
+        )
+        @test diagnostic.input_status == fill(InputAccepted, 2)
+        @test all(>(0), diagnostic.globe.evaluations)
+        @test all(>(0), diagnostic.natural_wet_bulb.evaluations)
+        @test diagnostic.globe.reason == fill(NoFailure, 2)
+        @test diagnostic.natural_wet_bulb.reason == fill(NoFailure, 2)
+    end
+
     @testset "shared typed row execution" begin
         air, dew, wind, radiation, time = _batch_inputs(1)
         config = HeatStress._config_as_type(Float64, LiljegrenConfig())

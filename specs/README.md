@@ -44,6 +44,10 @@ scientific audit.
 Spec 018 adds explicit wind-height preprocessing for the non-breaking v0.3.1
 release without changing the default v0.3 numerical path.
 
+Spec 019 removes the unsupported Liljegren temperature gate as the
+backward-compatible v0.3.2 patch release while leaving standalone
+psychrometric-helper APIs unchanged.
+
 ## Status legend
 
 - `Planned` — requirements are captured; implementation has not met its acceptance criteria.
@@ -75,6 +79,7 @@ release without changing the default v0.3 numerical path.
 | 016 | [Scientific validation hardening](./016-scientific-validation-hardening/) | Complete | Additive post-v0.2 numerical-conformance evidence; preserves released APIs and audit records |
 | 017 | [Irradiance component inputs](./017-irradiance-component-inputs/) | Complete | Breaking v0.3 radiation API; depends on completed 004, 007, 008 and 016 evidence |
 | 018 | [Wind-height preprocessing](./018-wind-height-preprocessing/) | Complete | Additive v0.3.1 preprocessing; depends on completed 003, 007, 008 and 017 interfaces |
+| 019 | [Liljegren temperature-domain correction](./019-liljegren-temperature-domain/) | Complete | Corrects the package-owned temperature gate while preserving 004 helper APIs and 007–008 interfaces |
 
 The completed v0.1.0 path was `000–008 → Liljegren/core slice of 010 →
 publication gate of 011 → 012 → focused 013 audit → tag, release and General

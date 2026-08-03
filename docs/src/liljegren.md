@@ -18,6 +18,13 @@ no-input daytime rows use clear-sky GHI. Meteorology is then validated and
 normalised before either solve. `DateTime` is UTC; `ZonedDateTime` is converted
 to its UTC instant.
 
+Air and dew-point inputs must be finite and their values after
+`DewPointPolicy` must be strictly above absolute zero. The Liljegren pathway
+has no package-imposed `[-40, 50] °C` range and does not clamp temperatures to
+that interval. Vapour pressure and transport properties must remain finite and
+physically positive, with vapour pressure below total pressure, before either
+component solve begins.
+
 ## Component balances
 
 Both balances use the prepared atmosphere, radiation partition, surface
@@ -34,6 +41,10 @@ retained. WBGT itself is available only when both components have accepted
 roots. `diagnose_liljegren` exposes input adjustments, solver brackets,
 candidate roots, validation residuals, failure reasons, and nested irradiance
 provenance. A closure mismatch rejects the row before component solving.
+
+Successful calculation outside the former `[-40, 50] °C` package interval
+does not establish scientific accuracy there; dedicated extreme-condition
+validation remains future work.
 
 The package implementation is independently expressed from published
 literature; see [Scientific provenance](@ref) for source policy.

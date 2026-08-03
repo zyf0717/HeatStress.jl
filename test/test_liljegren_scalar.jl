@@ -310,6 +310,62 @@ end
         @test ismissing(partial.result.wbgt_c)
     end
 
+    @testset "extended temperature calculation domain" begin
+        for (air_temperature_c, dew_point_c) in ((-50.0, -55.0), (60.0, 55.0))
+            diagnostic = _diagnose_liljegren(
+                air_temperature_c,
+                dew_point_c,
+                1.0,
+                800.0,
+                DateTime(2024, 6, 21, 12),
+                0.0,
+                0.0;
+                direct_fraction = 0.7,
+            )
+            @test diagnostic.input_status === InputAccepted
+            @test diagnostic.globe.evaluations > 0
+            @test diagnostic.natural_wet_bulb.evaluations > 0
+            @test diagnostic.globe.reason === NoFailure
+            @test diagnostic.natural_wet_bulb.reason === NoFailure
+        end
+
+        zero_vapour_pressure_c = -237.3
+        nonfinite_vapour_pressure_c = prevfloat(zero_vapour_pressure_c)
+        @test HeatStress._saturation_vapour_pressure_hpa_unchecked(
+            zero_vapour_pressure_c,
+        ) == 0.0
+        @test !isfinite(HeatStress._saturation_vapour_pressure_hpa_unchecked(
+            nonfinite_vapour_pressure_c,
+        ))
+        @test HeatStress._saturation_vapour_pressure_hpa_unchecked(100.0) >= 1010.0
+        @test HeatStress._air_thermal_conductivity(
+            2000.0 + HeatStress.KELVIN_OFFSET,
+        ) <= 0.0
+        derived_state_failures = (
+            (-230.0, zero_vapour_pressure_c),
+            (-230.0, nonfinite_vapour_pressure_c),
+            (100.0, 100.0),
+            (2000.0, 20.0),
+        )
+        for (air_temperature_c, dew_point_c) in derived_state_failures
+            diagnostic = _diagnose_liljegren(
+                air_temperature_c,
+                dew_point_c,
+                1.0,
+                800.0,
+                DateTime(2024, 6, 21, 12),
+                0.0,
+                0.0;
+                direct_fraction = 0.7,
+            )
+            @test diagnostic.input_status === InvalidDomain
+            @test diagnostic.globe.reason === NotAttempted
+            @test diagnostic.natural_wet_bulb.reason === NotAttempted
+            @test diagnostic.globe.evaluations == 0
+            @test diagnostic.natural_wet_bulb.evaluations == 0
+        end
+    end
+
     @testset "time-zone and Float32 consistency" begin
         utc = ZonedDateTime(DateTime(2024, 6, 21, 12), TimeZone("UTC"))
         new_york = ZonedDateTime(DateTime(2024, 6, 21, 8), TimeZone("America/New_York"))
@@ -381,14 +437,16 @@ end
 
         accepted = @inferred _diagnose_liljegren(arguments...; direct_fraction = 0.7, config = config32)
         invalid_longitude = @inferred _diagnose_liljegren(30.0, 20.0, 1.0, 800.0, DateTime(2024, 6, 21, 12), 181.0, 0.0; direct_fraction = 0.7, config = config32)
-        invalid_temperature = @inferred _diagnose_liljegren(-41.0, -41.0, 1.0, 800.0, DateTime(2024, 6, 21, 12), 0.0, 0.0; direct_fraction = 0.7, config = config32)
+        supported_temperature = @inferred _diagnose_liljegren(-41.0, -41.0, 1.0, 800.0, DateTime(2024, 6, 21, 12), 0.0, 0.0; direct_fraction = 0.7, config = config32)
         missing_meteorology = @inferred _diagnose_liljegren(missing, 20.0, 1.0, 800.0, DateTime(2024, 6, 21, 12), 0.0, 0.0; direct_fraction = 0.7, config = config32)
         missing_time = @inferred _diagnose_liljegren(30.0, 20.0, 1.0, 800.0, missing, 0.0, 0.0; direct_fraction = 0.7, config = config32)
-        for diagnostic in (accepted, invalid_longitude, invalid_temperature, missing_meteorology, missing_time)
+        for diagnostic in (accepted, invalid_longitude, supported_temperature, missing_meteorology, missing_time)
             @test diagnostic isa DiagnosticWBGTResult{Float64}
         end
         @test invalid_longitude.input_status === InvalidDomain
-        @test invalid_temperature.input_status === InvalidDomain
+        @test supported_temperature.input_status === InputAccepted
+        @test supported_temperature.globe.reason === NoFailure
+        @test supported_temperature.natural_wet_bulb.reason === NoFailure
         @test missing_meteorology.input_status === MissingMeteorology
         @test missing_time.input_status === MissingTime
         @test _liljegren_wbgt(missing, 20.0, 1.0, 800.0, DateTime(2024, 6, 21, 12), 0.0, 0.0; direct_fraction = 0.7, config = config32) ==
