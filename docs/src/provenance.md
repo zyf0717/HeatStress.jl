@@ -34,6 +34,20 @@ The fixed `0.8` default is a package assumption, not a universal constant.
 The `0.85` cap is confined to the opt-in clearness estimator; measured GHI is
 not capped against top-of-atmosphere irradiance.
 
+## Wind-height preprocessing
+
+- U.S. EPA, *Meteorological Monitoring Guidance for Regulatory Modeling
+  Applications* (EPA-454/R-99-005, 2000), equation 6.2.20 supplies the
+  reference-height power law.
+- EPA table 6-2 supplies the rural and urban exponents for Pasquill-Gifford
+  stability classes A--F.
+- EPA table 6-7 supplies the daytime solar-radiation and nighttime vertical
+  delta-temperature classifier.
+
+HeatStress.jl independently expresses these tables and equations. The no-op
+high-level default, explicit-class override, row-level delta temperature, and
+diagnostic trace are package API decisions recorded under spec 018.
+
 ## Secondary measures
 
 - Measured-component WBGT uses the equations published in the US Occupational

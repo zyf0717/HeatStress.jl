@@ -4,6 +4,7 @@ struct _BasicMeteorology{T<:AbstractFloat}
     dew_point_c::T
     air_temperature_k::T
     dew_point_k::T
+    supplied_wind_speed_m_s::T
     wind_speed_m_s::T
     solar_radiation_w_m2::T
     pressure_hpa::T
@@ -20,6 +21,7 @@ struct _PreparedMeteorology{T<:AbstractFloat}
     air_temperature_k::T
     dew_point_k::T
     wind_speed_m_s::T
+    effective_wind_speed_m_s::T
     solar_radiation_w_m2::T
     solar_zenith_rad::T
     pressure_hpa::T
@@ -29,6 +31,7 @@ struct _PreparedMeteorology{T<:AbstractFloat}
     solar_radiation_clamped::Bool
     solar_geometry_mismatch::Bool
     direct_solar_clipped::Bool
+    wind_height::WindHeightDiagnostics{T}
     irradiance::IrradianceDiagnostics{T}
 end
 
@@ -139,6 +142,7 @@ function _normalize_basic_meteorology(
         resolution.dew_point_c,
         resolution.air_temperature_c + float_type(KELVIN_OFFSET),
         resolution.dew_point_c + float_type(KELVIN_OFFSET),
+        convert(float_type, wind_speed_m_s),
         wind,
         radiation,
         pressure,
@@ -155,6 +159,12 @@ function _apply_solar_policy(
     basic::_BasicMeteorology{T},
     solar_zenith_rad::Union{Missing,Real},
     irradiance::IrradianceDiagnostics{T};
+    wind_height_m::Union{Missing,Real} = T(2),
+    wind_height_policy::WindHeightPolicy = NoWindHeightAdjustment(),
+    terrain::WindTerrain = Rural(),
+    stability_class::Union{Nothing,PasquillStabilityClass} = nothing,
+    vertical_temperature_difference_c::Union{Nothing,Missing,Real} = nothing,
+    minimum_wind_speed_m_s::T = T(DEFAULT_MINIMUM_WIND_SPEED_M_S),
     geometry_mismatch::Bool = false,
     radiation_clamped::Bool = false,
 ) where {T<:AbstractFloat}
@@ -169,13 +179,35 @@ function _apply_solar_policy(
     radiation = below_horizon ? zero(T) : basic.solar_radiation_w_m2
     _, _, _, direct_clipped = _direct_solar_geometry(zenith)
     direct_solar_clipped = radiation > zero(T) && basic.direct_fraction > zero(T) && direct_clipped
+    measurement_height = ismissing(wind_height_m) ? missing : convert(T, wind_height_m)
+    vertical_delta = if isnothing(vertical_temperature_difference_c) ||
+                        ismissing(vertical_temperature_difference_c)
+        vertical_temperature_difference_c
+    else
+        convert(T, vertical_temperature_difference_c)
+    end
+    wind = _resolve_wind_height(
+        basic.supplied_wind_speed_m_s,
+        basic.wind_speed_m_s,
+        measurement_height;
+        reference_height_m = T(2),
+        policy = wind_height_policy,
+        terrain,
+        stability_class,
+        daytime = zenith < T(pi / 2),
+        ghi_w_m2 = radiation,
+        vertical_temperature_difference_c = vertical_delta,
+        minimum_wind_speed_m_s,
+    )
+    wind isa _WindHeightFailure && return wind
 
     return _PreparedMeteorology(
         basic.air_temperature_c,
         basic.dew_point_c,
         basic.air_temperature_k,
         basic.dew_point_k,
-        basic.wind_speed_m_s,
+        wind.wind_speed_at_reference_height_m_s,
+        wind.effective_wind_speed_m_s,
         radiation,
         zenith,
         basic.pressure_hpa,
@@ -185,6 +217,7 @@ function _apply_solar_policy(
         basic.solar_radiation_clamped || radiation_clamped,
         mismatch,
         direct_solar_clipped,
+        wind.diagnostics,
         irradiance,
     )
 end
