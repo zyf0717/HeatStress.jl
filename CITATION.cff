@@ -1,7 +1,7 @@
 cff-version: 1.2.0
 message: "If you use HeatStress.jl, please cite it using the metadata below."
 title: "HeatStress.jl"
-version: 0.3.1
+version: 0.3.2
 license: MIT
 repository-code: "https://github.com/zyf0717/HeatStress.jl"
 authors:

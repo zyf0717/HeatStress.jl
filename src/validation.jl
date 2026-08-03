@@ -118,9 +118,6 @@ function _normalize_basic_meteorology(
 
     all(isfinite, (air, dew, wind, radiation, pressure, fraction)) ||
         return _InputPreparationFailure(InvalidDomain)
-    oftype(air, -40) <= air <= oftype(air, 50) &&
-        oftype(dew, -40) <= dew <= oftype(dew, 50) ||
-        return _InputPreparationFailure(InvalidDomain)
     pressure > zero(float_type) || return _InputPreparationFailure(InvalidDomain)
     zero(float_type) <= fraction <= one(float_type) || return _InputPreparationFailure(InvalidDomain)
 
@@ -131,6 +128,10 @@ function _normalize_basic_meteorology(
         convert(float_type, config.dew_point_tolerance_c),
     )
     resolution.status === InputAccepted || return _InputPreparationFailure(resolution.status)
+    air_temperature_k = resolution.air_temperature_c + float_type(KELVIN_OFFSET)
+    dew_point_k = resolution.dew_point_c + float_type(KELVIN_OFFSET)
+    air_temperature_k > zero(float_type) && dew_point_k > zero(float_type) ||
+        return _InputPreparationFailure(InvalidDomain)
 
     wind_clamped = wind < zero(float_type)
     radiation_clamped = radiation < zero(float_type)
@@ -140,8 +141,8 @@ function _normalize_basic_meteorology(
     return _BasicMeteorology(
         resolution.air_temperature_c,
         resolution.dew_point_c,
-        resolution.air_temperature_c + float_type(KELVIN_OFFSET),
-        resolution.dew_point_c + float_type(KELVIN_OFFSET),
+        air_temperature_k,
+        dew_point_k,
         convert(float_type, wind_speed_m_s),
         wind,
         radiation,

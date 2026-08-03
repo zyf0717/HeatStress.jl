@@ -51,8 +51,23 @@ end
         air_viscosity::T = _air_viscosity(air_temperature_k),
     ) where {T<:AbstractFloat}
     conductivity = _air_thermal_conductivity(air_temperature_k)
-    prandtl = convert(T, SPECIFIC_HEAT_DRY_AIR) * air_viscosity / conductivity
-    schmidt = air_viscosity / (air_density * _air_diffusivity(air_temperature_k, pressure_hpa))
+    diffusivity = _air_diffusivity(air_temperature_k, pressure_hpa)
+    return _diffusivity_coefficient_from_properties(
+        air_density,
+        air_viscosity,
+        conductivity,
+        diffusivity,
+    )
+end
+
+@inline function _diffusivity_coefficient_from_properties(
+        air_density::T,
+        air_viscosity::T,
+        air_thermal_conductivity::T,
+        air_diffusivity::T,
+    ) where {T<:AbstractFloat}
+    prandtl = convert(T, SPECIFIC_HEAT_DRY_AIR) * air_viscosity / air_thermal_conductivity
+    schmidt = air_viscosity / (air_density * air_diffusivity)
     return convert(T, MOLAR_MASS_WATER / MOLAR_MASS_DRY_AIR) *
            (prandtl / schmidt)^convert(T, 0.56)
 end

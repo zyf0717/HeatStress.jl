@@ -103,10 +103,35 @@ end
             @test_throws ArgumentError LiljegrenConfig(minimum_wind_speed_m_s = value)
         end
 
-        @test _basic_for_test(air_temperature_c = NaN).status === InvalidDomain
-        @test _basic_for_test(air_temperature_c = -40.1).status === InvalidDomain
-        @test _basic_for_test(air_temperature_c = 50.1).status === InvalidDomain
-        @test _basic_for_test(dew_point_c = -40.1).status === InvalidDomain
+        for value in (NaN, Inf, -Inf)
+            @test _basic_for_test(air_temperature_c = value).status === InvalidDomain
+            @test _basic_for_test(dew_point_c = value).status === InvalidDomain
+        end
+        cold = _basic_for_test(air_temperature_c = -50.0, dew_point_c = -55.0)
+        hot = _basic_for_test(air_temperature_c = 60.0, dew_point_c = 55.0)
+        @test cold isa HeatStress._BasicMeteorology
+        @test cold.air_temperature_c == -50.0
+        @test cold.dew_point_c == -55.0
+        @test hot isa HeatStress._BasicMeteorology
+        @test hot.air_temperature_c == 60.0
+        @test hot.dew_point_c == 55.0
+
+        @test _basic_for_test(
+            air_temperature_c = -HeatStress.KELVIN_OFFSET,
+            dew_point_c = -HeatStress.KELVIN_OFFSET,
+        ).status === InvalidDomain
+        @test _basic_for_test(
+            air_temperature_c = -273.0,
+            dew_point_c = -HeatStress.KELVIN_OFFSET,
+        ).status === InvalidDomain
+        above_absolute_zero = nextfloat(-HeatStress.KELVIN_OFFSET)
+        representable = _basic_for_test(
+            air_temperature_c = above_absolute_zero,
+            dew_point_c = above_absolute_zero,
+        )
+        @test representable isa HeatStress._BasicMeteorology
+        @test representable.air_temperature_k > 0.0
+        @test representable.dew_point_k > 0.0
         @test _basic_for_test(pressure_hpa = -1.0).status === InvalidDomain
         @test _basic_for_test(pressure_hpa = NaN).status === InvalidDomain
         @test _basic_for_test(pressure_hpa = Inf).status === InvalidDomain
@@ -175,6 +200,42 @@ end
         @test _basic_for_test(
             air_temperature_c = 20.0,
             dew_point_c = 21.5,
+            config = reject_config,
+        ).status === InvalidDewPoint
+
+        extreme_clamp = _basic_for_test(
+            air_temperature_c = 60.0,
+            dew_point_c = 62.0,
+            config = clamp_config,
+        )
+        extreme_swap = _basic_for_test(
+            air_temperature_c = 60.0,
+            dew_point_c = 62.0,
+            config = swap_config,
+        )
+        extreme_reject = _basic_for_test(
+            air_temperature_c = 60.0,
+            dew_point_c = 62.0,
+            config = reject_config,
+        )
+        @test extreme_clamp.air_temperature_c == 60.0
+        @test extreme_clamp.dew_point_c == 60.0
+        @test extreme_swap.air_temperature_c == 62.0
+        @test extreme_swap.dew_point_c == 60.0
+        @test extreme_reject.status === InvalidDewPoint
+        @test _basic_for_test(
+            air_temperature_c = -274.0,
+            dew_point_c = -272.0,
+            config = clamp_config,
+        ).status === InvalidDomain
+        @test _basic_for_test(
+            air_temperature_c = -274.0,
+            dew_point_c = -272.0,
+            config = swap_config,
+        ).status === InvalidDomain
+        @test _basic_for_test(
+            air_temperature_c = -274.0,
+            dew_point_c = -272.0,
             config = reject_config,
         ).status === InvalidDewPoint
 

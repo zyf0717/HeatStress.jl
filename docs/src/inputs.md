@@ -21,6 +21,15 @@ by `DewPointPolicy`. Positive radiation at/below the geometric horizon is
 zeroed and flagged as a solar-geometry mismatch. Direct forcing is clipped in
 the one-degree near-horizon protection interval; diffuse forcing remains.
 
+The high-level Liljegren WBGT pathway does not impose a `[-40, 50] °C`
+operating range on air or dew-point temperature. Finite inputs whose
+policy-resolved temperatures are both strictly positive in Kelvin proceed to
+derived-state validation. Invalid vapour pressure or transport properties are
+classified as `InvalidDomain` before component solving; otherwise both
+component solvers are attempted and report their own failure reasons. Inputs
+are not clamped to the former interval. This is calculation support, not a
+claim of validated scientific accuracy under extreme conditions.
+
 Wind is treated as already measured at 2 m unless callers explicitly select
 `LiljegrenStabilityPowerLaw()` and supply `wind_height_m`. The power-law policy
 uses `Rural()` or `Urban()` exponents and either a supplied Pasquill class or

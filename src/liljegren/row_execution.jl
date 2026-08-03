@@ -3,24 +3,36 @@ function _solve_prepared_liljegren(
     config::LiljegrenConfig{T},
 ) where {T<:AbstractFloat}
     vapour_pressure_hpa = _saturation_vapour_pressure_hpa_unchecked(prepared.dew_point_c)
-    atmospheric_emissivity = _atmospheric_emissivity(vapour_pressure_hpa)
-    effective_wind_speed_m_s = prepared.effective_wind_speed_m_s
     air_density = _air_density(prepared.air_temperature_k, prepared.pressure_hpa)
     air_viscosity = _air_viscosity(prepared.air_temperature_k)
-    mass_transfer_ratio = _diffusivity_coefficient(
-        prepared.air_temperature_k,
-        prepared.pressure_hpa,
-        air_density,
-        air_viscosity,
-    )
+    air_thermal_conductivity = _air_thermal_conductivity(prepared.air_temperature_k)
+    air_diffusivity = _air_diffusivity(prepared.air_temperature_k, prepared.pressure_hpa)
     all(isfinite, (
         vapour_pressure_hpa,
-        atmospheric_emissivity,
-        effective_wind_speed_m_s,
         air_density,
         air_viscosity,
+        air_thermal_conductivity,
+        air_diffusivity,
+    )) &&
+        zero(T) < vapour_pressure_hpa < prepared.pressure_hpa &&
+        air_density > zero(T) && air_viscosity > zero(T) &&
+        air_thermal_conductivity > zero(T) && air_diffusivity > zero(T) ||
+        return _InputPreparationFailure(InvalidDomain)
+
+    atmospheric_emissivity = _atmospheric_emissivity(vapour_pressure_hpa)
+    effective_wind_speed_m_s = prepared.effective_wind_speed_m_s
+    mass_transfer_ratio = _diffusivity_coefficient_from_properties(
+        air_density,
+        air_viscosity,
+        air_thermal_conductivity,
+        air_diffusivity,
+    )
+    all(isfinite, (
+        atmospheric_emissivity,
+        effective_wind_speed_m_s,
         mass_transfer_ratio,
-    )) || return _InputPreparationFailure(InvalidDomain)
+    )) && atmospheric_emissivity > zero(T) && mass_transfer_ratio > zero(T) ||
+        return _InputPreparationFailure(InvalidDomain)
 
     globe = _solve_globe_balance_data(
         _globe_balance(prepared, atmospheric_emissivity, effective_wind_speed_m_s, config),

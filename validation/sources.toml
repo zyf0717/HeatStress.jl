@@ -601,12 +601,23 @@ validation = "test/test_liljegren_scalar.jl partial component retention and valu
 [items.scalar_temperature_domain]
 kind = "model_policy"
 owner_spec = "007"
-status = "validated"
+status = "superseded"
 provenance = "original_design"
-rationale = "The public scalar boundary accepts the documented -40 to 50 degrees C psychrometric domain before property kernels are evaluated."
+rationale = "The -40 to 50 degrees C interval was a package policy inherited from the standalone psychrometric helper, not a sourced Liljegren validity domain."
 units = "degrees C"
 implementation = "src/validation.jl"
 validation = "test/test_liljegren_scalar.jl invalid-temperature structured diagnostic cases"
+replacement = "liljegren_physical_temperature_domain"
+
+[items.liljegren_physical_temperature_domain]
+kind = "model_policy"
+owner_spec = "019"
+status = "validated"
+provenance = "original_design"
+rationale = "High-level Liljegren inputs are attempted when finite and physically representable in Kelvin; derived-state and solver checks classify later failures without an arbitrary meteorological interval."
+units = "degrees C converted to K"
+implementation = "src/validation.jl; src/liljegren/row_execution.jl"
+validation = "test/test_validation.jl absolute-zero and policy cases; test/test_liljegren_scalar.jl and test/test_liljegren_batch.jl extreme-domain solver-attempt and derived-state cases"
 
 [items.horizon_mismatch_and_direct_clip_diagnostics]
 kind = "api_design"
