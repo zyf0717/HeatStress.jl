@@ -7,8 +7,10 @@ using TOML
 
 const DEFAULT_ROW_COUNTS = (876_000,)
 const DEFAULT_SAMPLES = 3
+const GEOMETRY_MODES = (:fixed, :grouped, :unique)
+const DEFAULT_GEOMETRY_MODES = (:fixed,)
 
-function batch_inputs(rows::Integer)
+function batch_inputs(rows::Integer, geometry::Symbol = :fixed)
     rows > 0 || throw(ArgumentError("rows must be positive"))
     time = Vector{DateTime}(undef, rows)
     air = Vector{Float64}(undef, rows)
@@ -21,9 +23,26 @@ function batch_inputs(rows::Integer)
         air[row] = 28.0 + 4.0 * sin(phase)
         dew[row] = air[row] - (5.0 + cos(phase))
         wind[row] = 0.5 + 1.5 * abs(sin(phase))
-        time[row] = base_time + Minute(mod(row - 1, 240))
+        time[row] = geometry === :unique ?
+                    base_time + Millisecond(row - 1) :
+                    base_time + Minute(mod(row - 1, 240))
     end
-    return (air, dew, wind, radiation, time)
+    longitude, latitude = if geometry === :fixed
+        -74.0060, 40.7128
+    elseif geometry === :grouped
+        (
+            [isodd(row) ? -74.0060 : 151.2093 for row in 1:rows],
+            [isodd(row) ? 40.7128 : -33.8688 for row in 1:rows],
+        )
+    elseif geometry === :unique
+        (
+            [-100.0 + 30.0 * (row - 1) / rows for row in 1:rows],
+            [30.0 + 20.0 * (row - 0.5) / rows for row in 1:rows],
+        )
+    else
+        throw(ArgumentError("unknown geometry workload: $geometry"))
+    end
+    return (air, dew, wind, radiation, time, longitude, latitude)
 end
 
 function _outputs(rows::Int)
@@ -31,10 +50,16 @@ function _outputs(rows::Int)
     return values(), values(), values()
 end
 
-function _scalar_row_loop!(wbgt, wet, globe, air, dew, wind, radiation, time)
+_row_value(value::Real, ::Int) = value
+_row_value(value::AbstractVector, row::Int) = @inbounds value[row]
+
+function _scalar_row_loop!(
+    wbgt, wet, globe, air, dew, wind, radiation, time, longitude, latitude,
+)
     for row in eachindex(air)
         result = HeatStress.liljegren_wbgt(
-            air[row], dew[row], wind[row], time[row], -74.0060, 40.7128;
+            air[row], dew[row], wind[row], time[row],
+            _row_value(longitude, row), _row_value(latitude, row);
             ghi_w_m2 = radiation[row], partition = FixedDirectFraction(0.7),
         )
         wbgt[row] = result.wbgt_c
@@ -44,11 +69,14 @@ function _scalar_row_loop!(wbgt, wet, globe, air, dew, wind, radiation, time)
     return WBGTBatchResult{Float64}(wbgt, wet, globe)
 end
 
-function _scalar_public_results(air, dew, wind, radiation, time)
+function _scalar_public_results(
+    air, dew, wind, radiation, time, longitude, latitude,
+)
     results = Vector{WBGTResult{Float64}}(undef, length(air))
     for row in eachindex(air)
         results[row] = HeatStress.liljegren_wbgt(
-            air[row], dew[row], wind[row], time[row], -74.0060, 40.7128;
+            air[row], dew[row], wind[row], time[row],
+            _row_value(longitude, row), _row_value(latitude, row);
             ghi_w_m2 = radiation[row], partition = FixedDirectFraction(0.7),
         )
     end
@@ -77,28 +105,35 @@ function _assert_equal(actual::Vector{WBGTResult{Float64}}, expected::WBGTBatchR
     return nothing
 end
 
-function _measure(inputs, samples::Int, mode::Symbol)
-    air, dew, wind, radiation, time = inputs
+function _measure(inputs, samples::Int, mode::Symbol, geometry::Symbol)
+    air, dew, wind, radiation, time, longitude, latitude = inputs
     rows = length(air)
     reference_outputs = _outputs(rows)
-    reference = _scalar_row_loop!(reference_outputs..., air, dew, wind, radiation, time)
+    reference = _scalar_row_loop!(
+        reference_outputs..., air, dew, wind, radiation, time,
+        longitude, latitude,
+    )
     _validate(reference)
 
     call = if mode === :public_scalar_results
-        () -> _scalar_public_results(air, dew, wind, radiation, time)
+        () -> _scalar_public_results(
+            air, dew, wind, radiation, time, longitude, latitude,
+        )
     elseif mode === :public_scalar_preallocated
         outputs = _outputs(rows)
-        () -> _scalar_row_loop!(outputs..., air, dew, wind, radiation, time)
+        () -> _scalar_row_loop!(
+            outputs..., air, dew, wind, radiation, time, longitude, latitude,
+        )
     elseif mode === :preallocated_batch_serial || mode === :preallocated_batch_threaded
         outputs = _outputs(rows)
         threaded = mode === :preallocated_batch_threaded
         () -> HeatStress.liljegren_wbgt!(
-            outputs..., air, dew, wind, time, -74.0060, 40.7128;
+            outputs..., air, dew, wind, time, longitude, latitude;
             ghi_w_m2 = radiation, partition = FixedDirectFraction(0.7), threaded,
         )
     elseif mode === :allocating_batch
         () -> HeatStress.liljegren_wbgt_batch(
-            air, dew, wind, time, -74.0060, 40.7128;
+            air, dew, wind, time, longitude, latitude;
             ghi_w_m2 = radiation, partition = FixedDirectFraction(0.7),
         )
     else
@@ -113,6 +148,7 @@ function _measure(inputs, samples::Int, mode::Symbol)
     minimum_estimate, median_estimate = BenchmarkTools.minimum(trial), BenchmarkTools.median(trial)
     return Dict(
         "mode" => string(mode),
+        "geometry" => string(geometry),
         "rows" => rows,
         "minimum_seconds" => minimum_estimate.time / 1e9,
         "median_seconds" => median_estimate.time / 1e9,
@@ -127,7 +163,10 @@ function _measure(inputs, samples::Int, mode::Symbol)
 end
 
 function _parse_arguments(args::Vector{String})
-    samples, rows, output_path = DEFAULT_SAMPLES, collect(DEFAULT_ROW_COUNTS), nothing
+    samples = DEFAULT_SAMPLES
+    rows = collect(DEFAULT_ROW_COUNTS)
+    geometries = collect(DEFAULT_GEOMETRY_MODES)
+    output_path = nothing
     for argument in args
         if startswith(argument, "--samples=")
             samples = parse(Int, split(argument, '='; limit = 2)[2])
@@ -135,12 +174,16 @@ function _parse_arguments(args::Vector{String})
             rows = parse.(Int, split(split(argument, '='; limit = 2)[2], ','))
         elseif startswith(argument, "--output=")
             output_path = split(argument, '='; limit = 2)[2]
+        elseif startswith(argument, "--geometry=")
+            geometries = Symbol.(split(split(argument, '='; limit = 2)[2], ','))
         else
             error("unknown argument: $argument")
         end
     end
     samples > 0 && all(>(0), rows) || throw(ArgumentError("samples and rows must be positive"))
-    return samples, rows, output_path
+    all(geometry -> geometry in GEOMETRY_MODES, geometries) ||
+        throw(ArgumentError("geometry must be fixed, grouped, or unique"))
+    return samples, rows, geometries, output_path
 end
 
 function _git_metadata()
@@ -152,7 +195,7 @@ function _git_metadata()
 end
 
 function main(args::Vector{String} = ARGS)
-    samples, rows, output_path = _parse_arguments(args)
+    samples, rows, geometries, output_path = _parse_arguments(args)
     modes = Symbol[
         :public_scalar_results,
         :public_scalar_preallocated,
@@ -161,9 +204,12 @@ function main(args::Vector{String} = ARGS)
     ]
     Threads.nthreads() > 1 && push!(modes, :preallocated_batch_threaded)
     measurements = Dict{String,Any}[]
-    for row_count in rows
-        inputs = batch_inputs(row_count)
-        append!(measurements, (_measure(inputs, samples, mode) for mode in modes))
+    for row_count in rows, geometry in geometries
+        inputs = batch_inputs(row_count, geometry)
+        append!(
+            measurements,
+            (_measure(inputs, samples, mode, geometry) for mode in modes),
+        )
     end
     report = Dict(
         "metadata" => Dict(
