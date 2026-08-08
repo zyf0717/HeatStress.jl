@@ -48,6 +48,11 @@ Spec 019 removes the unsupported Liljegren temperature gate as the
 backward-compatible v0.3.2 patch release while leaving standalone
 psychrometric-helper APIs unchanged.
 
+Spec 020 records the rejected shared batch-geometry preprocessing experiment.
+The candidate did not meet its end-to-end retention gate, so the released
+worker-local fused path remains unchanged; reusable fixed, grouped and unique
+benchmark workloads were retained.
+
 ## Status legend
 
 - `Planned` — requirements are captured; implementation has not met its acceptance criteria.
@@ -80,6 +85,7 @@ psychrometric-helper APIs unchanged.
 | 017 | [Irradiance component inputs](./017-irradiance-component-inputs/) | Complete | Breaking v0.3 radiation API; depends on completed 004, 007, 008 and 016 evidence |
 | 018 | [Wind-height preprocessing](./018-wind-height-preprocessing/) | Complete | Additive v0.3.1 preprocessing; depends on completed 003, 007, 008 and 017 interfaces |
 | 019 | [Liljegren temperature-domain correction](./019-liljegren-temperature-domain/) | Complete | Corrects the package-owned temperature gate while preserving 004 helper APIs and 007–008 interfaces |
+| 020 | [Batch geometry preprocessing evaluation](./020-batch-geometry-preprocessing/) | Complete | Profile-led experiment rejected; fused 008/011 baseline retained |
 
 The completed v0.1.0 path was `000–008 → Liljegren/core slice of 010 →
 publication gate of 011 → 012 → focused 013 audit → tag, release and General

@@ -20,12 +20,12 @@ raw timing samples. This is the scalar fixed-station slice of spec 011, not a
 cross-language or batch benchmark; it neither publishes HeatStressR ratios nor
 replaces the independent scientific validation gate.
 
-`batch_e2e.jl` uses one deterministic structure-of-arrays input fixture for
-five comparable modes: a public scalar loop retaining `WBGTResult`s, a public
-scalar loop writing three preallocated component arrays, preallocated serial
-batch, allocating serial batch, and (when Julia has multiple threads)
-preallocated threaded batch. It validates all component values outside timed
-regions. The primary spec-008 comparison is the public scalar/preallocated
+`batch_e2e.jl` supports deterministic fixed, grouped and unique solar-geometry
+workloads for five comparable modes: a public scalar loop retaining
+`WBGTResult`s, a public scalar loop writing three preallocated component arrays,
+preallocated serial batch, allocating serial batch, and (when Julia has
+multiple threads) preallocated threaded batch. It validates all component
+values outside timed regions. The primary spec-008 comparison is the public scalar/preallocated
 output loop against preallocated serial batch. It reports minimum and median
 time, throughput, bytes, allocations, raw timing samples, the host,
 Julia/BenchmarkTools versions and repository state. Inputs, compilation,
@@ -35,7 +35,12 @@ public batch call is included. It is local evidence only:
 ```sh
 julia --project=benchmark benchmark/batch_e2e.jl
 julia --threads=auto --project=benchmark benchmark/batch_e2e.jl --rows=10000 --samples=3 --output=benchmark/results/batch-e2e.toml
+julia --threads=4 --project=benchmark benchmark/batch_e2e.jl --geometry=fixed,grouped,unique --rows=10000,100000 --samples=5
 ```
+
+The default remains the historical fixed-station workload. Select grouped and
+unique modes explicitly with `--geometry` when evaluating geometry-sensitive
+changes.
 
 ## Comparable local evidence (2026-07-24)
 
