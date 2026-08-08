@@ -1,7 +1,7 @@
 # Public API
 
-The public surface covers Liljegren outdoor WBGT, selected direct heat
-measures, and their supporting helpers and types.
+The public surface covers Liljegren outdoor WBGT, RCC estimated-WBGT models,
+selected direct heat measures, and their supporting helpers and types.
 
 ## Wind-height preprocessing
 
@@ -93,11 +93,33 @@ fixed direct fraction, wind height, terrain, stability class, and vertical
 temperature difference may be shared scalars or row-aligned vectors as
 documented in [Units and input policies](@ref).
 
+## RCC estimated-WBGT calls
+
+```julia
+rccd167l_wbgt(air, relative_humidity, wind, time, longitude, latitude;
+               ghi_w_m2, pressure_hpa=1010,
+               partition=LiljegrenClearnessFraction())
+rcc_nws_wbgt(air, relative_humidity, wind, time, longitude, latitude;
+              ghi_w_m2, pressure_hpa=1010,
+              partition=LiljegrenClearnessFraction())
+
+rccd167l_wbgt_batch(air, relative_humidity, wind, time, longitude, latitude;
+                     ghi_w_m2, pressure_hpa=1010, threaded=false)
+rcc_nws_wbgt_batch(air, relative_humidity, wind, time, longitude, latitude;
+                    ghi_w_m2, pressure_hpa=1010, threaded=false)
+```
+
+The corresponding `!` forms accept three output vectors first. Component APIs
+cover NWS psychrometric wet bulb, RCC-NWS/RCCNL natural wet bulb, and
+Dim228/Dim167L globe temperature. See [RCC estimated WBGT](@ref) for exact
+contracts and the operational-NDFD scope boundary.
+
 ## Types
 
-`SolverConfig` controls root and residual acceptance. `LiljegrenConfig`
-contains physical and input-policy settings. `WBGTResult` and
-`WBGTBatchResult` contain values; `DiagnosticWBGTResult`,
+`WBGTResult` and `WBGTBatchResult` contain values shared by Liljegren and RCC
+estimators. `SolverConfig` controls Liljegren root and residual acceptance;
+`LiljegrenConfig` contains its physical and input-policy settings.
+`DiagnosticWBGTResult`,
 `DiagnosticWBGTBatchResult`, and `SolverDiagnostics` expose input and solver
 state. `DewPointPolicy`, `InputStatus`, and `FailureReason` are explicit enums.
 `RadiationPartitionPolicy`, `FixedDirectFraction`, and

@@ -53,6 +53,10 @@ The candidate did not meet its end-to-end retention gate, so the released
 worker-local fused path remains unchanged; reusable fixed, grouped and unique
 benchmark workloads were retained.
 
+Spec 021 adds the RCCD167L and RCC-documented Dim228 + RCC-NWS estimated-WBGT
+models for v0.4.0. Source audit, implementation and local validation are
+complete; final PR CI and scientific release audit remain in progress.
+
 ## Status legend
 
 - `Planned` — requirements are captured; implementation has not met its acceptance criteria.
@@ -86,6 +90,7 @@ benchmark workloads were retained.
 | 018 | [Wind-height preprocessing](./018-wind-height-preprocessing/) | Complete | Additive v0.3.1 preprocessing; depends on completed 003, 007, 008 and 017 interfaces |
 | 019 | [Liljegren temperature-domain correction](./019-liljegren-temperature-domain/) | Complete | Corrects the package-owned temperature gate while preserving 004 helper APIs and 007–008 interfaces |
 | 020 | [Batch geometry preprocessing evaluation](./020-batch-geometry-preprocessing/) | Complete | Profile-led experiment rejected; fused 008/011 baseline retained |
+| 021 | [RCC WBGT estimators](./021-rcc-wbgt-estimators/) | In progress | Additive v0.4.0 models; depends on completed 004, 008, 016 and 017 interfaces |
 
 The completed v0.1.0 path was `000–008 → Liljegren/core slice of 010 →
 publication gate of 011 → 012 → focused 013 audit → tag, release and General

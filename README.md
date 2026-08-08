@@ -2,7 +2,8 @@
 
 HeatStress.jl is an independent MIT-licensed Julia package for heat-stress
 measures. It implements the Liljegren outdoor wet-bulb globe temperature
-(WBGT) model, measured-component WBGT, the US National Weather Service heat
+(WBGT) model, RCCD167L and the RCC-documented NWS estimated-WBGT combination,
+measured-component WBGT, the US National Weather Service heat
 index, the Stull wet-bulb approximation, and Environment and Climate Change
 Canada humidex. Liljegren supports scalar and diagnostic calls plus allocating,
 preallocated, and threaded aligned batches; the direct formulas are scalar and
@@ -34,6 +35,12 @@ result = liljegren_wbgt(
     partition = FixedDirectFraction(0.7),
 )
 result.wbgt_c
+
+rcc = rccd167l_wbgt(
+    32.0, 40.0, 2.0, DateTime(2025, 7, 1, 12), 0.0, 0.0;
+    ghi_w_m2 = 800.0,
+    pressure_hpa = 900.0,
+)
 ```
 
 For direct measures:
@@ -68,6 +75,12 @@ estimate. The default partition is `FixedDirectFraction(0.8)`; use
 fixed direct-fraction value may be scalars or vectors aligned with the primary
 input vectors. Use `liljegren_wbgt!` for compatible preallocated outputs.
 
+RCC estimators use relative humidity rather than dew point, require explicit
+GHI, default to `LiljegrenClearnessFraction()`, and consume model-ready wind
+without implicit height conversion. `rcc_nws_wbgt` is the Dim228 + RCC-NWS
+combination evaluated in RCC WP-25-001, not the complete operational NDFD
+forecast preprocessing chain. See [RCC estimated WBGT](docs/src/rcc-wbgt.md).
+
 ## Numerical behaviour and limitations
 
 The model rejects non-finite inputs, invalid coordinates, non-positive
@@ -80,6 +93,9 @@ solar method, radiation partitioning, instrument parameters, and solver
 policies—do not assume equivalence with another WBGT implementation unless
 these are aligned.
 
+RCC inputs reject negative wind/radiation. RCCNL requires positive wind, while
+both Dimiceli globe components apply their sourced 1 m/s floor.
+
 Measured-component WBGT assumes representative instrument readings. NWS heat
 index represents shaded conditions and omits wind, radiation, and workload.
 The Stull approximation is a standard-pressure empirical fit with a restricted
@@ -90,7 +106,8 @@ individual physiological response or exposure limit.
 
 The implementation is expressed independently from published literature; its
 primary model source is Liljegren et al. (2008), DOI
-10.1080/15459620802310770. Secondary-measure authorities include OSHA, NWS,
+10.1080/15459620802310770. RCC estimator authority is RCC WP-25-001 (2025).
+Secondary-measure authorities include OSHA, NWS,
 Stull (2011), and Environment and Climate Change Canada. Equation and policy
 provenance lives in
 [`validation/sources.toml`](validation/sources.toml), while committed offline

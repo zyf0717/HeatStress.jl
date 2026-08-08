@@ -37,6 +37,20 @@ protection is distinct from physical night-time zeroing.
 The configured minimum wind is applied later by component physics, never during
 public-boundary normalization.
 
+## RCC estimated-WBGT models
+
+RCC scalar APIs use air temperature in °C, RH in percent, model-ready wind in
+m/s, GHI in W/m², station pressure in hPa, and the common timestamp/coordinate
+contract. The component globe functions take solar zenith in degrees and a
+direct-horizontal/GHI fraction. `ghi_w_m2` is required by composed calls.
+
+The NWS psychrometric component uses exactly five published Newton updates.
+RCCNL requires strictly positive wind. Dim228 and Dim167L use a fixed 1 m/s
+wind floor and treat `zenith >= 87°` as night (`h=0`). No `LiljegrenConfig`
+field changes these fixed source contracts. Invalid domains throw
+`ArgumentError`; a missing scientific input returns `missing` or missing result
+fields.
+
 ## Scalar Liljegren model
 
 `diagnose_liljegren` is the canonical scalar calculation; `liljegren_wbgt`,
