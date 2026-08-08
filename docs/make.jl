@@ -13,6 +13,7 @@ makedocs(
         "Public API" => "api.md",
         "Secondary measures" => "secondary-measures.md",
         "Liljegren pipeline" => "liljegren.md",
+        "RCC estimated WBGT" => "rcc-wbgt.md",
         "Inputs and policies" => "inputs.md",
         "Numerical behaviour" => "numerical-behaviour.md",
         "Performance" => "performance.md",

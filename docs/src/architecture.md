@@ -35,6 +35,23 @@ public batch API
 own output positions, and the same typed row path supplies serial and threaded
 execution.
 
+## RCC execution flow
+
+```text
+named RCC scalar/batch API
+  -> promote and validate native Ta/RH/wind/GHI/pressure inputs
+  -> NWS fixed-iteration psychrometric wet bulb
+  -> RCC-NWS or RCCNL natural wet bulb
+  -> shared solar geometry + selected direct partition
+  -> Dim228 or Dim167L direct globe calculation
+  -> WBGTResult / WBGTBatchResult materialisation
+```
+
+RCC coefficients remain private and model-local. The non-iterative component
+kernels do not use Liljegren solver diagnostics, configuration, wind-height
+policy, or clear-sky fallback. Scalar and batch entry points share the same
+typed RCC row engine; the public surface does not introduce a model hierarchy.
+
 ## Direct-formula execution
 
 Measured WBGT, NWS heat index, Stull wet bulb, and humidex are independent

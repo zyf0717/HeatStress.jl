@@ -42,6 +42,18 @@ The default remains the historical fixed-station workload. Select grouped and
 unique modes explicitly with `--geometry` when evaluating geometry-sensitive
 changes.
 
+`rcc_e2e.jl` provides a smaller scalar/aligned-batch benchmark for RCCD167L
+and RCC/NWS, with Liljegren scalar timing included only as algorithmic-cost
+context. It validates RCC scalar/batch equality before timing. Arguments are
+row count and sample count:
+
+```sh
+julia --project=benchmark benchmark/rcc_e2e.jl 100000 5
+```
+
+The RCC estimators are non-iterative models, not optimized implementations of
+the Liljegren algorithm; timing differences must not be reported as such.
+
 ## Comparable local evidence (2026-07-24)
 
 On `znver3` with Julia 1.10.11, BenchmarkTools 1.8.0 and four Julia threads,

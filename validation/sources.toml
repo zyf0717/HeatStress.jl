@@ -24,6 +24,10 @@ generation_method = "Declared input and numerical-policy invariants."
 sources = ["osha_wbgt", "nws_heat_index", "stull_2011", "eccc_humidex"]
 generation_method = "Independent 256-bit direct evaluation of the selected equations without importing HeatStress."
 
+[fixture_families.rcc_wbgt]
+sources = ["rcc_wp_25_001", "dimiceli_piltz"]
+generation_method = "Standalone 256-bit evaluation of Appendix B, equations 1, 3-4 and 8-9, and independent Spencer solar geometry without importing HeatStress."
+
 [fixture_families.numerical_conformance_v3]
 sources = [
     "liljegren_2008",
@@ -764,3 +768,218 @@ provenance = "original_design"
 rationale = "Existing wind inputs have no measurement-height metadata, so height conversion must be explicit to preserve released numerical behavior."
 implementation = "src/wind_height.jl; src/liljegren/api.jl; src/liljegren/batch.jl"
 validation = "test/test_wind_height.jl legacy no-op equivalence, explicit-policy integration and diagnostic provenance"
+
+[sources.rcc_wp_25_001]
+kind = "government_technical_report"
+authors = "Range Commanders Council Meteorology Group"
+title = "Assessment of Estimation Methods for the Wet-bulb Globe Temperature"
+year = 2025
+report_number = "RCC WP-25-001"
+url = "https://www.trmc.osd.mil/wiki/download/attachments/373186458/WP-25-001.pdf?api=v2"
+role = "Primary authority for RCCD167L, RCC-NWS, RCCNL and the evaluated Dim228 plus RCC-NWS combination"
+
+[sources.dimiceli_piltz]
+kind = "government_technical_report"
+authors = "Dimiceli, V. E.; Piltz, S. F."
+title = "Estimation of Black Globe Temperature for Calculation of the WBGT Index"
+year = 2013
+url = "https://www.weather.gov/media/tsa/pdf/WBGTpaper2.pdf"
+role = "Primary derivation of the linearized Dimiceli globe equation and fixed constants"
+
+[sources.nws_ndfd_wbgt_design]
+kind = "government_technical_report"
+authors = "Boyer, T. R."
+title = "NDFD Wet Bulb Globe Temperature Algorithm and Software Design"
+year = 2022
+url = "https://vlab.noaa.gov/documents/6609493/7858379/NDFD+WBGT+Description+Document.pdf"
+role = "Scope boundary for operational NDFD preprocessing excluded from the RCC component-combination API"
+
+[items.rcc_nws_psychrometric_vapour_pressure]
+kind = "equation"
+owner_spec = "021"
+status = "validated"
+source = "rcc_wp_25_001"
+location = "Appendix B, esat and dew_point functions"
+units = "degrees Celsius and relative humidity percent to hPa and degrees Celsius"
+implementation = "src/rcc/psychrometrics.jl"
+validation = "test/test_rcc_psychrometrics.jl and validation/fixtures/rcc_wbgt.csv independent vapour-pressure/dew-point procedure coverage"
+
+[items.rcc_nws_psychrometric_coefficients]
+kind = "coefficient"
+owner_spec = "021"
+status = "validated"
+source = "rcc_wp_25_001"
+location = "Appendix B: 1.004, 6.1121, 17.502, 240.97, 6.11, 7.5, 237.3, 0.0006355, c1=0.0091 and c2=6106.4"
+units = "mixed coefficients in the Appendix B hPa/K/Celsius procedure"
+implementation = "src/rcc/psychrometrics.jl"
+validation = "test/test_rcc_psychrometrics.jl and validation/fixtures/rcc_wbgt.csv selected-coefficient reference cases"
+
+[items.rcc_nws_psychrometric_iteration]
+kind = "numerical_policy"
+owner_spec = "021"
+status = "validated"
+source = "rcc_wp_25_001"
+location = "Appendix B, TwNatlWS: initial interpolation followed by exactly five Newton updates"
+implementation = "src/rcc/psychrometrics.jl"
+validation = "test/test_rcc_psychrometrics.jl independent fixed-five-update fixtures and saturated identity"
+
+[items.rcc_nws_natural_wet_bulb]
+kind = "equation"
+owner_spec = "021"
+status = "validated"
+source = "rcc_wp_25_001"
+location = "equation 8"
+units = "degrees Celsius from Tw, W m^-2, m s^-1 and wet-bulb depression"
+implementation = "src/rcc/natural_wet_bulb.jl"
+validation = "test/test_rcc_scalar.jl equation 8 independent fixtures, zero wind, broadcast and composed cases"
+
+[items.rccnl_natural_wet_bulb]
+kind = "equation"
+owner_spec = "021"
+status = "validated"
+source = "rcc_wp_25_001"
+location = "equation 9"
+units = "degrees Celsius from Tw, W m^-2, m s^-1 and wet-bulb depression"
+implementation = "src/rcc/natural_wet_bulb.jl"
+validation = "test/test_rcc_scalar.jl equation 9 independent fixtures, low-wind and composed cases"
+
+[items.rccnl_positive_wind_domain]
+kind = "model_policy"
+owner_spec = "021"
+status = "validated"
+source = "rcc_wp_25_001"
+location = "equation 9 denominator u^0.15; no source floor is stated"
+implementation = "src/rcc/natural_wet_bulb.jl"
+validation = "test/test_rcc_scalar.jl zero/negative wind rejection; test/test_rcc_batch.jl pre-mutation zero-wind rejection"
+
+[items.dimiceli_linearized_globe]
+kind = "equation"
+owner_spec = "021"
+status = "validated"
+source = "dimiceli_piltz"
+location = "equations 7, 9 and 10; Celsius tangent linearization at 40 degrees Celsius"
+units = "degrees Celsius"
+implementation = "src/rcc/globe_temperature.jl"
+validation = "test/test_rcc_scalar.jl and validation/fixtures/rcc_wbgt.csv independent Dim228/Dim167L results"
+
+[items.dimiceli_globe_constants]
+kind = "physical_constant"
+owner_spec = "021"
+status = "validated"
+source = "dimiceli_piltz"
+location = "derivation and algorithm: sigma=5.67e-8, globe emissivity=0.95, tangent constants 256000 and 7680000"
+units = "mixed W m^-2 K^-4, dimensionless and degrees Celsius fourth-power linearization"
+implementation = "src/rcc/globe_temperature.jl"
+validation = "test/test_rcc_scalar.jl independent globe fixtures and day/night/minimum-wind invariants"
+
+[items.dimiceli_wind_policy]
+kind = "model_policy"
+owner_spec = "021"
+status = "validated"
+source = "rcc_wp_25_001"
+location = "section 3.1 following equation 3: u in m hr^-1, exponent 0.58 and minimum wind 1 m s^-1"
+implementation = "src/rcc/globe_temperature.jl"
+validation = "test/test_rcc_scalar.jl exact 1 m/s floor equivalence and independent fixtures"
+
+[items.dim228_globe]
+kind = "equation"
+owner_spec = "021"
+status = "validated"
+source = "rcc_wp_25_001"
+location = "equation 3 and Table 5: hday=0.228, hnight=0"
+units = "degrees Celsius"
+implementation = "src/rcc/globe_temperature.jl"
+validation = "test/test_rcc_scalar.jl Dim228 independent component and RCC/NWS composition fixtures"
+
+[items.dim167l_globe]
+kind = "equation"
+owner_spec = "021"
+status = "validated"
+source = "rcc_wp_25_001"
+location = "equations 3-4 and Table 5: Liljegren-form B, hday=0.167, hnight=0"
+units = "degrees Celsius"
+implementation = "src/rcc/globe_temperature.jl"
+validation = "test/test_rcc_scalar.jl Dim167L independent component and RCCD167L composition fixtures"
+
+[items.rcc_dimiceli_surface_albedo]
+kind = "coefficient"
+owner_spec = "021"
+status = "validated"
+source = "rcc_wp_25_001"
+location = "section 3.1 following equation 3: alpha_sfc=0.2 for evaluated Dimiceli family"
+units = "dimensionless"
+implementation = "src/rcc/globe_temperature.jl"
+validation = "validation/generate_rcc_wbgt.jl independent fixed-0.2 globe evaluations"
+
+[items.rcc_globe_day_night]
+kind = "model_policy"
+owner_spec = "021"
+status = "validated"
+source = "rcc_wp_25_001"
+location = "section 3.1: day/night differentiation at 87 degrees solar zenith"
+implementation = "src/rcc/globe_temperature.jl"
+validation = "test/test_rcc_scalar.jl exact 87-degree and predecessor boundary cases"
+
+[items.rcc_globe_boundary_ownership]
+kind = "numerical_policy"
+owner_spec = "021"
+status = "validated"
+provenance = "original_design"
+rationale = "WP-25-001 identifies 87 degrees as the day/night threshold but does not assign equality; night owns equality to make the branch total and avoid extending daytime convection beyond the stated threshold."
+implementation = "src/rcc/globe_temperature.jl"
+validation = "test/test_rcc_scalar.jl exact 87-degree night ownership"
+
+[items.rcc_globe_radiation_partition]
+kind = "model_policy"
+owner_spec = "021"
+status = "validated"
+source = "rcc_wp_25_001"
+location = "section 4: direct beam fraction determined from Liljegren equations 13-14"
+implementation = "src/rcc/row_execution.jl"
+validation = "test/test_rcc_scalar.jl fixed and default clearness partitions; validation/fixtures/rcc_wbgt.csv fixed-fraction cases"
+
+[items.rcc_wbgt_composition]
+kind = "equation"
+owner_spec = "021"
+status = "validated"
+source = "rcc_wp_25_001"
+location = "equation 1 and Table 5 component combinations"
+units = "degrees Celsius"
+implementation = "src/rcc/row_execution.jl"
+validation = "test/test_rcc_scalar.jl independent RCC/NWS and RCCD167L composition fixtures"
+
+[items.rcc_named_api_contract]
+kind = "api_design"
+owner_spec = "021"
+status = "validated"
+provenance = "original_design"
+rationale = "Explicit component and model names preserve source identity and avoid hidden switching; RH and mandatory GHI match the selected source inputs."
+implementation = "src/rcc/api.jl"
+validation = "test/test_rcc_scalar.jl exported named scalar/component contracts"
+
+[items.rcc_result_reuse]
+kind = "api_design"
+owner_spec = "021"
+status = "validated"
+provenance = "original_design"
+rationale = "RCC estimators produce the same WBGT/Tnwb/Tg value shape as Liljegren and require no solver diagnostics."
+implementation = "src/types/results.jl; src/rcc/api.jl; src/rcc/batch.jl"
+validation = "test/test_rcc_scalar.jl WBGTResult types; test/test_rcc_batch.jl WBGTBatchResult scalar/batch equivalence"
+
+[items.rcc_no_implicit_preprocessing]
+kind = "api_design"
+owner_spec = "021"
+status = "validated"
+provenance = "original_design"
+rationale = "Mandatory GHI and model-ready wind prevent package-owned clear-sky or wind-height preprocessing from being misrepresented as RCC/NDFD source behavior."
+implementation = "src/rcc/api.jl; src/rcc/batch.jl"
+validation = "test/test_rcc_scalar.jl mandatory-GHI/default-partition cases; test/test_rcc_batch.jl scalar expansion and no-thread policy"
+
+[items.rcc_nws_scope_boundary]
+kind = "api_design"
+owner_spec = "021"
+status = "validated"
+source = "nws_ndfd_wbgt_design"
+location = "solar-flux, NDFD mosaics, wind downscaling, pressure and recent-updates sections"
+implementation = "src/rcc/api.jl; docs/src/rcc-wbgt.md"
+validation = "docs/src/rcc-wbgt.md explicit NDFD preprocessing exclusions; documentation build"

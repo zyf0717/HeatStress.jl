@@ -46,6 +46,15 @@ row-aligned vectors. `missing` irradiance elements are reconstructed as absent.
 `liljegren_wbgt!` validates all inputs, output types/lengths, and aliases
 before writing any output.
 
+RCC estimators use air temperature plus relative humidity as native humidity
+inputs. GHI is mandatory and never replaced by the package clear-sky estimate.
+The selected partition applies only to direct/diffuse splitting. RCC functions
+consume model-ready wind without implicit height conversion. RCC-NWS accepts
+zero wind in its linear natural-wet-bulb equation; RCCNL requires `wind > 0`;
+Dim228 and Dim167L reject negative wind and apply their source-defined 1 m/s
+floor internally. RCC radiation must be finite and non-negative. Positive GHI
+with the sun at/below the geometric horizon is rejected rather than clamped.
+
 Secondary measures use formula-native inputs. Relative humidity is always a
 percentage, not a fraction. Invalid finite domains and non-finite real inputs
 throw `DomainError`; any `missing` input returns `missing`.

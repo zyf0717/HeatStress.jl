@@ -19,6 +19,11 @@ those are independently curated source/invariant records described in
 `fixtures/simple_indices.csv` at 256-bit precision without importing
 `HeatStress`. Its metadata is separate from the frozen v0.1 fixture record.
 
+`generate_rcc_wbgt.jl` independently regenerates `fixtures/rcc_wbgt.csv` at
+256-bit precision. It directly evaluates the published NWS psychrometric,
+RCC-NWS, RCCNL, Dim228 and Dim167L equations plus both WBGT compositions; it
+does not import `HeatStress`.
+
 The v1/v2 fixtures above are frozen release evidence. Additive fixture set v3
 hardens numerical-conformance validation without changing released behavior.
 It deterministically selects 64 pairwise-covering Liljegren observations and
@@ -33,6 +38,7 @@ generator changes under review:
 ```sh
 julia --project=. validation/generate_validation_cases.jl
 julia --project=. validation/generate_simple_indices.jl
+julia --project=. validation/generate_rcc_wbgt.jl
 julia --project=validation/high_precision validation/generate_fixture_set_v3.jl
 ```
 

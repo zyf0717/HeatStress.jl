@@ -63,6 +63,10 @@ This repository is `HeatStress.jl`, an independent MIT-licensed Julia implementa
 
 * For documentation-only changes, tests are not required; state that explicitly.
 
+* Set the candidate version consistently in `Project.toml` and `CITATION.cff`
+  before final scientific-audit PR checks. The checked final head and resulting
+  squash commit must contain that release metadata; do not add a post-audit
+  version commit.
 * Do not tag, publish, archive or register a release until the final scientific
   audit PR passes its required CI on the final head and an authorised maintainer
   squash-merges it. The successful CI and squash merge are the approval record;

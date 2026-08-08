@@ -1,4 +1,4 @@
-"""Value-only Liljegren outcome; WBGT and component temperatures are °C."""
+"""Value-only estimated-WBGT outcome; WBGT and component temperatures are °C."""
 struct WBGTResult{T<:AbstractFloat}
     wbgt_c::Union{Missing,T}
     natural_wet_bulb_c::Union{Missing,T}
@@ -26,7 +26,7 @@ function WBGTResult(
     )
 end
 
-"""Aligned batch result; each array contains °C values or `missing`."""
+"""Aligned estimated-WBGT result; each array contains °C values or `missing`."""
 struct WBGTBatchResult{T<:AbstractFloat,VW<:AbstractVector,VN<:AbstractVector,VG<:AbstractVector}
     wbgt_c::VW
     natural_wet_bulb_c::VN

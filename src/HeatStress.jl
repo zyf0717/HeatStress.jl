@@ -33,6 +33,12 @@ include("liljegren/result_materialisation.jl")
 include("liljegren/row_execution.jl")
 include("liljegren/api.jl")
 include("liljegren/batch.jl")
+include("rcc/psychrometrics.jl")
+include("rcc/natural_wet_bulb.jl")
+include("rcc/globe_temperature.jl")
+include("rcc/row_execution.jl")
+include("rcc/api.jl")
+include("rcc/batch.jl")
 
 # Public exports are declared here once their owning specifications are complete.
 export DewPointPolicy,
@@ -94,6 +100,17 @@ export DewPointPolicy,
     saturation_vapour_pressure_hpa,
     vapour_pressure,
     relative_humidity_from_dewpoint,
+    psychrometric_wet_bulb_nws,
+    rccnl_natural_wet_bulb_temperature,
+    rcc_nws_natural_wet_bulb_temperature,
+    dim167l_globe_temperature,
+    dim228_globe_temperature,
+    rccd167l_wbgt,
+    rcc_nws_wbgt,
+    rccd167l_wbgt_batch,
+    rccd167l_wbgt!,
+    rcc_nws_wbgt_batch,
+    rcc_nws_wbgt!,
     wbgt_with_solar_load,
     wbgt_without_solar_load,
     heat_index_nws,

@@ -30,9 +30,12 @@ right to submit all code, test data, and documentation they provide.
 
 ## Publishing an authorised release
 
-Publish only after the release PR passes its required checks on the final head
-and an authorised maintainer squash-merges it. Verify that `Project.toml` and
-`CITATION.cff` contain the same version, and record the squash commit SHA.
+Before requesting final release-PR checks, set the same candidate version in
+`Project.toml` and `CITATION.cff`. That metadata must be part of the checked
+final head and its squash commit; do not add a release-only version commit
+after approval. Publish only after the release PR passes its required checks
+on that final head and an authorised maintainer squash-merges it. Record the
+squash commit SHA.
 
 This repository disables Julia Registrator commands in pull-request comments.
 Invoke Registrator in a comment on the squash commit instead; this also pins the
