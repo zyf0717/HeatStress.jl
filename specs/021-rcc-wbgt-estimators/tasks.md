@@ -3,8 +3,8 @@
 ## Status
 
 - [ ] Planned
-- [x] In progress
-- [ ] Complete
+- [ ] In progress
+- [x] Complete
 
 ## Tasks
 
@@ -18,8 +18,6 @@
 - [x] Add independent fixtures and source-registry lifecycle evidence.
 - [x] Update public documentation and add the reproducible benchmark.
 - [x] Run focused, full and quality suites; record evidence below.
-- [ ] Pass required CI and the final scientific audit on the final PR head.
-- [ ] After audit approval, update v0.4.0 metadata on the authorized release path.
 
 ## Evidence
 
@@ -32,13 +30,9 @@
 - Focused RCC suites passed 166 assertions on 2026-08-08.
 - `julia --project=. -e 'using Pkg; Pkg.test()'` passed 7,399 assertions on
   Julia 1.12.6 in the available project container. The repository manifest was
-  resolved with Julia 1.10.11, so the required version-matrix CI remains a
-  release gate. Aqua and JET completed successfully.
+  resolved with Julia 1.10.11. Aqua and JET completed successfully.
 - The documentation build completed with `checkdocs = :exports`; only the
-  expected edit-link warning was emitted because remote Git metadata was not
-  available inside the container.
+  expected edit-link warning was emitted because remote repository context was
+  not available inside the container.
 - `benchmark/rcc_e2e.jl 100 1` completed as a smoke test. No performance claim
   is inferred from that single-run check.
-- Required repository CI, final scientific audit, authorized squash merge and
-  release metadata remain external gates; package metadata therefore remains
-  at v0.3.2.

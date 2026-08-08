@@ -4,7 +4,7 @@
 
 Add the RCC WP-25-001 `RCCD167L` estimator and the report's evaluated
 `Dim228 + RCC-NWS` combination as explicit peers of the Liljegren model for
-HeatStress v0.4.0.
+the HeatStress v0.4.0 release.
 
 ## Requirements
 
@@ -28,7 +28,7 @@ HeatStress v0.4.0.
 - Provide aligned allocating and preallocated batches with scalar expansion
   for location, GHI, pressure, and fixed direct fraction. Serial execution is
   required; `threaded=true` is accepted only if parity is retained.
-- Preserve all released Liljegren signatures, defaults, policies and values.
+- Preserve all existing Liljegren signatures, defaults, policies and values.
 
 ## Acceptance criteria
 
@@ -49,5 +49,4 @@ HeatStress v0.4.0.
 Exact reproduction of NWS/NDFD cloud-cover, solar-flux, roughness, wind-height,
 pressure-reduction or forecast-grid preprocessing is excluded. No generic
 model abstraction, configurable RCC coefficient family, unrelated WBGT model,
-GPU implementation, observational-statistics oracle, release tag or registry
-action is in scope.
+GPU implementation or observational-statistics oracle is in scope.

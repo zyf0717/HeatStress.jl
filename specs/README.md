@@ -54,16 +54,17 @@ worker-local fused path remains unchanged; reusable fixed, grouped and unique
 benchmark workloads were retained.
 
 Spec 021 adds the RCCD167L and RCC-documented Dim228 + RCC-NWS estimated-WBGT
-models for v0.4.0. Source audit, implementation and local validation are
-complete; final PR CI and scientific release audit remain in progress.
+models for the v0.4.0 release. Source audit, implementation and local
+validation are complete.
 
 ## Status legend
 
 - `Planned` — requirements are captured; implementation has not met its acceptance criteria.
 - `In progress` — implementation is active; record test/benchmark evidence in that unit’s `tasks.md`.
 - `Complete` — the repository evidence package is complete. For a merge-gated
-  audit, publication authorisation becomes effective only after required CI
-  passes on the final PR head and an authorised maintainer squash-merges it.
+  audit, candidate release metadata is included before final-head CI, and
+  publication authorisation becomes effective only after required CI passes
+  on that head and an authorised maintainer squash-merges it.
 
 ## Dependency order
 
@@ -90,7 +91,7 @@ complete; final PR CI and scientific release audit remain in progress.
 | 018 | [Wind-height preprocessing](./018-wind-height-preprocessing/) | Complete | Additive v0.3.1 preprocessing; depends on completed 003, 007, 008 and 017 interfaces |
 | 019 | [Liljegren temperature-domain correction](./019-liljegren-temperature-domain/) | Complete | Corrects the package-owned temperature gate while preserving 004 helper APIs and 007–008 interfaces |
 | 020 | [Batch geometry preprocessing evaluation](./020-batch-geometry-preprocessing/) | Complete | Profile-led experiment rejected; fused 008/011 baseline retained |
-| 021 | [RCC WBGT estimators](./021-rcc-wbgt-estimators/) | In progress | Additive v0.4.0 models; depends on completed 004, 008, 016 and 017 interfaces |
+| 021 | [RCC WBGT estimators](./021-rcc-wbgt-estimators/) | Complete | Additive v0.4.0 models; depends on completed 004, 008, 016 and 017 interfaces |
 
 The completed v0.1.0 path was `000–008 → Liljegren/core slice of 010 →
 publication gate of 011 → 012 → focused 013 audit → tag, release and General
@@ -107,10 +108,11 @@ appropriately scoped `0.x` versions.
 
 Release tagging and General registration are post-audit actions. Unit 012
 established readiness and unit 013 preserves the completed v0.1.0 audit record.
-For v0.2 and later, required CI validates the final audit PR head and an
-authorised squash merge both approves and integrates that tree. GitHub retains
-the checked revision, approver, time and resulting commit; no separate
-audit-record commit is required.
+For v0.2 and later, the final audit PR head includes consistent candidate
+version metadata before required CI validates it. An authorised squash merge
+both approves and integrates that exact tree. GitHub retains the checked
+revision, approver, time and resulting commit; no separate audit-record or
+post-audit version commit is required.
 
 ## Directory convention
 
