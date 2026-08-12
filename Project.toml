@@ -1,7 +1,7 @@
 name = "HeatStress"
 uuid = "c9d8216c-ea74-476f-aa8c-bb789241bdba"
 authors = ["Yifei Zheng <zyf0717@gmail.com>"]
-version = "0.4.0"
+version = "0.4.1"
 
 [deps]
 Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"

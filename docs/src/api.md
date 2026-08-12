@@ -75,16 +75,28 @@ diagnose_liljegren(air_temperature_c, dew_point_c, wind_speed_m_s,
 liljegren_wbgt_batch(air, dew, wind, time, longitude, latitude;
                       ghi_w_m2=nothing, dni_w_m2=nothing, dhi_w_m2=nothing,
                       partition=FixedDirectFraction(0.8), pressure_hpa=1010,
+                      wind_height_m=2.0,
+                      wind_height_policy=NoWindHeightAdjustment(),
+                      terrain=Rural(), stability_class=nothing,
+                      vertical_temperature_difference_c=nothing,
                       config=LiljegrenConfig(), threaded=false)
 
 liljegren_wbgt!(wbgt_out, wet_out, globe_out, air, dew, wind, time,
                  longitude, latitude; ghi_w_m2=nothing, dni_w_m2=nothing,
                  dhi_w_m2=nothing, partition=FixedDirectFraction(0.8),
-                 pressure_hpa=1010, config=LiljegrenConfig(), threaded=false)
+                 pressure_hpa=1010, wind_height_m=2.0,
+                 wind_height_policy=NoWindHeightAdjustment(),
+                 terrain=Rural(), stability_class=nothing,
+                 vertical_temperature_difference_c=nothing,
+                 config=LiljegrenConfig(), threaded=false)
 
 diagnose_liljegren_batch(air, dew, wind, time, longitude, latitude;
                          ghi_w_m2=nothing, dni_w_m2=nothing, dhi_w_m2=nothing,
                          partition=FixedDirectFraction(0.8), pressure_hpa=1010,
+                         wind_height_m=2.0,
+                         wind_height_policy=NoWindHeightAdjustment(),
+                         terrain=Rural(), stability_class=nothing,
+                         vertical_temperature_difference_c=nothing,
                          config=LiljegrenConfig(), threaded=false)
 ```
 
