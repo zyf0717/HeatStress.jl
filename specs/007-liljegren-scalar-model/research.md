@@ -20,9 +20,9 @@ The authoritative detail and citations remain in `spec.md`; software implementat
   radians only at the prepared-meteorology boundary. `DateTime` remains UTC;
   `ZonedDateTime` is reduced to the same UTC instant.
 - Actual vapour pressure is evaluated from normalized dew point using the
-  internal FAO-56 kernel. This supplies atmospheric emissivity and the wet
-  bulb's vapour-pressure term without applying public temperature-domain
-  checks to solver candidates.
+  private pressure-enhanced Buck kernel. Dew point and wet-bulb candidates are
+  restricted to its published liquid/supercooled-liquid range; air temperature
+  is not independently restricted to that range.
 - Both component balances use the configured effective-wind floor. Wet-bulb
   longwave forcing remains active at night; solar forcing alone is zeroed by
   the shared horizon policy.
@@ -33,8 +33,8 @@ The authoritative detail and citations remain in `spec.md`; software implementat
   coordinates, direct fraction and configuration before any validation return.
   The documented Float64 pressure default therefore produces Float64 results;
   callers that require Float32 pass `pressure_hpa = 1010f0` explicitly.
-- Scalar coordinates and the FAO-56 -40--50 °C public temperature domain are
-  checked before physical-property construction. Invalid observations return
+- Scalar coordinates and the Buck -40--50 °C dew-point domain are checked
+  before physical-property construction. Invalid observations return
   `InvalidDomain` with unattempted component diagnostics rather than throwing.
 - Near-horizon direct-beam clipping is propagated through
   `direct_solar_clipped`; it is not conflated with the below-horizon radiation

@@ -1,7 +1,7 @@
-schema_version = 3
+schema_version = 4
 fixture_set = "numerical-conformance-v3"
 generator = "validation/generate_fixture_set_v3.jl"
-generator_revision = "v1"
+generator_revision = "v2-buck-liljegren"
 julia_version = "1.10"
 precision_bits = 256
 timezone = "UTC"
@@ -15,7 +15,7 @@ sha256 = "3cc9ce4704f499c8d91fb097e76f2d943980a39e335856b5d3388e606a392dc4"
 
 [files.validation_fixtures_v3_liljegren_components_csv]
 path = "validation/fixtures/v3/liljegren_components.csv"
-sha256 = "14e654af88813c1958a919b08cf91b8827d7db9c248a0f59b9859985ba865b4e"
+sha256 = "a8eeb248ac0319d48f1fc853971e276334fc464c4c5c96567f9d9a584e18e747"
 
 [files.validation_fixtures_v3_liljegren_failures_csv]
 path = "validation/fixtures/v3/liljegren_failures.csv"
@@ -23,7 +23,7 @@ sha256 = "c598971dee4e7fac895b8ff429071d49b9dc86c9f1c2643090f847d4fac1588e"
 
 [files.validation_fixtures_v3_liljegren_reference_csv]
 path = "validation/fixtures/v3/liljegren_reference.csv"
-sha256 = "92f20b3b850620315ac67a392b20ccad2f269069423f8108bc361762752907f8"
+sha256 = "d8b5996b72ae9bac0043dd9f2019a87cc3948cfe98b229069d31b624e9dd0766"
 
 [files.validation_fixtures_v3_physical_kernels_csv]
 path = "validation/fixtures/v3/physical_kernels.csv"

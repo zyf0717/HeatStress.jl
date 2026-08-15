@@ -7,20 +7,22 @@ implements its selected published equations and documented policies. This unit
 validates numerical conformance; it does not assess empirical model accuracy,
 field performance, exposure guidance or clinical suitability.
 
-Specs 010, 013 and 015 remain immutable records of the v0.1.0 and v0.2.0
-release evidence. The new fixture set is additive and must not rewrite their
-v1/v2 fixtures or metadata.
+Specs 010, 013 and 015 remain historical release records. Spec 022 authorizes
+replacement of current Liljegren expectations in the stable v1/v3 fixture
+paths; Git history preserves the earlier release evidence. The secondary-only
+v2 family is unchanged.
 
 ## Compatibility
 
 - Do not change exports, public method signatures, default configuration,
   accepted input domains, clamping policies or runtime dependencies.
-- Preserve all existing numerical results within their declared tolerances.
+- Preserve public interfaces; scientific corrections may change numerical
+  results and missingness when their provenance and sensitivity are recorded.
 - Do not tag, publish, register or otherwise release under this unit.
 
 ## Fixture set v3
 
-Create an additive, offline `fixture-set-v3` with:
+Maintain the offline `fixture-set-v3` with:
 
 - exactly 64 end-to-end Liljegren reference scenarios;
 - component roots, brackets, validation residuals and expected statuses;
@@ -102,7 +104,8 @@ Do not assert empirical accuracy or unsupported physical monotonicity.
 
 ## Acceptance criteria
 
-- v1/v2 fixtures and historical release-audit specifications are unchanged;
+- current Liljegren v1/v3 expectations and metadata identify the spec-022
+  equation revision while Git preserves prior audit evidence;
 - the v3 generator is deterministic, standalone and reproducible;
 - all v3 schema, coverage, numerical, failure and property checks pass;
 - focused, full, four-thread, Aqua, JET and documentation checks pass;

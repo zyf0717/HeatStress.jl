@@ -262,10 +262,10 @@ function globe_root(residual, validation_residual, air_k::BigFloat)
 end
 
 function wet_root(residual, air_k::BigFloat, dew_k::BigFloat)
-    minimum = air_k - 100
-    maximum = air_k + 100
+    minimum = bf("233.15")
+    maximum = bf("323.15")
     lower = max(dew_k - 1, minimum)
-    upper = air_k + 1
+    upper = max(lower, min(maximum, air_k + 1))
     lower_residual = residual(lower)
     upper_residual = residual(upper)
     if !isfinite(lower_residual) || !isfinite(upper_residual)
@@ -325,12 +325,21 @@ function reference_case(row)
     pi_value = BigFloat(pi)
     radiation = zenith >= pi_value / 2 ? zero(BigFloat) : row.radiation
     direct_projection, wick_projection = if zenith >= pi_value / 2 ||
-                                            zenith > pi_value / 2 - pi_value / 180
+                                            zenith >= pi_value / 2 - pi_value / 360
         (zero(BigFloat), zero(BigFloat))
     else
         (inv(2cos(zenith)), tan(zenith) / pi_value)
     end
-    saturation(t) = bf("6.108") * exp(bf("17.27") * t / (t + bf("237.3")))
+    function buck_saturation(t, pressure)
+        -bf("40") <= t <= bf("50") || return BigFloat(NaN)
+        enhancement = bf("1.0007") + bf("3.46e-6") * pressure
+        if t < 0
+            return bf("6.1121") * enhancement *
+                   exp(bf("17.966") * t / (bf("247.15") + t))
+        end
+        return bf("6.1121") * enhancement *
+               exp(bf("17.502") * t / (bf("240.97") + t))
+    end
     density(t, pressure) = pressure * 100 * molar_air / (gas_constant * t)
     function viscosity(t)
         reduced = t / 97
@@ -370,10 +379,10 @@ function reference_case(row)
         bf("6.376351e-5") * t^2 + bf("8.187135e-8") * t^3
     )
 
-    vapour = saturation(row.dew)
+    vapour = buck_saturation(row.dew, row.pressure)
     emissivity = bf("0.575") * vapour^(inv(BigFloat(7)))
     effective_wind = max(row.wind, bf("0.13"))
-    globe_longwave = (emissivity + bf("0.999")) * air_k^4 / 2
+    globe_longwave = (emissivity + 1) * air_k^4 / 2
     globe_solar = radiation * (1 - bf("0.05")) *
                   (1 - row.direct + row.direct * direct_projection + bf("0.45")) /
                   (2 * bf("0.95") * sigma)
@@ -403,29 +412,30 @@ function reference_case(row)
     end
     globe = globe_root(globe_residual, globe_validation_residual, air_k)
 
-    rho = density(air_k, row.pressure)
-    mu = viscosity(air_k)
-    prandtl = heat_capacity * mu / conductivity(air_k)
-    schmidt = mu / (rho * diffusivity(air_k, row.pressure))
-    transfer_ratio = molar_water / molar_air * (prandtl / schmidt)^bf("0.56")
-    wet_longwave = sigma * bf("0.95") * (emissivity + bf("0.999")) * air_k^4 / 2
+    wet_longwave = sigma * bf("0.95") * (emissivity + 1) * air_k^4 / 2
     diffuse_geometry = 1 + bf("0.007") / (4 * bf("0.0254"))
     direct_geometry = wick_projection + bf("0.007") / (4 * bf("0.0254"))
     wet_solar = radiation * (1 - bf("0.4")) *
                 ((1 - row.direct) * diffuse_geometry +
                  row.direct * direct_geometry + bf("0.45"))
     wet_residual = function (candidate)
+        film = (candidate + air_k) / 2
+        rho = density(film, row.pressure)
+        mu = viscosity(film)
+        prandtl = heat_capacity * mu / conductivity(film)
+        schmidt = mu / (rho * diffusivity(film, row.pressure))
+        transfer_ratio = molar_water / molar_air * (prandtl / schmidt)^bf("0.56")
         convection = cylinder_convection(
-            air_k,
+            film,
             effective_wind,
             bf("0.007"),
             rho,
             mu,
         )
         candidate_c = candidate - bf("273.15")
-        evaporation = latent(air_k) / heat_capacity * transfer_ratio *
-                      (saturation(candidate_c) - vapour) /
-                      (row.pressure - saturation(candidate_c))
+        saturated = buck_saturation(candidate_c, row.pressure)
+        evaporation = latent(film) / heat_capacity * transfer_ratio *
+                      (saturated - vapour) / (row.pressure - saturated)
         equilibrium = air_k - evaporation +
                       (wet_longwave + wet_solar -
                        sigma * bf("0.95") * candidate^4) / convection
@@ -758,10 +768,10 @@ end
 function metadata(generated)
     entries = sort(collect(generated); by = first)
     io = IOBuffer()
-    println(io, "schema_version = 3")
+    println(io, "schema_version = 4")
     println(io, "fixture_set = \"numerical-conformance-v3\"")
     println(io, "generator = \"validation/generate_fixture_set_v3.jl\"")
-    println(io, "generator_revision = \"v1\"")
+    println(io, "generator_revision = \"v2-buck-liljegren\"")
     println(io, "julia_version = \"1.10\"")
     println(io, "precision_bits = $PRECISION_BITS")
     println(io, "timezone = \"UTC\"")

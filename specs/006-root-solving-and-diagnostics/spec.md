@@ -66,17 +66,19 @@ Candidate initial bracket:
 ```text
 lower = dew_point_k - 1
 upper = air_temperature_k + 1
-minimum = air_temperature_k - 100
-maximum = air_temperature_k + 100
+minimum = 233.15
+maximum = 323.15
 ```
 
-Expand lower by up to 10 K and then upper by up to 10 K per cycle while the endpoints remain finite, same-signed and within bounds. The initial lower endpoint is clipped to the stated minimum when a valid dew point lies more than 99 K below air temperature.
+Expand lower by up to 10 K and then upper by up to 10 K per cycle while the
+endpoints remain finite, same-signed and within the bounded Buck domain. Both
+initial endpoints are clipped to the stated limits.
 
 The natural-wet-bulb residual is candidate temperature minus its signed
 fixed-point equilibrium temperature, and is negative below and positive above
 the ordinary physical root. Its fixed-step two-sided expansion avoids assuming
-which endpoint is initially nearest the root. The ±100 K bounds are numerical
-search guardrails. Existing `SolverConfig` defaults (`1e-6 K` location,
+which endpoint is initially nearest the root. The absolute bounds prevent
+extrapolation of Buck psychrometrics. Existing `SolverConfig` defaults (`1e-6 K` location,
 `1e-4 K` validation, 128 iterations) are retained from spec 002; at the
 widest selected brackets, bisection needs fewer than 29 iterations to reach
 the Float64 location tolerance. Float32 stops at adjacent representable

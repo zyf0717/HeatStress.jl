@@ -1,17 +1,6 @@
-# Liljegren temperature-domain correction: validation
+# Liljegren temperature-domain supersession checks
 
-Run the focused policy and scalar regressions:
-
-```sh
-julia --project=. -e 'using Test, HeatStress; include("test/test_validation.jl"); include("test/test_liljegren_scalar.jl")'
-```
-
-Run the full package suite:
-
-```sh
-julia --project=. -e 'using Pkg; Pkg.test()'
-```
-
-Confirm that representative temperatures outside `[-40, 50] °C` are
-unchanged, both component diagnostics record evaluations, exact absolute zero
-is rejected, and invalid derived state remains unattempted.
+Run the spec-022 validation commands. Confirm that out-of-range resolved dew
+points are `InvalidDomain`, air above 50 °C can calculate with a supported dew
+point/root, and a root outside the Buck interval is `Unbracketed` with any
+successful globe component retained.

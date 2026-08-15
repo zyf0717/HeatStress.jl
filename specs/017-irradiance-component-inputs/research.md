@@ -20,9 +20,10 @@
 - Direct fraction is direct-horizontal/GHI. DNI is projected before use.
 - The fixed 0.8 default is an explicit downstream clear-sky assumption, not a
   universal Liljegren constant. Measured component pairs take precedence.
-- The original implementation's 0.85 clearness bound stabilises only the
-  empirical partition estimator. Mutating the physical GHI would discard
-  valid measurements, including cloud-enhancement events, and is not adopted.
+- Equation 13 is evaluated from the uncapped clearness ratio. Spec 022's
+  original-design policy clamps only its output to the physical fraction
+  interval; earlier `0.85` and `0.9` caps were unsupported implementation
+  additions.
 - A singleton DHI cannot uniquely determine GHI through the clearness relation.
   Under the clearness policy, singleton DNI/DHI therefore uses the clear-sky
   complementary horizontal component instead of an ambiguous inverse.

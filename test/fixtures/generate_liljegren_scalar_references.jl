@@ -15,7 +15,14 @@ function main()
         R = b("8314.34")
         πb = big(π)
 
-        sat(t) = b("6.108") * exp(b("17.27") * t / (t + b("237.3")))
+        function sat(t, p)
+            -b("40") <= t <= b("50") || error("Buck temperature outside [-40, 50]: $t")
+            enhancement = b("1.0007") + b("3.46e-6") * p
+            if t < zero(B)
+                return b("6.1121") * enhancement * exp(b("17.966") * t / (b("247.15") + t))
+            end
+            return b("6.1121") * enhancement * exp(b("17.502") * t / (b("240.97") + t))
+        end
         ρair(t, p) = p * b("100") * ma / (R * t)
 
         function μair(t)
@@ -73,7 +80,7 @@ function main()
 
         function solar_geometry(zenith)
             zenith >= πb / b(2) && return zero(B), zero(B)
-            zenith > πb / b(2) - πb / b(180) && return zero(B), zero(B)
+            zenith >= πb / b(2) - πb / b(360) && return zero(B), zero(B)
             return inv(b(2) * cos(zenith)), tan(zenith) / πb
         end
 
@@ -97,11 +104,11 @@ function main()
             zenith = solar_zenith(time, longitude, latitude)
             radiation = zenith >= πb / b(2) ? zero(B) : radiation
             globe_projection, wick_projection = solar_geometry(zenith)
-            vapour = sat(dew_c)
+            vapour = sat(dew_c, pressure)
             emissivity = b("0.575") * vapour^inv(b(7))
             effective_wind = max(wind, b("0.13"))
 
-            globe_longwave = (emissivity + b("0.999")) * air^4 / b(2)
+            globe_longwave = (emissivity + one(B)) * air^4 / b(2)
             globe_solar = radiation * (one(B) - b("0.05")) *
                           (one(B) - direct + direct * globe_projection + b("0.45")) /
                           (b(2) * b("0.95") * σ)
@@ -112,20 +119,23 @@ function main()
             end
             tg = bisect(globe_residual, air - b("200"), air + b("200"))
 
-            ρ, μ = ρair(air, pressure), μair(air)
-            ratio = mass_ratio(air, pressure, ρ, μ)
-            wet_longwave = σ * b("0.95") * (emissivity + b("0.999")) * air^4 / b(2)
+            wet_longwave = σ * b("0.95") * (emissivity + one(B)) * air^4 / b(2)
             diffuse = one(B) + b("0.007") / (b(4) * b("0.0254"))
             direct_geometry = wick_projection + b("0.007") / (b(4) * b("0.0254"))
             wet_solar = radiation * (one(B) - b("0.4")) *
                         ((one(B) - direct) * diffuse + direct * direct_geometry + b("0.45"))
             wet_residual = function (tw)
-                h = hcylinder(air, effective_wind, b("0.007"), ρ, μ)
-                evaporation = latent(air) / cp * ratio * (sat(tw - b("273.15")) - vapour) / (pressure - sat(tw - b("273.15")))
+                film = (tw + air) / b(2)
+                ρ, μ = ρair(film, pressure), μair(film)
+                ratio = mass_ratio(film, pressure, ρ, μ)
+                h = hcylinder(film, effective_wind, b("0.007"), ρ, μ)
+                saturated = sat(tw - b("273.15"), pressure)
+                evaporation = latent(film) / cp * ratio *
+                              (saturated - vapour) / (pressure - saturated)
                 equilibrium = air - evaporation + (wet_longwave + wet_solar - σ * b("0.95") * tw^4) / h
                 tw - equilibrium
             end
-            tw = bisect(wet_residual, dew - one(B), air + b("3"))
+            tw = bisect(wet_residual, b("233.15"), b("323.15"))
             tg_c, tw_c = tg - b("273.15"), tw - b("273.15")
             return Dict("globe_temperature_c" => string(tg_c), "natural_wet_bulb_c" => string(tw_c),
                         "wbgt_c" => string(b("0.7") * tw_c + b("0.2") * tg_c + b("0.1") * air_c))
@@ -154,11 +164,11 @@ function main()
             "subminute" => fixture(b("30"), b("20"), b("1"), b("800"), DateTime(2024, 6, 21, 12, 0, 30, 250), b("0"), b("0")),
         )
         TOML.print(stdout, Dict(
-            "schema_version" => 2,
+            "schema_version" => 3,
             "precision_bits" => 256,
-            "generator_schema_version" => 2,
+            "generator_schema_version" => 3,
             "generator_path" => "test/fixtures/generate_liljegren_scalar_references.jl",
-            "source_identifiers" => ["liljegren_2008", "hall_2022", "specs/004", "specs/005", "specs/006", "specs/007"],
+            "source_identifiers" => ["buck_1981", "liljegren_2008", "hall_2022", "specs/022"],
             "fixtures" => fixtures,
         ))
     end

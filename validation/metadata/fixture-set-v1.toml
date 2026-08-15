@@ -1,7 +1,7 @@
-schema_version = 1
+schema_version = 2
 fixture_set = "liljegren-core-v1"
 generator = "validation/generate_validation_cases.jl"
-generator_revision = "v1"
+generator_revision = "v2-buck-liljegren"
 julia_version = "1.10"
 precision_bits = 256
 timezone = "UTC"
@@ -9,5 +9,5 @@ random_seed = 0
 solar_geometry_method = "independently computed NREL-SPA references; see sources.toml"
 psychrometrics_method = "independently curated analytic FAO-56 records"
 physical_kernels_method = "independently curated direct equation evaluations"
-liljegren_reference_method = "deterministically regenerated standalone 256-bit reference"
+liljegren_reference_method = "deterministically regenerated standalone 256-bit Liljegren reference with bounded pressure-enhanced Buck psychrometrics and candidate-film properties"
 liljegren_failures_method = "independently curated input/numerical-policy invariants"

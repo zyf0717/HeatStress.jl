@@ -1,5 +1,10 @@
 # Scientific validation hardening: execution checklist
 
+This checklist records the completed original v3 delivery. Spec 022 replaces
+the Liljegren v1/v3 expectations under generator revision
+`v2-buck-liljegren`; historical assertion counts below are not final-head
+v0.5.0 evidence.
+
 ## Status
 
 - [ ] Planned

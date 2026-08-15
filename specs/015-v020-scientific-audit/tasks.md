@@ -1,5 +1,8 @@
 # v0.2 scientific audit: execution checklist
 
+This is historical v0.2 authorization evidence. Its completed status does not
+authorize the spec-022 implementation or replacement fixtures.
+
 ## Status
 
 - [ ] Planned

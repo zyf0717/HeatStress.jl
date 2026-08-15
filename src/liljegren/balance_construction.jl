@@ -11,7 +11,6 @@
         _globe_longwave_term(
             prepared.air_temperature_k,
             atmospheric_emissivity,
-            convert(T, SURFACE_EMISSIVITY),
         ),
         _globe_solar_term(
             prepared.solar_radiation_w_m2,
@@ -31,9 +30,6 @@ end
     vapour_pressure_hpa::T,
     atmospheric_emissivity::T,
     effective_wind_speed_m_s::T,
-    air_density::T,
-    air_viscosity::T,
-    mass_transfer_ratio::T,
     config::LiljegrenConfig{T},
 ) where {T<:AbstractFloat}
     return WetBulbBalance(
@@ -41,14 +37,10 @@ end
         prepared.pressure_hpa,
         effective_wind_speed_m_s,
         vapour_pressure_hpa,
-        air_density,
-        air_viscosity,
-        mass_transfer_ratio,
         _wet_bulb_longwave_term(
             prepared.air_temperature_k,
             atmospheric_emissivity,
             convert(T, WICK_EMISSIVITY),
-            convert(T, SURFACE_EMISSIVITY),
         ),
         _wet_bulb_solar_term(
             prepared.solar_radiation_w_m2,

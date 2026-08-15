@@ -17,9 +17,6 @@ struct WetBulbBalance{T<:AbstractFloat}
     pressure_hpa::T
     effective_wind_m_s::T
     vapour_pressure_hpa::T
-    air_density::T
-    air_viscosity::T
-    mass_transfer_ratio::T # dimensionless `(M_w/M_a) (Pr/Sc)^0.56`
     longwave_term::T
     solar_term::T
     radiation_enabled::Bool
@@ -30,15 +27,15 @@ end
 """Direct-beam geometry shared by globe and wick solar forcing.
 
 Zenith is in radians. At and below the geometric horizon direct radiation is
-physically absent. Within one degree of the horizon direct radiation is
-discarded by the documented numerical policy in `constants.jl`; diffuse
-forcing remains active. The last tuple value distinguishes that clip from
-physical night-time zeroing.
+physically absent. At zenith angles of 89.5 degrees or greater, direct
+radiation is discarded as specified by Liljegren et al. (2008); diffuse forcing
+remains active. The last tuple value distinguishes that clip from physical
+night-time zeroing.
 """
 @inline function _direct_solar_geometry(zenith_rad::T) where {T<:AbstractFloat}
     horizon_rad = convert(T, π / 2)
     zenith_rad >= horizon_rad && return (zero(T), zero(T), false, false)
-    zenith_rad > horizon_rad - convert(T, MINIMUM_DIRECT_SOLAR_ELEVATION_RAD) &&
+    zenith_rad >= horizon_rad - convert(T, MINIMUM_DIRECT_SOLAR_ELEVATION_RAD) &&
         return (zero(T), zero(T), false, true)
     return (
         inv(convert(T, 2) * cos(zenith_rad)),
@@ -51,9 +48,8 @@ end
 @inline function _globe_longwave_term(
         air_temperature_k::T,
         atmospheric_emissivity::T,
-        surface_emissivity::T = one(T),
     ) where {T<:AbstractFloat}
-    return (atmospheric_emissivity + surface_emissivity) * air_temperature_k^4 / convert(T, 2)
+    return (atmospheric_emissivity + one(T)) * air_temperature_k^4 / convert(T, 2)
 end
 
 @inline function _globe_solar_term(
@@ -74,10 +70,9 @@ end
         air_temperature_k::T,
         atmospheric_emissivity::T,
         wick_emissivity::T,
-        surface_emissivity::T = one(T),
     ) where {T<:AbstractFloat}
     return convert(T, STEFAN_BOLTZMANN) * wick_emissivity *
-           (atmospheric_emissivity + surface_emissivity) * air_temperature_k^4 / convert(T, 2)
+           (atmospheric_emissivity + one(T)) * air_temperature_k^4 / convert(T, 2)
 end
 
 @inline function _wet_bulb_solar_term(
@@ -142,25 +137,49 @@ end
         wet_bulb_temperature_k::T,
         balance::WetBulbBalance{T},
     ) where {T<:AbstractFloat}
+    wet_bulb_temperature_c = wet_bulb_temperature_k - convert(T, KELVIN_OFFSET)
+    minimum_c = convert(T, BUCK_MINIMUM_TEMPERATURE_C)
+    maximum_c = convert(T, BUCK_MAXIMUM_TEMPERATURE_C)
+    isfinite(wet_bulb_temperature_c) && minimum_c <= wet_bulb_temperature_c <= maximum_c ||
+        return T(NaN)
+
+    film_temperature_k = (wet_bulb_temperature_k + balance.air_temperature_k) / convert(T, 2)
+    density = _air_density(film_temperature_k, balance.pressure_hpa)
+    viscosity = _air_viscosity(film_temperature_k)
+    conductivity = _air_thermal_conductivity(film_temperature_k)
+    diffusivity = _air_diffusivity(film_temperature_k, balance.pressure_hpa)
+    mass_transfer_ratio = _diffusivity_coefficient_from_properties(
+        density,
+        viscosity,
+        conductivity,
+        diffusivity,
+    )
     coefficient = _heat_transfer_cylinder_air(
-        balance.air_temperature_k,
+        film_temperature_k,
         balance.effective_wind_m_s,
         balance.wick_diameter_m,
-        balance.air_density,
-        balance.air_viscosity,
+        density,
+        viscosity,
     )
-    saturated_pressure_hpa = _saturation_vapour_pressure_hpa_unchecked(
-        wet_bulb_temperature_k - convert(T, KELVIN_OFFSET),
+    saturated_pressure_hpa = _buck_saturation_vapour_pressure_hpa(
+        wet_bulb_temperature_c,
+        balance.pressure_hpa,
     )
-    evaporation_cooling_k = _latent_heat_vaporization(balance.air_temperature_k) /
+    all(isfinite, (density, viscosity, conductivity, diffusivity,
+                   mass_transfer_ratio, coefficient, saturated_pressure_hpa)) &&
+        density > zero(T) && viscosity > zero(T) && conductivity > zero(T) &&
+        diffusivity > zero(T) && mass_transfer_ratio > zero(T) && coefficient > zero(T) &&
+        saturated_pressure_hpa < balance.pressure_hpa || return T(NaN)
+    evaporation_cooling_k = _latent_heat_vaporization(film_temperature_k) /
                             convert(T, SPECIFIC_HEAT_DRY_AIR) *
-                            balance.mass_transfer_ratio *
+                            mass_transfer_ratio *
                             (saturated_pressure_hpa - balance.vapour_pressure_hpa) /
                             (balance.pressure_hpa - saturated_pressure_hpa)
     radiative_flux = balance.radiation_enabled ?
                      balance.longwave_term + balance.solar_term -
                      convert(T, STEFAN_BOLTZMANN) * balance.wick_emissivity * wet_bulb_temperature_k^4 :
                      zero(T)
-    equilibrium_temperature_k = balance.air_temperature_k - evaporation_cooling_k + radiative_flux / coefficient
+    equilibrium_temperature_k = balance.air_temperature_k - evaporation_cooling_k +
+                                radiative_flux / coefficient
     return wet_bulb_temperature_k - equilibrium_temperature_k
 end

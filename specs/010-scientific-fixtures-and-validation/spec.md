@@ -107,9 +107,11 @@ The v0.1 validation slice covers every released formula and API:
 - source records for solar geometry, psychrometrics, physical kernels and all
   released Liljegren formula families.
 
-Existing independent Liljegren fixtures and regression tests are stable input
-to this work. Close only any evidence, coverage or provenance gap found in the
-declared release surface.
+Independent Liljegren fixtures and regression tests are stable by path, not
+immutable by content. A later sourced scientific correction may replace them
+in place when its generator, provenance, sensitivity and audit evidence are
+updated together; Git history preserves the released values. Spec 022 is the
+first such authorized replacement.
 
 ### v0.2 validation slice
 

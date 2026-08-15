@@ -16,8 +16,8 @@ Before implementing a formula family, record its publication/standard, equation 
 | sphere convection | Bird, Stewart & Lightfoot (2006) | eqs. 14.2-3, 14.4-5 | K, hPa, m s⁻¹, m → W m⁻² K⁻¹ | `Nu=2+0.6Re^0.5Pr^(1/3)`. |
 | cylinder convection | Liljegren et al. (2008) | eq. 10 | K, hPa, m s⁻¹, m → W m⁻² K⁻¹ | `Nu=0.281Re^0.6Pr^0.44`, for the wick in cross-flow. |
 | globe balance/residuals | Liljegren et al. (2008) | globe balance; independently transcribed by Hall et al. (2022), eqs. 21–23 | K⁴ root residual; K acceptance residual | Fourth-power equation is retained for bracketing; the fixed-point residual is separately evaluated in Kelvin. |
-| natural wet-bulb balance/residual | Liljegren et al. (2008) | eqs. 10–11; independently transcribed by Hall et al. (2022), eqs. 6, 16, 18–20 | K residual | Uses FAO-56 saturation pressure from spec 004; latent-heat fit is Oke (1987), table A3.1. |
-| near-horizon direct forcing | Original package numerical policy | `MINIMUM_DIRECT_SOLAR_ELEVATION_RAD` | rad | At solar elevation <1°, discard the singular direct horizontal-to-normal transformation and retain diffuse forcing; distinct from physical night zeroing. |
+| natural wet-bulb balance/residual | Liljegren et al. (2008) | eqs. 2–12; independently transcribed by Hall et al. (2022), eqs. 6, 16, 18–20 | K residual | Uses bounded pressure-enhanced Buck saturation pressure; all transport properties are evaluated at candidate/air film temperature. |
+| near-horizon direct forcing | Liljegren et al. (2008) | eqs. 13–14 and text after eq. 12 | rad | At zenith `>=89.5°`, discard direct forcing and retain diffuse forcing; distinct from physical night zeroing. |
 
 The source-selection gate is complete for this unit.
 
@@ -34,7 +34,8 @@ Implement the physical kernels required by the published Liljegren formulation, 
 - diffusivity and diffusivity coefficient;
 - atmospheric emissivity;
 
-Consume the saturation-vapour-pressure kernel owned and validated by spec 004; do not define a second formula in this layer.
+Consume the private Liljegren Buck kernel owned by spec 022. The exported
+spec-004 FAO helper remains separate and must not be called by the balance.
 
 Recommended internal names:
 
@@ -92,9 +93,6 @@ struct WetBulbBalance{T<:AbstractFloat}
     pressure_hpa::T
     effective_wind_m_s::T
     vapour_pressure_hpa::T
-    air_density::T
-    air_viscosity::T
-    diffusivity_coefficient::T # document dimensions beside the final definition
     longwave_term::T
     solar_term::T
     radiation_enabled::Bool
@@ -103,7 +101,9 @@ struct WetBulbBalance{T<:AbstractFloat}
 end
 ```
 
-The exact fields may change if formula inspection proves different, but structs must remain immutable and concrete.
+Temperature-dependent wick properties are intentionally absent from the
+struct because they must be recomputed at each candidate film temperature.
+Structs remain immutable and concrete.
 
 ## Solar-forcing and horizon policy
 

@@ -17,9 +17,10 @@
 
 ## Findings and decisions
 
-- Air properties use Kelvin and pressure hPa.  `_air_diffusivity` returns
+- Air properties use Kelvin and pressure hPa. `_air_diffusivity` returns
   m² s⁻¹; `_diffusivity_coefficient` is dimensionless
-  `(M_w/M_a)(Pr/Sc)^0.56` and is precomputed in `WetBulbBalance`.
+  `(M_w/M_a)(Pr/Sc)^0.56` and is recomputed at every candidate/air film
+  temperature.
 - `GlobeBalance.longwave_term` and `.solar_term` are K⁴.  Wet-bulb forcing
   fields are W m⁻².  This makes units explicit at the residual boundary.
 - The globe root equation is fourth-power energy balance; acceptance is its
@@ -29,18 +30,16 @@
   temperature.
 - Direct horizontal-beam geometry is singular as zenith approaches 90°:
   `1/(2cos θ)` for the globe and `tan θ/π` for the wick. The package applies
-  the original `MINIMUM_DIRECT_SOLAR_ELEVATION_RAD = 1°` numerical policy:
-  below that positive elevation it discards direct forcing, retains diffuse
+  Liljegren's `MINIMUM_DIRECT_SOLAR_ELEVATION_RAD = 0.5°` rule: at and below
+  that positive elevation it discards direct forcing, retains diffuse
   forcing, and returns a helper flag distinct from physical night-time
   zeroing. The scalar diagnostic path in spec 007 must carry that flag when
   constructing the public result.
 - Internal solar zenith is radians, matching `_PreparedMeteorology` and the
-  spec-003 unit contract. Wet-bulb transport properties are evaluated
-  consistently at ambient air temperature, then stored in `WetBulbBalance` as
-  specified for reuse across residual candidates.
-- The residual layer calls the spec-004 FAO-56 formula through its unchecked
-  internal kernel so non-finite candidate temperatures yield non-finite
-  residuals rather than a public-input `ArgumentError`.
+  spec-003 unit contract. Wet-bulb transport properties and latent heat are
+  evaluated at `(Twick + Tair)/2` for each residual candidate.
+- The residual layer calls the private pressure-enhanced Buck kernel and is
+  evaluated only on its closed `[-40, 50] °C` domain.
 
 ## Validation method
 

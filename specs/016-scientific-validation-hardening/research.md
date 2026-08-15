@@ -15,16 +15,15 @@ alone exclude a transcription error shared with production code.
   exhaustive input-space proof.
 - Synthetic solver fixtures exercise failure machinery that is unsafe or
   impossible to induce through valid meteorological observations.
-- Frozen historical fixture sets preserve the evidence used for released
-  versions.
+- Stable fixture paths plus Git history preserve evidence used for released
+  versions while allowing the current scientific contract to be corrected.
 
 ## Known limits
 
 - No field-observation dataset or implementation comparator is normative.
 - Coverage percentage is diagnostic only.
 - Test success does not prove the absence of all implementation errors.
-- Seven v3 reference rows exceed the `1e-4 K` component residual threshold in
-  Float32 because the nearest representable candidate produces a residual of
-  approximately `1.07e-4` to `2.75e-4 K`. Their affected component and complete
-  WBGT remain missing as required; the other component is retained. Float64
-  accepts all 64 rows.
+- Spec 022 revision 2 intentionally contains bounded-Buck `Unbracketed` rows;
+  these retain the globe component and leave WBGT missing. Float32 may
+  additionally reject a located component at the residual threshold when its
+  nearest representable candidate is insufficient.

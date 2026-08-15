@@ -20,6 +20,17 @@ using Dates
         @test !unchanged.height_adjusted
         @test isnothing(unchanged.stability_class)
 
+        for supplied in (0.13, 0.14)
+            above_or_equal = diagnose_wind_speed_at_height(
+                supplied,
+                10.0;
+                policy = NoWindHeightAdjustment(),
+                minimum_wind_speed_m_s = 0.13,
+            )
+            @test above_or_equal.effective_wind_speed_m_s == supplied
+            @test !above_or_equal.minimum_wind_floor_applied
+        end
+
         for (terrain, exponents) in (
             (Rural(), (0.07, 0.07, 0.10, 0.15, 0.35, 0.55)),
             (Urban(), (0.15, 0.15, 0.20, 0.25, 0.30, 0.30)),

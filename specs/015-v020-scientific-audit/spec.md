@@ -1,14 +1,17 @@
 # v0.2 scientific audit and release authorisation
 
+> Historical v0.2 audit only. It does not authorize the current corrected
+> Liljegren implementation; spec 022 owns the v0.5.0 final-head audit.
+
 ## Purpose
 
 Audit the exact final v0.2.0 PR head after the selected spec 009 secondary
-measures and their spec 010 validation are complete. Preserve the completed
-v0.1 audit in spec 013 unchanged.
+measures and their spec 010 validation are complete. The completed v0.1 audit
+in spec 013 remains a historical release record.
 
 ## Release surface
 
-The audit covers the unchanged v0.1 Liljegren/core surface plus:
+The audit covered the then-unchanged v0.1 Liljegren/core surface plus:
 
 - measured-component WBGT with and without solar load;
 - NWS operational heat index;

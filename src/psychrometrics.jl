@@ -12,14 +12,41 @@ function saturation_vapour_pressure_hpa(air_temperature_c::Real)
     return _saturation_vapour_pressure_hpa_unchecked(temperature)
 end
 
-# The physical kernels evaluate candidate root temperatures.  They retain the
-# FAO-56 relation but deliberately bypass the public-input domain check so a
-# non-finite candidate becomes a non-finite residual for solver classification.
+# Internal users of the standalone FAO-56 helper can bypass its public-input
+# domain check. Liljegren uses the separate bounded Buck kernel below.
 @inline function _saturation_vapour_pressure_hpa_unchecked(temperature::T) where {T<:AbstractFloat}
     return convert(T, 6108 // 1000) * exp(
         convert(T, 1727 // 100) * temperature /
         (temperature + convert(T, 2373 // 10)),
     )
+end
+
+"""Pressure-enhanced Buck saturation pressure over liquid water in hPa.
+
+This private kernel is the Liljegren psychrometric relation. Its two branches
+cover supercooled liquid water on `[-40, 0)` degrees Celsius and liquid water
+on `[0, 50]` degrees Celsius. Callers must enforce that closed combined domain;
+the kernel returns `NaN` rather than extrapolating.
+"""
+@inline function _buck_saturation_vapour_pressure_hpa(
+        temperature_c::T,
+        pressure_hpa::T,
+    ) where {T<:AbstractFloat}
+    minimum_c = convert(T, BUCK_MINIMUM_TEMPERATURE_C)
+    maximum_c = convert(T, BUCK_MAXIMUM_TEMPERATURE_C)
+    isfinite(temperature_c) && minimum_c <= temperature_c <= maximum_c &&
+        isfinite(pressure_hpa) && pressure_hpa > zero(T) || return T(NaN)
+
+    enhancement = convert(T, 10007 // 10000) +
+                  convert(T, 173 // 50_000_000) * pressure_hpa
+    if temperature_c < zero(T)
+        exponent = convert(T, 8983 // 500) * temperature_c /
+                   (convert(T, 4943 // 20) + temperature_c)
+    else
+        exponent = convert(T, 8751 // 500) * temperature_c /
+                   (convert(T, 24097 // 100) + temperature_c)
+    end
+    return convert(T, 61121 // 10000) * enhancement * exp(exponent)
 end
 
 """

@@ -119,9 +119,9 @@ end
     @testset "independent scalar component fixtures" begin
         fixture_path = joinpath(@__DIR__, "fixtures", "liljegren_scalar_reference.toml")
         fixture_data = TOML.parsefile(fixture_path)
-        @test fixture_data["schema_version"] == 2
+        @test fixture_data["schema_version"] == 3
         @test fixture_data["precision_bits"] == 256
-        @test fixture_data["generator_schema_version"] == 2
+        @test fixture_data["generator_schema_version"] == 3
         @test fixture_data["generator_path"] == "test/fixtures/generate_liljegren_scalar_references.jl"
         @test "liljegren_2008" in fixture_data["source_identifiers"]
         for fixture in values(fixture_data["fixtures"])
@@ -181,7 +181,7 @@ end
             20.0,
             1.0,
             600.0,
-            DateTime(2024, 9, 22, 5, 55),
+            DateTime(2024, 9, 22, 5, 54),
             0.0,
             0.0;
             direct_fraction = 0.7,
@@ -322,12 +322,31 @@ end
                 0.0;
                 direct_fraction = 0.7,
             )
-            @test diagnostic.input_status === InputAccepted
-            @test diagnostic.globe.evaluations > 0
-            @test diagnostic.natural_wet_bulb.evaluations > 0
-            @test diagnostic.globe.reason === NoFailure
-            @test diagnostic.natural_wet_bulb.reason === NoFailure
+            @test diagnostic.input_status === InvalidDomain
+            @test diagnostic.globe.evaluations == 0
+            @test diagnostic.natural_wet_bulb.evaluations == 0
+            @test diagnostic.globe.reason === NotAttempted
+            @test diagnostic.natural_wet_bulb.reason === NotAttempted
         end
+
+        supported_dew_point = _diagnose_liljegren(
+            60.0, 40.0, 1.0, 0.0, DateTime(2024, 6, 21, 12), 0.0, 0.0;
+            direct_fraction = 0.7,
+        )
+        @test supported_dew_point.input_status === InputAccepted
+        @test supported_dew_point.globe.reason === NoFailure
+        @test supported_dew_point.natural_wet_bulb.reason === NoFailure
+
+        bounded_root = _diagnose_liljegren(
+            60.0, 50.0, 1.0, 0.0, DateTime(2024, 6, 21, 12), 0.0, 0.0;
+            direct_fraction = 0.7,
+        )
+        @test bounded_root.input_status === InputAccepted
+        @test bounded_root.globe.reason === NoFailure
+        @test bounded_root.natural_wet_bulb.reason === Unbracketed
+        @test !ismissing(bounded_root.result.globe_temperature_c)
+        @test ismissing(bounded_root.result.natural_wet_bulb_c)
+        @test ismissing(bounded_root.result.wbgt_c)
 
         zero_vapour_pressure_c = -237.3
         nonfinite_vapour_pressure_c = prevfloat(zero_vapour_pressure_c)
@@ -345,7 +364,6 @@ end
             (-230.0, zero_vapour_pressure_c),
             (-230.0, nonfinite_vapour_pressure_c),
             (100.0, 100.0),
-            (2000.0, 20.0),
         )
         for (air_temperature_c, dew_point_c) in derived_state_failures
             diagnostic = _diagnose_liljegren(
@@ -364,6 +382,13 @@ end
             @test diagnostic.globe.evaluations == 0
             @test diagnostic.natural_wet_bulb.evaluations == 0
         end
+        extreme_air = _diagnose_liljegren(
+            2000.0, 20.0, 1.0, 800.0, DateTime(2024, 6, 21, 12), 0.0, 0.0;
+            direct_fraction = 0.7,
+        )
+        @test extreme_air.input_status === InputAccepted
+        @test extreme_air.globe.reason === NoFailure
+        @test extreme_air.natural_wet_bulb.reason === Unbracketed
     end
 
     @testset "time-zone and Float32 consistency" begin
@@ -437,7 +462,7 @@ end
 
         accepted = @inferred _diagnose_liljegren(arguments...; direct_fraction = 0.7, config = config32)
         invalid_longitude = @inferred _diagnose_liljegren(30.0, 20.0, 1.0, 800.0, DateTime(2024, 6, 21, 12), 181.0, 0.0; direct_fraction = 0.7, config = config32)
-        supported_temperature = @inferred _diagnose_liljegren(-41.0, -41.0, 1.0, 800.0, DateTime(2024, 6, 21, 12), 0.0, 0.0; direct_fraction = 0.7, config = config32)
+        supported_temperature = @inferred _diagnose_liljegren(60.0, 40.0, 1.0, 0.0, DateTime(2024, 6, 21, 12), 0.0, 0.0; direct_fraction = 0.7, config = config32)
         missing_meteorology = @inferred _diagnose_liljegren(missing, 20.0, 1.0, 800.0, DateTime(2024, 6, 21, 12), 0.0, 0.0; direct_fraction = 0.7, config = config32)
         missing_time = @inferred _diagnose_liljegren(30.0, 20.0, 1.0, 800.0, missing, 0.0, 0.0; direct_fraction = 0.7, config = config32)
         for diagnostic in (accepted, invalid_longitude, supported_temperature, missing_meteorology, missing_time)
