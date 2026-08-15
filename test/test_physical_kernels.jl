@@ -20,16 +20,11 @@ function _wet_bulb_balance_fixture(::Type{T} = Float64) where {T<:AbstractFloat}
     pressure_hpa = T(1013.25)
     vapour_pressure_hpa = T(20)
     atmospheric_emissivity = HeatStress._atmospheric_emissivity(vapour_pressure_hpa)
-    density = HeatStress._air_density(air_temperature_k, pressure_hpa)
-    viscosity = HeatStress._air_viscosity(air_temperature_k)
     return HeatStress.WetBulbBalance(
         air_temperature_k,
         pressure_hpa,
         T(1),
         vapour_pressure_hpa,
-        density,
-        viscosity,
-        HeatStress._diffusivity_coefficient(air_temperature_k, pressure_hpa, density, viscosity),
         HeatStress._wet_bulb_longwave_term(air_temperature_k, atmospheric_emissivity, T(0.95)),
         HeatStress._wet_bulb_solar_term(T(800), T(0.7), T(π / 6), T(0.45), T(0.4), T(0.007), T(0.0254)),
         true,
@@ -64,6 +59,34 @@ function _residual_allocations(globe, wet_bulb)
 end
 
 @testset "physical kernels" begin
+    @testset "bounded pressure-enhanced Buck kernel" begin
+        for T in (Float32, Float64, BigFloat)
+            pressure = T(1010)
+            minimum = T(-40)
+            maximum = T(50)
+            at_minimum = HeatStress._buck_saturation_vapour_pressure_hpa(minimum, pressure)
+            below_zero = HeatStress._buck_saturation_vapour_pressure_hpa(prevfloat(zero(T)), pressure)
+            at_zero = HeatStress._buck_saturation_vapour_pressure_hpa(zero(T), pressure)
+            at_maximum = HeatStress._buck_saturation_vapour_pressure_hpa(maximum, pressure)
+
+            @test at_minimum isa T
+            @test at_minimum ≈ T(0.19114543808424305) rtol = T(2e-6)
+            @test at_zero ≈ T(6.13773781466) rtol = T(2e-6)
+            @test at_maximum ≈ T(124.21113127862339) rtol = T(2e-6)
+            @test below_zero <= at_zero
+            @test isnan(HeatStress._buck_saturation_vapour_pressure_hpa(
+                prevfloat(minimum), pressure,
+            ))
+            @test isnan(HeatStress._buck_saturation_vapour_pressure_hpa(
+                nextfloat(maximum), pressure,
+            ))
+            @test HeatStress._buck_saturation_vapour_pressure_hpa(zero(T), T(1100)) >
+                  HeatStress._buck_saturation_vapour_pressure_hpa(zero(T), T(700))
+        end
+        @test isnan(HeatStress._buck_saturation_vapour_pressure_hpa(0.0, 0.0))
+        @test isnan(HeatStress._buck_saturation_vapour_pressure_hpa(NaN, 1010.0))
+    end
+
     @testset "air-property fixtures" begin
         # Independent values from the equations selected in specs/005 research.
         fixtures = [
@@ -110,12 +133,14 @@ end
         clipped = HeatStress._direct_solar_geometry(pi / 2 - threshold + 1e-6)
         at_horizon = HeatStress._direct_solar_geometry(pi / 2)
         below_horizon = HeatStress._direct_solar_geometry(pi / 2 + 1e-6)
-        @test active[1] < 30
-        @test active[2] < 20
+        @test 0 < active[1] < 60
+        @test 0 < active[2] < 40
         @test active[3:4] == (true, false)
         @test clipped == (0.0, 0.0, false, true)
         @test at_horizon == (0.0, 0.0, false, false)
         @test below_horizon == (0.0, 0.0, false, false)
+        @test HeatStress._direct_solar_geometry(deg2rad(89.5)) ==
+              (0.0, 0.0, false, true)
 
         globe_day = HeatStress._globe_solar_term(800.0, 0.7, pi / 6, 0.45, 0.05, 0.95)
         globe_clipped = HeatStress._globe_solar_term(800.0, 0.7, pi / 2 - threshold / 2, 0.45, 0.05, 0.95)
@@ -148,15 +173,17 @@ end
 
         wet_bulb = _wet_bulb_balance_fixture()
         @test isbitstype(typeof(wet_bulb))
+        @test HeatStress._globe_longwave_term(303.15, 0.8) ==
+              (0.8 + 1.0) * 303.15^4 / 2
+        @test HeatStress._wet_bulb_longwave_term(303.15, 0.8, 0.95) ==
+              HeatStress.STEFAN_BOLTZMANN * 0.95 * (0.8 + 1.0) * 303.15^4 / 2
+        film_temperature_k = (295.0 + wet_bulb.air_temperature_k) / 2
         @test HeatStress._heat_transfer_cylinder_air(
-            wet_bulb.air_temperature_k,
+            film_temperature_k,
+            wet_bulb.pressure_hpa,
             wet_bulb.effective_wind_m_s,
             wet_bulb.wick_diameter_m,
-            wet_bulb.air_density,
-            wet_bulb.air_viscosity,
-        ) ≈ 34.923577024519275 rtol = 2e-14
-        @test HeatStress._natural_wet_bulb_residual(295.0, wet_bulb) ≈ -11.260804115125609 rtol = 2e-14
-        @test HeatStress._natural_wet_bulb_residual(300.0, wet_bulb) ≈ 10.265976145484615 rtol = 2e-14
+        ) > 0
         @test HeatStress._natural_wet_bulb_residual(295.0, wet_bulb) < 0
         @test HeatStress._natural_wet_bulb_residual(300.0, wet_bulb) > 0
         wet_root = _bisect_root(t -> HeatStress._natural_wet_bulb_residual(t, wet_bulb), 295.0, 300.0)

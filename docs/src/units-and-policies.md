@@ -15,10 +15,11 @@ irradiance components that violate closure beyond the configured tolerance. A
 batch boundary may represent a missing pressure as a row-level missing
 meteorology result.
 
-For high-level Liljegren calculations, policy-resolved air and dew-point
-temperatures must convert to positive Kelvin, but no `[-40, 50] °C` interval is
-imposed. Derived vapour pressure and transport state are checked before either
-component solver. No temperature is clamped to the former interval.
+For high-level Liljegren calculations, policy-resolved temperatures must
+convert to positive Kelvin and the dew point must be in `[-40, 50] °C`, the
+combined Buck liquid/supercooled-liquid interval. Air temperature has no
+independent Buck-range gate. The wet-bulb root search is bounded to the same
+interval; no temperature is clamped into it.
 
 GHI and DHI are horizontal; DNI is beam-normal. Supplied pairs resolve the
 third component through `GHI = DHI + DNI*cos(zenith)`. A GHI-only row uses the
@@ -31,9 +32,10 @@ flags. Dew point above air temperature is reconciled within the configured
 tolerance, then clamped, swapped, or rejected according to `DewPointPolicy`.
 Solar forcing is zeroed below the computed horizon; positive supplied radiation
 below that horizon sets the diagnostic-only `solar_geometry_mismatch` flag.
-Positive direct radiation within one degree above the horizon instead sets
-`direct_solar_clipped`; diffuse forcing remains active, and this numerical
-protection is distinct from physical night-time zeroing.
+At zenith angles from `89.5°` up to but excluding the geometric horizon,
+direct forcing is zero and `direct_solar_clipped` is set; diffuse forcing
+remains active. This sourced Liljegren cutoff is distinct from physical
+night-time zeroing.
 The configured minimum wind is applied later by component physics, never during
 public-boundary normalization.
 

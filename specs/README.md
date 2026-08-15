@@ -8,14 +8,12 @@ match it.
 
 ## Current delivery focus
 
-HeatStress v0.2.0 is registered in Julia General and published. It preserves
-the focused v0.1.0 Liljegren-first surface and adds the independently sourced
-secondary-measure slice completed by specs 009, 010 and 015. Current work
-maintains those released surfaces while deferred measures and profile-led
-optimisation remain later work.
+HeatStress v0.4.0 is the latest completed release scope. It includes the
+Liljegren APIs, secondary measures, irradiance-component reconstruction,
+wind-height preprocessing and RCC estimated-WBGT models established by specs
+000--021.
 
-The v0.1.0 release surface is limited to the coherent core already supporting
-the Liljegren model:
+The Liljegren surface includes:
 
 - solar geometry and model-required psychrometric helpers;
 - globe temperature, natural wet-bulb temperature and WBGT;
@@ -23,9 +21,9 @@ the Liljegren model:
 - serial allocating, preallocated and threaded batch APIs, including
   diagnostics.
 
-Measured-component WBGT, NWS heat index, Stull wet bulb and humidex are the
-published v0.2.0 additions. Bernard/simplified WBGT, apparent/effective
-temperature, discomfort index and UTCI remain deferred.
+Measured-component WBGT, NWS heat index, Stull wet bulb, humidex, RCCD167L and
+RCC/NWS are additional published package surfaces. Deferred measures remain
+outside the current correction.
 
 Existing reproducible Julia scalar/batch benchmarks, threading evidence and
 the completed readability refactor are sufficient performance evidence for the
@@ -37,16 +35,15 @@ become a public claim without a reproducible, correctness-gated report. Future
 comparisons may use any reviewed HeatStressR version but must pin and record its
 exact commit and dependency environment.
 
-Spec 017 completes the breaking v0.3 irradiance-component API supporting GHI,
-DNI and DHI reconstruction. Release remains blocked pending a separate final
-scientific audit.
+Spec 017 completed the v0.3 irradiance-component API supporting GHI, DNI and
+DHI reconstruction.
 
 Spec 018 adds explicit wind-height preprocessing for the non-breaking v0.3.1
 release without changing the default v0.3 numerical path.
 
-Spec 019 removes the unsupported Liljegren temperature gate as the
-backward-compatible v0.3.2 patch release while leaving standalone
-psychrometric-helper APIs unchanged.
+Spec 019 recorded the v0.3.2 removal of an unsourced blanket temperature gate;
+its extrapolation behavior is superseded by the dependency-specific Buck
+domain in spec 022.
 
 Spec 020 records the rejected shared batch-geometry preprocessing experiment.
 The candidate did not meet its end-to-end retention gate, so the released
@@ -56,6 +53,11 @@ benchmark workloads were retained.
 Spec 021 adds the RCCD167L and RCC-documented Dim228 + RCC-NWS estimated-WBGT
 models for the v0.4.0 release. Source audit, implementation and local
 validation are complete.
+
+Spec 022 corrects Liljegren scientific provenance and numerical conformance
+for the v0.5.0 candidate. It supersedes incompatible Liljegren claims in
+earlier completed specifications without changing their historical release
+records.
 
 ## Status legend
 
@@ -89,9 +91,10 @@ validation are complete.
 | 016 | [Scientific validation hardening](./016-scientific-validation-hardening/) | Complete | Additive post-v0.2 numerical-conformance evidence; preserves released APIs and audit records |
 | 017 | [Irradiance component inputs](./017-irradiance-component-inputs/) | Complete | Breaking v0.3 radiation API; depends on completed 004, 007, 008 and 016 evidence |
 | 018 | [Wind-height preprocessing](./018-wind-height-preprocessing/) | Complete | Additive v0.3.1 preprocessing; depends on completed 003, 007, 008 and 017 interfaces |
-| 019 | [Liljegren temperature-domain correction](./019-liljegren-temperature-domain/) | Complete | Corrects the package-owned temperature gate while preserving 004 helper APIs and 007–008 interfaces |
+| 019 | [Liljegren temperature-domain correction](./019-liljegren-temperature-domain/) | Complete | Historical v0.3.2 gate removal; extrapolation behavior superseded by 022 |
 | 020 | [Batch geometry preprocessing evaluation](./020-batch-geometry-preprocessing/) | Complete | Profile-led experiment rejected; fused 008/011 baseline retained |
 | 021 | [RCC WBGT estimators](./021-rcc-wbgt-estimators/) | Complete | Additive v0.4.0 models; depends on completed 004, 008, 016 and 017 interfaces |
+| 022 | [Liljegren provenance conformance](./022-liljegren-provenance-conformance/) | Complete | Breaking v0.5.0 correction; supersedes incompatible Liljegren scientific claims in 003--019 |
 
 The completed v0.1.0 path was `000–008 → Liljegren/core slice of 010 →
 publication gate of 011 → 012 → focused 013 audit → tag, release and General

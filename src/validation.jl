@@ -128,6 +128,9 @@ function _normalize_basic_meteorology(
         convert(float_type, config.dew_point_tolerance_c),
     )
     resolution.status === InputAccepted || return _InputPreparationFailure(resolution.status)
+    convert(float_type, BUCK_MINIMUM_TEMPERATURE_C) <= resolution.dew_point_c <=
+        convert(float_type, BUCK_MAXIMUM_TEMPERATURE_C) ||
+        return _InputPreparationFailure(InvalidDomain)
     air_temperature_k = resolution.air_temperature_c + float_type(KELVIN_OFFSET)
     dew_point_k = resolution.dew_point_c + float_type(KELVIN_OFFSET)
     air_temperature_k > zero(float_type) && dew_point_k > zero(float_type) ||

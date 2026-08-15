@@ -79,8 +79,33 @@ end
         )
         @test clearness.input_status === InputAccepted
         @test clearness.irradiance.ghi_w_m2 == high_ghi
-        @test 0.0 <= clearness.irradiance.direct_fraction <= 0.9
+        @test 0.0 <= clearness.irradiance.direct_fraction <= 1.0
         @test clearness.irradiance.partition_policy === :liljegren_clearness
+
+        test_cosine = 0.5
+        toa = HeatStress._extraterrestrial_horizontal_irradiance(
+            _IRRADIANCE_TIME,
+            test_cosine,
+        )
+        uncapped_clearness = 0.9
+        uncapped_fraction = HeatStress._partition_fraction(
+            LiljegrenClearnessFraction(),
+            _IRRADIANCE_TIME,
+            uncapped_clearness * toa,
+            test_cosine,
+            Float64,
+        )
+        @test uncapped_fraction ≈ exp(
+            3 - 1.34 * uncapped_clearness - 1.65 / uncapped_clearness,
+        )
+        @test uncapped_fraction > 0.9
+        @test HeatStress._partition_fraction(
+            LiljegrenClearnessFraction(),
+            _IRRADIANCE_TIME,
+            1.1 * toa,
+            test_cosine,
+            Float64,
+        ) == 1.0
 
         clear = _irradiance_call()
         @test clear.irradiance.ghi_w_m2 ≈ max(0.0, 910.0 * cosine - 30.0)
@@ -118,6 +143,13 @@ end
         )
         @test ismissing(near_horizon.diagnostics.dni_w_m2)
         @test near_horizon.diagnostics.direct_fraction == 0.8
+
+        clearness_at_cutoff = HeatStress._resolve_irradiance(
+            ghi, nothing, nothing, LiljegrenClearnessFraction(),
+            _IRRADIANCE_TIME, deg2rad(89.5), LiljegrenConfig(),
+        )
+        @test clearness_at_cutoff.diagnostics.direct_fraction == 0.0
+        @test clearness_at_cutoff.diagnostics.dni_w_m2 == 0.0
 
         midnight = diagnose_liljegren(
             30.0, 20.0, 1.0,

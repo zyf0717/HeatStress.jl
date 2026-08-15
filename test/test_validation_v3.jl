@@ -86,7 +86,8 @@ end
     @testset "metadata, provenance, schema, and covering array" begin
         metadata_path = joinpath(_V3_VALIDATION_ROOT, "metadata", "fixture-set-v3.toml")
         metadata = TOML.parsefile(metadata_path)
-        @test metadata["schema_version"] == 3
+        @test metadata["schema_version"] == 4
+        @test metadata["generator_revision"] == "v2-buck-liljegren"
         @test metadata["precision_bits"] == 256
         @test metadata["liljegren_reference_rows"] == 64
         for record in values(metadata["files"])
@@ -120,15 +121,23 @@ end
         @test getproperty.(components, :id) == getproperty.(rows[1:16], :id)
         for component in components
             @test component.expected_globe_reason == "NoFailure"
-            @test component.expected_wet_bulb_reason == "NoFailure"
             @test component.expected_globe_lower_k - component.atol_c <=
                   component.expected_globe_c + HeatStress.KELVIN_OFFSET <=
                   component.expected_globe_upper_k + component.atol_c
-            @test component.expected_wet_lower_k - component.atol_c <=
-                  component.expected_natural_wet_bulb_c + HeatStress.KELVIN_OFFSET <=
-                  component.expected_wet_upper_k + component.atol_c
             @test isfinite(component.expected_globe_residual)
-            @test isfinite(component.expected_wet_bulb_residual)
+            if component.expected_wet_bulb_reason == "NoFailure"
+                @test component.expected_wet_lower_k - component.atol_c <=
+                      component.expected_natural_wet_bulb_c + HeatStress.KELVIN_OFFSET <=
+                      component.expected_wet_upper_k + component.atol_c
+                @test isfinite(component.expected_wet_bulb_residual)
+            else
+                @test component.expected_wet_bulb_reason == "Unbracketed"
+                @test ismissing(component.expected_natural_wet_bulb_c)
+                @test component.expected_wet_lower_k >=
+                      HeatStress.KELVIN_OFFSET + HeatStress.BUCK_MINIMUM_TEMPERATURE_C
+                @test component.expected_wet_upper_k <=
+                      HeatStress.KELVIN_OFFSET + HeatStress.BUCK_MAXIMUM_TEMPERATURE_C
+            end
         end
         factor_names = (
             :air_factor, :dew_factor, :wind_factor, :radiation_factor,
@@ -271,22 +280,35 @@ end
                 _v3_status(row.expected_globe_reason))
             _v3_equal("liljegren/wet_status", row, diagnostic.natural_wet_bulb.reason,
                 _v3_status(row.expected_wet_bulb_reason))
-            _v3_close("liljegren/globe", row,
-                diagnostic.result.globe_temperature_c, row.expected_globe_c;
-                atol = row.atol_c, rtol = row.rtol)
-            _v3_close("liljegren/wet", row,
-                diagnostic.result.natural_wet_bulb_c,
-                row.expected_natural_wet_bulb_c;
-                atol = row.atol_c, rtol = row.rtol)
-            _v3_close("liljegren/wbgt", row,
-                diagnostic.result.wbgt_c, row.expected_wbgt_c;
-                atol = row.atol_c, rtol = row.rtol)
+            if row.expected_globe_reason == "NoFailure"
+                _v3_close("liljegren/globe", row,
+                    diagnostic.result.globe_temperature_c, row.expected_globe_c;
+                    atol = row.atol_c, rtol = row.rtol)
+            else
+                @test ismissing(diagnostic.result.globe_temperature_c)
+            end
+            if row.expected_wet_bulb_reason == "NoFailure"
+                _v3_close("liljegren/wet", row,
+                    diagnostic.result.natural_wet_bulb_c,
+                    row.expected_natural_wet_bulb_c;
+                    atol = row.atol_c, rtol = row.rtol)
+            else
+                @test ismissing(diagnostic.result.natural_wet_bulb_c)
+            end
             _v3_assert_component_invariants(diagnostic.globe)
             _v3_assert_component_invariants(diagnostic.natural_wet_bulb)
-            @test diagnostic.result.wbgt_c ≈
-                  0.7 * diagnostic.result.natural_wet_bulb_c +
-                  0.2 * diagnostic.result.globe_temperature_c +
-                  0.1 * row.air_temperature_c atol = 2eps(Float64)
+            if row.expected_globe_reason == "NoFailure" &&
+               row.expected_wet_bulb_reason == "NoFailure"
+                _v3_close("liljegren/wbgt", row,
+                    diagnostic.result.wbgt_c, row.expected_wbgt_c;
+                    atol = row.atol_c, rtol = row.rtol)
+                @test diagnostic.result.wbgt_c ≈
+                      0.7 * diagnostic.result.natural_wet_bulb_c +
+                      0.2 * diagnostic.result.globe_temperature_c +
+                      0.1 * row.air_temperature_c atol = 2eps(Float64)
+            else
+                @test ismissing(diagnostic.result.wbgt_c)
+            end
         end
 
         air = getproperty.(rows, :air_temperature_c)
@@ -309,8 +331,8 @@ end
                 direct_fraction = direct,
                 threaded,
             )
-            @test batch.wbgt_c == expected_wbgt
-            @test batch.natural_wet_bulb_c == expected_wet
+            @test isequal(batch.wbgt_c, expected_wbgt)
+            @test isequal(batch.natural_wet_bulb_c, expected_wet)
             @test batch.globe_temperature_c == expected_globe
             diagnostic_batch = _compat_diagnose_liljegren_batch(
                 air, dew, wind, radiation, time, longitude, latitude;
@@ -319,7 +341,7 @@ end
                 threaded,
             )
             @test diagnostic_batch.input_status == getproperty.(diagnostics, :input_status)
-            @test diagnostic_batch.result.wbgt_c == expected_wbgt
+            @test isequal(diagnostic_batch.result.wbgt_c, expected_wbgt)
         end
 
         outputs = (
@@ -333,8 +355,8 @@ end
             pressure_hpa = pressure,
             direct_fraction = direct,
         )
-        @test preallocated.wbgt_c == expected_wbgt
-        @test preallocated.natural_wet_bulb_c == expected_wet
+        @test isequal(preallocated.wbgt_c, expected_wbgt)
+        @test isequal(preallocated.natural_wet_bulb_c, expected_wet)
         @test preallocated.globe_temperature_c == expected_globe
 
         tighter = LiljegrenConfig(
@@ -346,7 +368,13 @@ end
             direct_fraction = direct,
             config = tighter,
         )
-        @test all(abs.(tighter_values.wbgt_c .- expected_wbgt) .<= 5e-4)
+        for index in eachindex(expected_wbgt)
+            if ismissing(expected_wbgt[index])
+                @test ismissing(tighter_values.wbgt_c[index])
+            else
+                @test abs(tighter_values.wbgt_c[index] - expected_wbgt[index]) <= 5e-4
+            end
+        end
 
         config32 = LiljegrenConfig(
             solver = SolverConfig(root_tolerance_k = 1f-6, residual_tolerance_k = 1f-4),
@@ -360,30 +388,32 @@ end
             config = config32,
         )
         @test diagnostics32.input_status == getproperty.(diagnostics, :input_status)
-        float32_residual_limit = Dict(
-            "liljegren_v3_004" => :globe,
-            "liljegren_v3_008" => :globe,
-            "liljegren_v3_014" => :wet,
-            "liljegren_v3_022" => :globe,
-            "liljegren_v3_025" => :globe,
-            "liljegren_v3_044" => :wet,
-            "liljegren_v3_060" => :wet,
+        float32_expected_reasons = Dict(
+            "liljegren_v3_004" => (globe = ResidualValidationFailed, wet = NoFailure),
+            "liljegren_v3_040" => (globe = ResidualValidationFailed, wet = NoFailure),
+            "liljegren_v3_047" => (
+                globe = ResidualValidationFailed,
+                wet = ResidualValidationFailed,
+            ),
+            "liljegren_v3_061" => (globe = ResidualValidationFailed, wet = NoFailure),
         )
         for (index, row) in enumerate(rows)
-            expected_limited_component = get(float32_residual_limit, row.id, nothing)
             globe_reason = diagnostics32.globe.reason[index]
             wet_reason = diagnostics32.natural_wet_bulb.reason[index]
-            if expected_limited_component === :globe
-                @test globe_reason === ResidualValidationFailed
-                @test wet_reason === NoFailure
-                @test ismissing(diagnostics32.result.wbgt_c[index])
-            elseif expected_limited_component === :wet
-                @test globe_reason === NoFailure
-                @test wet_reason === ResidualValidationFailed
+            expected_reasons = get(
+                float32_expected_reasons,
+                row.id,
+                (
+                    globe = diagnostics[index].globe.reason,
+                    wet = diagnostics[index].natural_wet_bulb.reason,
+                ),
+            )
+            @test globe_reason === expected_reasons.globe
+            @test wet_reason === expected_reasons.wet
+            if ismissing(expected_wbgt[index]) || globe_reason !== NoFailure ||
+               wet_reason !== NoFailure
                 @test ismissing(diagnostics32.result.wbgt_c[index])
             else
-                @test globe_reason === diagnostics[index].globe.reason
-                @test wet_reason === diagnostics[index].natural_wet_bulb.reason
                 @test abs(
                     Float64(diagnostics32.result.wbgt_c[index]) - expected_wbgt[index],
                 ) <= 2e-3

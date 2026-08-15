@@ -1,5 +1,8 @@
 # Final scientific audit and release authorisation: execution checklist
 
+This is immutable evidence of the v0.1 authorization decision. Its completed
+status does not authorize the spec-022 implementation or replacement fixtures.
+
 ## Status
 
 - [ ] Planned

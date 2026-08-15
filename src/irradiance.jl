@@ -74,24 +74,23 @@ function _partition_fraction(
     ::Type{T},
 ) where {T<:AbstractFloat}
     ghi_w_m2 > zero(T) || return zero(T)
+    direct_cutoff = sin(convert(T, MINIMUM_DIRECT_SOLAR_ELEVATION_RAD))
+    cos_zenith > direct_cutoff || return zero(T)
     toa = _extraterrestrial_horizontal_irradiance(utc_time, cos_zenith)
     toa > zero(T) || return zero(T)
-    clearness = min(
-        ghi_w_m2 / toa,
-        convert(T, LILJEGREN_CLEARNESS_MAX),
-    )
+    clearness = ghi_w_m2 / toa
     clearness > zero(T) || return zero(T)
     fraction = exp(
         convert(T, 3) - convert(T, 1.34) * clearness -
         convert(T, 1.65) / clearness,
     )
-    return clamp(fraction, zero(T), convert(T, LILJEGREN_DIRECT_FRACTION_MAX))
+    return clamp(fraction, zero(T), one(T))
 end
 
 @inline function _dni_from_bhi(bhi::T, cos_zenith::T) where {T<:AbstractFloat}
     direct_cutoff = sin(convert(T, MINIMUM_DIRECT_SOLAR_ELEVATION_RAD))
     bhi > zero(T) || return zero(T)
-    cos_zenith >= direct_cutoff || return missing
+    cos_zenith > direct_cutoff || return missing
     return bhi / cos_zenith
 end
 

@@ -1,8 +1,7 @@
 # Liljegren scalar model
 
-> The component-balance science remains authoritative here. Spec 017
-> supersedes only the public radiation boundary and its preparation step for
-> v0.3.
+> Specs 017 and 022 supersede the public radiation boundary and corrected
+> Liljegren psychrometric/physical behavior respectively.
 
 ## Purpose
 
@@ -24,10 +23,11 @@ Do not invoke either component solver until preprocessing reports `InputAccepted
 Using the equations documented from the primary paper and supporting sources:
 
 1. convert air temperature to Kelvin;
-2. convert RH percent to fraction;
+2. calculate pressure-enhanced Buck actual vapour pressure at resolved dew point;
 3. apply the sourced, shared solar-forcing/horizon policy defined by specs 004–005;
 4. calculate effective wind;
-5. calculate atmospheric/surface longwave term;
+5. calculate atmospheric/effective-surface longwave term with
+   `epsilon_surface * T_surface^4 = T_air^4`;
 6. calculate direct/diffuse solar term using `direct_fraction`, surface albedo, globe albedo, emissivity and Stefan-Boltzmann constant;
 7. build `GlobeBalance`;
 8. solve using globe bracket policy;
@@ -37,9 +37,10 @@ Using the equations documented from the primary paper and supporting sources:
 ### Step 3: prepare natural wet-bulb balance
 
 1. convert air/dewpoint to Kelvin;
-2. calculate RH fraction and vapour pressure;
+2. calculate pressure-enhanced Buck vapour pressure without extrapolation;
 3. calculate atmospheric emissivity;
-4. calculate air density, viscosity and diffusivity coefficient;
+4. calculate density, viscosity, conductivity, diffusivity, latent heat and
+   mass-transfer coefficient at each candidate/air film temperature;
 5. calculate effective wind, longwave and solar terms;
 6. build `WetBulbBalance`;
 7. solve using wet-bulb bracket policy;
@@ -84,7 +85,7 @@ Value-only functions should call the same internal diagnostic computation and di
 - interpreted as `direct / (direct + diffuse)`;
 - solar geometry does not derive direct fraction; a future derivation requires
   its own sourced model and specification change;
-- no package fallback is a canonical Liljegren or public API default;
+- no package fallback is a published Liljegren or public API default;
 - validate before solver invocation.
 
 ## Pressure

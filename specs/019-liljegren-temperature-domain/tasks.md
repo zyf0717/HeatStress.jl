@@ -1,5 +1,9 @@
 # Liljegren temperature-domain correction: execution checklist
 
+This checklist records completed v0.3.2 work. Its extrapolation behavior is
+superseded by spec 022; the historical test counts below are not evidence for
+the v0.5.0 candidate.
+
 ## Status
 
 - [ ] Planned

@@ -126,22 +126,27 @@ end
         @test isempty(empty.wbgt_c)
     end
 
-    @testset "extended temperature rows reach component solving" begin
+    @testset "Buck dew-point domain and extended air temperature" begin
         diagnostic = _legacy_diagnose_batch(
-            [-50.0, 60.0],
-            [-55.0, 55.0],
-            [1.0, 1.0],
-            [800.0, 800.0],
-            fill(DateTime(2024, 6, 21, 12), 2),
+            [-50.0, 60.0, 60.0],
+            [-55.0, 55.0, 40.0],
+            [1.0, 1.0, 1.0],
+            [800.0, 800.0, 0.0],
+            fill(DateTime(2024, 6, 21, 12), 3),
             0.0,
             0.0;
             direct_fraction = 0.7,
         )
-        @test diagnostic.input_status == fill(InputAccepted, 2)
-        @test all(>(0), diagnostic.globe.evaluations)
-        @test all(>(0), diagnostic.natural_wet_bulb.evaluations)
-        @test diagnostic.globe.reason == fill(NoFailure, 2)
-        @test diagnostic.natural_wet_bulb.reason == fill(NoFailure, 2)
+        @test diagnostic.input_status ==
+              [InvalidDomain, InvalidDomain, InputAccepted]
+        @test diagnostic.globe.evaluations[1:2] == [0, 0]
+        @test diagnostic.natural_wet_bulb.evaluations[1:2] == [0, 0]
+        @test diagnostic.globe.reason ==
+              [NotAttempted, NotAttempted, NoFailure]
+        @test diagnostic.natural_wet_bulb.reason ==
+              [NotAttempted, NotAttempted, NoFailure]
+        @test diagnostic.globe.evaluations[3] > 0
+        @test diagnostic.natural_wet_bulb.evaluations[3] > 0
     end
 
     @testset "shared typed row execution" begin

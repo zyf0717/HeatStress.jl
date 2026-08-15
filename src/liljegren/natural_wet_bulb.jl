@@ -13,10 +13,10 @@ function _solve_natural_wet_bulb_balance_data(
     config::SolverConfig{T},
 ) where {T<:AbstractFloat}
     air_temperature_k = balance.air_temperature_k
-    minimum_k = air_temperature_k - convert(T, 100)
-    maximum_k = air_temperature_k + convert(T, 100)
+    minimum_k = convert(T, KELVIN_OFFSET) + convert(T, BUCK_MINIMUM_TEMPERATURE_C)
+    maximum_k = convert(T, KELVIN_OFFSET) + convert(T, BUCK_MAXIMUM_TEMPERATURE_C)
     initial_lower_k = max(minimum_k, dew_point_k - one(T))
-    initial_upper_k = min(maximum_k, air_temperature_k + one(T))
+    initial_upper_k = max(initial_lower_k, min(maximum_k, air_temperature_k + one(T)))
     solve = _solve_bracketed(
         _NaturalWetBulbResidual{T}(balance),
         initial_lower_k,

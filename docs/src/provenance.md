@@ -35,16 +35,20 @@ and the observational accuracy statistics reported by RCC are distinct forms
 of evidence; the unavailable underlying 2021 observations are not inferred
 from aggregate tables.
 
-## Liljegren temperature-domain policy
+## Liljegren psychrometrics and temperature domain
 
-The former high-level `[-40, 50] °C` air/dew-point rejection was an original
-package policy inherited from the standalone FAO-56 helper contract. It was
-not established as a Liljegren or FAO-56 scientific validity limit and is
-superseded by spec 019. The Liljegren pathway now attempts finite,
-Kelvin-positive inputs when derived psychrometric and transport state is
-physical; subsequent failures come from derived-state validation or component
-solvers. Calculation support outside the former interval is not evidence of
-validated accuracy in extreme conditions.
+Liljegren et al. (2008), p. 647, explicitly selects Buck (1981) for saturation
+vapour pressure. The model therefore uses Buck's pressure-enhanced
+supercooled-liquid branch on `[-40, 0) °C` and liquid-water branch on
+`[0, 50] °C`; it does not extrapolate either branch. A policy-resolved dew
+point outside the combined interval is `InvalidDomain`. The natural-wet-bulb
+search is bounded to the same interval and reports `Unbracketed` when no root
+exists there. Air temperature is not independently restricted to that
+interval because Buck is not evaluated at air temperature in the dew-point
+input formulation.
+
+The exported FAO-56 psychrometric helpers remain a separate API and are not
+used by the Liljegren balance.
 
 ## Irradiance reconstruction
 
@@ -61,8 +65,9 @@ validated accuracy in extreme conditions.
   reconciliation policy.
 
 The fixed `0.8` default is a package assumption, not a universal constant.
-The `0.85` cap is confined to the opt-in clearness estimator; measured GHI is
-not capped against top-of-atmosphere irradiance.
+The opt-in estimator evaluates equation 13 without a clearness cap. Package
+policy clamps only the resulting direct fraction to its physical `[0, 1]`
+interval. Direct forcing is zero at solar zenith angles of `89.5°` or greater.
 
 ## Wind-height preprocessing
 
@@ -95,23 +100,23 @@ standalone 256-bit evaluator that does not import this package.
 
 ## Constants and fixed instrument parameters
 
-Spec 003 centralizes the values used by the Liljegren model. The source of the
-model and device values is Liljegren et al. (2008), Table 1 and its instrument
-description. Independent literature confirms the globe and wick geometry,
-emissivities and albedos, and the 1003.5 J kg⁻¹ K⁻¹ dry-air heat capacity
-(Hall et al., 2022, §2.3). NIST SP 250-39 supplies the SI temperature offset,
-the relation between molar and specific gas constants, and modern reference
-values for dry-air and water molar masses.
+Spec 003 centralizes values used by the Liljegren model. Liljegren et al.
+(2008) has no constants table: instrument geometry and fitted optical
+coefficients are located in the model derivation and instrument description.
+Supporting physical constants and property correlations are attributed to
+their own sources rather than to a nonexistent paper table. Hall et al.
+(2022, §2.3) independently records the computational constants, while NIST SP
+250-39 supplies the SI temperature offset and modern comparison values.
 
 | Group | Values selected | Basis |
 | --- | --- | --- |
-| Thermodynamic model constants | `σ=5.6696e-8`, `cₚ=1003.5`, `Mₐ=28.97`, `M_w=18.015`, `R=8314.34` | Liljegren model convention; units are W m⁻² K⁻⁴, J kg⁻¹ K⁻¹, kg kmol⁻¹, kg kmol⁻¹, and J kmol⁻¹ K⁻¹ respectively. |
+| Thermodynamic computational constants | `σ=5.6696e-8`, `cₚ=1003.5`, `Mₐ=28.97`, `M_w=18.015`, `R=8314.34` | Supporting computational convention documented by Hall and the cited property sources; units are W m⁻² K⁻⁴, J kg⁻¹ K⁻¹, kg kmol⁻¹, kg kmol⁻¹, and J kmol⁻¹ K⁻¹. |
 | Derived constant | `R_d=R/Mₐ` | Formula; J kg⁻¹ K⁻¹. |
 | Globe | diameter 0.0508 m, emissivity 0.95, albedo 0.05 | Liljegren instrument parameters. |
 | Wick | diameter 0.007 m, length 0.0254 m, emissivity 0.95, albedo 0.4 | Liljegren instrument parameters. |
-| Surface | emissivity 0.999, default albedo 0.45 | Liljegren model convention; 0.45 is independently described as its assumed ground albedo. |
-| Pressure fallback | 1010 hPa | Package API fallback only; canonical Liljegren calculations take observed pressure explicitly. |
-| Minimum wind | 0.13 m/s | Canonical computational wind floor, configurable by package policy. |
+| Surface | effective long-wave factor 1, default albedo 0.45 | Equations 12 and 17 set `εsfc Tsfc⁴ = Ta⁴`; 0.45 is a fitted surface-albedo coefficient and may depend on instrument surroundings. |
+| Pressure fallback | 1010 hPa | Package API fallback only; the published Liljegren calculations take observed pressure explicitly. |
+| Minimum wind | 0.13 m/s | Figure 6 caption, p. 653: threshold applied to estimated 2 m wind because it was the sensor threshold; configurable package default. |
 
 The current CODATA/NIST Stefan–Boltzmann value (5.670374419e-8 W m⁻² K⁻⁴)
 differs from the historical model value. The package retains `5.6696e-8` so
@@ -122,6 +127,7 @@ explicit model-version decision.
 References:
 
 - Liljegren et al. (2008), DOI: https://doi.org/10.1080/15459620802310770.
+- Buck (1981), DOI: https://doi.org/10.1175/1520-0450(1981)020%3C1527:NEFCVP%3E2.0.CO;2.
 - Hall et al. (2022), *Weather and Climate Extremes*, 35, 100420,
   https://doi.org/10.1016/j.wace.2022.100420.
 - NIST SP 250-39 (2009), Appendix A,

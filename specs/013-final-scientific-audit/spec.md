@@ -1,5 +1,9 @@
 # Final scientific audit and release authorisation
 
+> Historical v0.1 audit only. It authorized the recorded v0.1 commit, not the
+> current Liljegren equations or fixtures. Spec 022 requires a new final-head
+> audit for the v0.5.0 correction.
+
 ## Purpose
 
 Run a strict final audit before publishing the Liljegren-first `v0.1.0` candidate. Audit one exact candidate source commit and only APIs, formulas and fixtures declared in the release scope. Secondary indices are audited when, and only when, a later release adds them.

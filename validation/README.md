@@ -24,9 +24,13 @@ those are independently curated source/invariant records described in
 RCC-NWS, RCCNL, Dim228 and Dim167L equations plus both WBGT compositions; it
 does not import `HeatStress`.
 
-The v1/v2 fixtures above are frozen release evidence. Additive fixture set v3
-hardens numerical-conformance validation without changing released behavior.
-It deterministically selects 64 pairwise-covering Liljegren observations and
+The fixture-family filenames are stable while their current contents are
+replaced in place when an approved scientific correction changes expected
+behavior; Git history preserves earlier release evidence. The v2
+secondary-measure family is unchanged. Liljegren v1 and v3 revision 2 use
+bounded pressure-enhanced Buck psychrometrics, film-temperature wick
+properties and the corrected Liljegren radiation assumptions. It
+deterministically selects 64 pairwise-covering Liljegren observations and
 recomputes their expected components and WBGT directly at 256-bit precision.
 It also contains expanded solar, psychrometric, heat-transfer,
 secondary-index, and failure-taxonomy fixtures. Neither its case selector nor

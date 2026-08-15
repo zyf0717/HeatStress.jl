@@ -13,8 +13,8 @@ sources = ["bird_stewart_lightfoot_2002", "kannuluik_carman_1951", "oke_1987"]
 generation_method = "Independent direct evaluation of the cited equations."
 
 [fixture_families.liljegren_reference]
-sources = ["liljegren_2008", "hall_2022"]
-generation_method = "Standalone 256-bit calculation; validation/generate_validation_cases.jl deterministically regenerates only this CSV and never imports HeatStress."
+sources = ["liljegren_2008", "buck_1981", "hall_2022"]
+generation_method = "Standalone 256-bit calculation with bounded pressure-enhanced Buck psychrometrics; test/fixtures/generate_liljegren_scalar_references.jl and validation/generate_validation_cases.jl never import HeatStress."
 
 [fixture_families.liljegren_failures]
 sources = ["package_contract"]
@@ -31,6 +31,7 @@ generation_method = "Standalone 256-bit evaluation of Appendix B, equations 1, 3
 [fixture_families.numerical_conformance_v3]
 sources = [
     "liljegren_2008",
+    "buck_1981",
     "hall_2022",
     "nrel_spa",
     "nrel_spa_pvlib_0152",
@@ -45,7 +46,7 @@ sources = [
     "eccc_humidex",
     "package_contract",
 ]
-generation_method = "Additive fixture-set-v3: deterministic pairwise/three-way case selection and standalone 256-bit equation evaluation without importing HeatStress; external NREL-SPA rows remain independently computed authorities."
+generation_method = "Fixture-set-v3 revision 2: deterministic pairwise/three-way case selection and standalone 256-bit Liljegren/Buck equation evaluation without importing HeatStress; external NREL-SPA rows remain independently computed authorities."
 
 [registry]
 item_key_format = "lowercase_snake_case"
@@ -135,6 +136,17 @@ issue = "10"
 pages = "645-655"
 doi = "10.1080/15459620802310770"
 role = "Primary source for the outdoor Liljegren WBGT model"
+
+[sources.buck_1981]
+kind = "journal_article"
+authors = "Buck, A. L."
+title = "New Equations for Computing Vapor Pressure and Enhancement Factor"
+journal = "Journal of Applied Meteorology"
+year = 1981
+volume = "20"
+pages = "1527-1532"
+doi = "10.1175/1520-0450(1981)020<1527:NEFCVP>2.0.CO;2"
+role = "Pressure-enhanced saturation vapour pressure over liquid and supercooled liquid water, selected explicitly by Liljegren et al."
 
 [sources.osha_wbgt]
 kind = "government_technical_manual"
@@ -449,20 +461,20 @@ validation = "test/test_physical_kernels.jl raw-radicand and fixed-point residua
 
 [items.wet_bulb_balance]
 kind = "equation"
-owner_spec = "005"
+owner_spec = "022"
 status = "validated"
-source = "hall_2022"
-location = "eqs. 6, 16, 18-20, transcribing Liljegren wick balance"
+source = "liljegren_2008"
+location = "eqs. 2-12, pp. 646-648"
 units = "K signed residual"
 implementation = "src/liljegren/residuals.jl"
-validation = "test/test_physical_kernels.jl wet-bulb residual sign brackets"
+validation = "test/test_physical_kernels.jl wet-bulb residual sign brackets and film-property evaluation; validation/fixtures/v3/liljegren_reference.csv"
 
 [items.direct_solar_elevation_clip]
-kind = "numerical_policy"
-owner_spec = "005"
+kind = "model_policy"
+owner_spec = "022"
 status = "validated"
-provenance = "original_design"
-rationale = "Direct horizontal-to-normal geometry is singular at the horizon while the API does not provide direct-normal irradiance; 1 degree bounds both shared direct terms while retaining diffuse forcing and distinguishing physical night zeroing."
+source = "liljegren_2008"
+location = "eqs. 13-14 and text following eq. 12, p. 648: direct fraction is zero at theta >= 89.5 degrees"
 implementation = "src/constants.jl; src/liljegren/residuals.jl"
 validation = "test/test_physical_kernels.jl direct-forcing threshold and horizon boundaries"
 
@@ -527,13 +539,13 @@ validation = "test/test_root_solver.jl wet-bulb expansion tests"
 
 [items.wet_bulb_search_guardrail]
 kind = "numerical_policy"
-owner_spec = "006"
+owner_spec = "022"
 status = "validated"
 provenance = "original_design"
-rationale = "The ±100 K air-relative bound prevents invalid saturation-pressure exploration while retaining a broad physical search domain."
-units = "K relative to air temperature"
+rationale = "The absolute solver bounds prevent evaluation outside the Buck (1981) Table 1 ranges registered under liljegren_buck_saturation_pressure; mapping failure to the existing Unbracketed diagnostic is package policy."
+units = "233.15 to 323.15 K inclusive"
 implementation = "src/liljegren/natural_wet_bulb.jl"
-validation = "test/test_root_solver.jl unbracketed and convergence tests"
+validation = "test/test_liljegren_scalar.jl bounded-root unbracketed case; test/test_physical_kernels.jl exact Buck endpoints"
 
 [items.root_location_tolerance]
 kind = "numerical_policy"
@@ -616,12 +628,81 @@ replacement = "liljegren_physical_temperature_domain"
 [items.liljegren_physical_temperature_domain]
 kind = "model_policy"
 owner_spec = "019"
-status = "validated"
+status = "superseded"
 provenance = "original_design"
-rationale = "High-level Liljegren inputs are attempted when finite and physically representable in Kelvin; derived-state and solver checks classify later failures without an arbitrary meteorological interval."
+rationale = "The high-level Kelvin-only gate permitted extrapolation of the saturation-pressure equation outside its published range. Spec 022 replaces it with dependency-specific Buck domain handling."
 units = "degrees C converted to K"
 implementation = "src/validation.jl; src/liljegren/row_execution.jl"
 validation = "test/test_validation.jl absolute-zero and policy cases; test/test_liljegren_scalar.jl and test/test_liljegren_batch.jl extreme-domain solver-attempt and derived-state cases"
+replacement = "liljegren_buck_temperature_domain"
+
+[items.liljegren_buck_saturation_pressure]
+kind = "equation"
+owner_spec = "022"
+status = "validated"
+source = "buck_1981"
+location = "Table 1 liquid-water and supercooled-liquid curves, p. 1528; recommended moist-air pressure-enhanced expression, p. 1531"
+units = "degrees C and hPa to hPa"
+implementation = "src/psychrometrics.jl"
+validation = "test/test_physical_kernels.jl endpoints, branch transition, pressure enhancement, non-finite and out-of-range cases"
+
+[items.liljegren_buck_temperature_domain]
+kind = "model_policy"
+owner_spec = "022"
+status = "validated"
+provenance = "original_design"
+rationale = "Mapping a resolved dew point outside the Buck (1981) Table 1 ranges registered under liljegren_buck_saturation_pressure to row-level InvalidDomain is the package diagnostic policy that prevents extrapolation."
+units = "degrees C"
+implementation = "src/validation.jl; src/liljegren/natural_wet_bulb.jl; src/liljegren/residuals.jl"
+validation = "test/test_validation.jl exact/outside dew-point boundaries; test/test_liljegren_scalar.jl row rejection, supported extreme air and bounded-root failure"
+
+[items.liljegren_wet_bulb_film_properties]
+kind = "model_policy"
+owner_spec = "022"
+status = "validated"
+source = "liljegren_2008"
+location = "p. 648 after eq. 12: all properties evaluated before each iteration at average wick and air temperature"
+implementation = "src/liljegren/residuals.jl"
+validation = "test/test_physical_kernels.jl film-temperature convection and wet-bulb residual tests; validation/fixtures/v3/liljegren_reference.csv"
+
+[items.liljegren_effective_surface_longwave]
+kind = "model_policy"
+owner_spec = "022"
+status = "validated"
+source = "liljegren_2008"
+location = "eq. 12 and derivation on pp. 647-648; eqs. 15-17 on p. 649: epsilon_surface T_surface^4 = T_air^4"
+implementation = "src/liljegren/residuals.jl; src/liljegren/balance_construction.jl"
+validation = "test/test_physical_kernels.jl unit effective-surface long-wave identity; scalar and v3 fixtures"
+
+[items.liljegren_direct_fraction_partition]
+kind = "equation"
+owner_spec = "022"
+status = "validated"
+source = "liljegren_2008"
+location = "eqs. 13-14 and fitted-coefficient discussion, p. 648"
+units = "dimensionless clearness ratio to dimensionless direct fraction"
+implementation = "src/irradiance.jl"
+validation = "test/test_irradiance_inputs.jl uncapped clearness evaluation and 89.5-degree boundary"
+
+[items.liljegren_direct_fraction_physical_clamp]
+kind = "numerical_policy"
+owner_spec = "022"
+status = "validated"
+provenance = "original_design"
+rationale = "Equation 13 is evaluated without an input cap, then bounded to the physical direct-fraction interval so derived irradiance components cannot be negative or exceed GHI."
+units = "dimensionless [0, 1]"
+implementation = "src/irradiance.jl"
+validation = "test/test_irradiance_inputs.jl physical output-clamp cases"
+
+[items.liljegren_minimum_estimated_wind]
+kind = "model_policy"
+owner_spec = "022"
+status = "validated"
+source = "liljegren_2008"
+location = "Figure 6 caption, p. 653: estimated 2 m wind minimum 0.13 m/s, the sensor threshold"
+units = "m s^-1"
+implementation = "src/constants.jl; src/types/configuration.jl; src/wind_height.jl"
+validation = "test/test_validation.jl default configuration; test/test_wind_height.jl below/equal/above floor and post-height-conversion ordering"
 
 [items.horizon_mismatch_and_direct_clip_diagnostics]
 kind = "api_design"

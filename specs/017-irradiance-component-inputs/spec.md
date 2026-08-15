@@ -133,7 +133,7 @@ I_{0h}=1367d_r\max(0,\cos\theta).
 For positive GHI and `I0h`,
 
 \[
-k_t^*=\min(GHI/I_{0h},0.85)
+k_t^*=GHI/I_{0h}
 \]
 
 and
@@ -141,20 +141,23 @@ and
 \[
 f_\mathrm{dir} =
 \operatorname{clamp}\left(
-\exp(3-1.34k_t^*-1.65/k_t^*),0,0.9
+\exp(3-1.34k_t^*-1.65/k_t^*),0,1
 \right).
 \]
 
-The `0.85` limit applies only inside this empirical partition estimator.
-Supplied or reconstructed GHI is never capped against top-of-atmosphere
-irradiance.
+The exponential is sourced equation 13; the final `[0, 1]` clamp is a package
+physical-output policy owned by spec 022.
+
+No cap is applied to the clearness ratio. Supplied or reconstructed GHI is
+never capped against top-of-atmosphere irradiance; only the resulting physical
+fraction is clamped to `[0,1]`.
 
 ## Horizon policy
 
 At and below the geometric horizon, all resolved solar forcing is zero.
 Positive supplied components set the existing solar-geometry mismatch flag.
-The existing one-degree direct-beam protection remains in force above the
-horizon and is reported separately.
+Liljegren's `89.5°` zenith cutoff remains in force above the horizon and is
+reported separately.
 
 ## Diagnostics
 

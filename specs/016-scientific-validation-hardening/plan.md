@@ -10,7 +10,8 @@ Preserve specs 013 and 015 as historical release records.
 1. Define the v3 case, metadata and fixture schemas.
 2. Implement deterministic covering-array selection and standalone 256-bit
    recomputation.
-3. Commit additive v3 fixtures and provenance metadata.
+3. Commit v3 fixtures and provenance metadata; later sourced corrections may
+   replace them in place under a new specification.
 4. Add schema, numerical, failure, cross-path and Halton-property tests.
 5. Correct per-row tolerance and worst-case reporting in the existing corpus.
 6. Extend CI, resolve manifests and run all acceptance checks.

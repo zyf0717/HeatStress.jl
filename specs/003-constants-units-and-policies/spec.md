@@ -43,11 +43,12 @@ const DEFAULT_GLOBE_DIAMETER_M = 0.0508
 const DEFAULT_MINIMUM_WIND_SPEED_M_S = 0.13
 const GLOBE_EMISSIVITY = 0.95
 const GLOBE_ALBEDO = 0.05
-const SURFACE_EMISSIVITY = 0.999
 const WICK_EMISSIVITY = 0.95
 const WICK_ALBEDO = 0.4
 const WICK_DIAMETER_M = 0.007
 const WICK_LENGTH_M = 0.0254
+const BUCK_MINIMUM_TEMPERATURE_C = -40.0
+const BUCK_MAXIMUM_TEMPERATURE_C = 50.0
 ```
 
 Verify exact values against cited publications before committing. If authoritative sources disagree, record the discrepancy in `docs/src/provenance.md`, select one explicitly and add a sensitivity or compatibility note; do not silently normalise it.
@@ -86,10 +87,11 @@ Implement two composable internal scalar functions:
    - apply the dewpoint policy;
    - retain the supplied non-negative wind for later component physics.
 
-   Scalar air and dew-point temperatures must be finite. The former package
-   policy requiring both values to lie within -40 through 50 °C is superseded
-   for the Liljegren pathway by spec 019; the standalone spec-004
-   psychrometric-helper contract is unchanged.
+   Scalar air and dew-point temperatures must be finite. After dew-point
+   policy resolution, Liljegren dew point must lie within the bounded Buck
+   interval from -40 through 50 °C. Air temperature has no independent Buck
+   range gate. Spec 022 supersedes the broader spec-019 extrapolation policy;
+   the standalone spec-004 psychrometric-helper contract is unchanged.
 
 2. `_apply_solar_policy(...)` must accept a validated solar zenith from the
    spec-004 kernel, reject zenith outside `[0, π]`, zero radiation at and below
@@ -107,8 +109,8 @@ Preprocessing must also report `dew_point_adjusted`, `wind_speed_clamped`,
 `solar_radiation_clamped` and `direct_solar_clipped` flags. The diagnostic APIs
 expose them; value-only API documentation must state the normalization policy.
 
-`direct_solar_clipped` identifies the separate one-degree direct-beam numerical
-policy and remains distinct from the below-horizon `solar_geometry_mismatch` flag.
+`direct_solar_clipped` identifies the Liljegren `89.5°` zenith cutoff and
+remains distinct from the below-horizon `solar_geometry_mismatch` flag.
 
 The v0.1 mismatch flag is deliberately strict and diagnostic-only. A noise threshold or near-horizon threshold may replace it only as an explicitly sourced or original documented policy with boundary tests; do not inherit historical thresholds from another implementation.
 

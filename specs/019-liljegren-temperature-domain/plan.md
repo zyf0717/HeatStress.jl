@@ -1,11 +1,6 @@
-# Liljegren temperature-domain correction: implementation plan
+# Liljegren temperature-domain correction: supersession plan
 
-1. Replace the high-level Celsius interval with post-policy positive-Kelvin
-   validation.
-2. Validate primitive transport properties before constructing the
-   mass-transfer coefficient, then reject non-finite or non-positive derived
-   state before component solving.
-3. Add boundary, policy, solver-attempt and derived-state regressions.
-4. Update input and provenance documentation without broadening the public
-   psychrometric API.
-5. Run focused tests followed by `Pkg.test()` and record the evidence.
+The v0.3.2 implementation plan is complete historical evidence. Spec 022 owns
+the corrective implementation: replace FAO extrapolation with bounded Buck
+evaluation, enforce the domain only at dependency call sites, bound the wick
+root search, replace affected fixtures, and re-audit the final candidate.

@@ -19,9 +19,10 @@ balances. Negative-input clamping and minimum-floor application therefore
 remain independently observable. The no-adjustment default preserves the
 released numerical path.
 
-Irradiance resolution does not cap a supplied GHI against clear-sky or
-top-of-atmosphere estimates. The `0.85` clearness cap applies only inside the
-opt-in empirical partition relation. Redundant measured components are
+Irradiance resolution does not cap a supplied GHI or the equation-13
+clearness ratio against clear-sky or top-of-atmosphere estimates. The opt-in
+empirical partition clamps only its resulting direct fraction to `[0, 1]`.
+Redundant measured components are
 accepted within
 `max(irradiance_closure_atol_w_m2,
 irradiance_closure_kt_tolerance * I0h)` and otherwise rejected before solving.

@@ -18,17 +18,16 @@ as clear sky. Negative wind and irradiance are clamped to zero with diagnostic
 flags. Dew point above air temperature is
 reconciled within `dew_point_tolerance_c`, then clamped, swapped, or rejected
 by `DewPointPolicy`. Positive radiation at/below the geometric horizon is
-zeroed and flagged as a solar-geometry mismatch. Direct forcing is clipped in
-the one-degree near-horizon protection interval; diffuse forcing remains.
+zeroed and flagged as a solar-geometry mismatch. Direct forcing is zeroed at
+solar zenith angles of `89.5°` or greater; diffuse forcing remains.
 
-The high-level Liljegren WBGT pathway does not impose a `[-40, 50] °C`
-operating range on air or dew-point temperature. Finite inputs whose
-policy-resolved temperatures are both strictly positive in Kelvin proceed to
-derived-state validation. Invalid vapour pressure or transport properties are
-classified as `InvalidDomain` before component solving; otherwise both
-component solvers are attempted and report their own failure reasons. Inputs
-are not clamped to the former interval. This is calculation support, not a
-claim of validated scientific accuracy under extreme conditions.
+The high-level Liljegren pathway uses bounded pressure-enhanced Buck
+psychrometrics. A policy-resolved dew point outside `[-40, 50] °C` is
+`InvalidDomain`; neither component is attempted. Air temperature has no
+independent Buck-range gate. The natural-wet-bulb solver searches only the
+same interval and reports `Unbracketed` if no supported root exists, while
+retaining an independently accepted globe result. Temperatures are never
+clamped to force them into the Buck interval.
 
 Wind is treated as already measured at 2 m unless callers explicitly select
 `LiljegrenStabilityPowerLaw()` and supply `wind_height_m`. The power-law policy
