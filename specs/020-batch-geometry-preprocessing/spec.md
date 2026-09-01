@@ -20,6 +20,8 @@ the recorded end-to-end performance gate.
   threaded scaling.
 - Preserve the released worker-local fused path when the gate is not met.
 - Retain reusable benchmark coverage independently of the candidate decision.
+- Include a grid workload with very few distinct timestamps and many distinct
+  coordinate pairs, matching flattened spatial-raster cardinality.
 
 ## Acceptance criteria
 
@@ -28,8 +30,10 @@ the recorded end-to-end performance gate.
   workloads at 100,000 and 1,000,000 rows.
 - The retention decision and measured evidence are recorded.
 - Production source and tests remain unchanged when the gate fails.
-- The committed benchmark harness reproduces fixed, grouped and unique
+- The committed benchmark harness reproduces fixed, grouped, unique and grid
   workloads while preserving the historical fixed workload as its default.
+- The solar-only harness times only the batch call and reproduces the natural
+  Julia equivalents of `(100000, 1, 1)` and `(1, 1, 100000)` cardinalities.
 
 ## Non-goals
 

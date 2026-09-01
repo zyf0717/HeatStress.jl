@@ -8,3 +8,5 @@
 4. Reject and remove the candidate if it does not pass the retention gate.
 5. Retain the reusable geometry-workload benchmark extension and record the
    decision in `tasks.md`.
+6. Add the missing spatial-grid cardinality and correct the solar-only harness
+   so reference generation and validation are excluded from timing.

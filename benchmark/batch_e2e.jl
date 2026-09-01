@@ -7,7 +7,7 @@ using TOML
 
 const DEFAULT_ROW_COUNTS = (876_000,)
 const DEFAULT_SAMPLES = 3
-const GEOMETRY_MODES = (:fixed, :grouped, :unique)
+const GEOMETRY_MODES = (:fixed, :grouped, :unique, :grid)
 const DEFAULT_GEOMETRY_MODES = (:fixed,)
 
 function batch_inputs(rows::Integer, geometry::Symbol = :fixed)
@@ -23,8 +23,8 @@ function batch_inputs(rows::Integer, geometry::Symbol = :fixed)
         air[row] = 28.0 + 4.0 * sin(phase)
         dew[row] = air[row] - (5.0 + cos(phase))
         wind[row] = 0.5 + 1.5 * abs(sin(phase))
-        time[row] = geometry === :unique ?
-                    base_time + Millisecond(row - 1) :
+        time[row] = geometry === :unique ? base_time + Millisecond(row - 1) :
+                    geometry === :grid ? base_time :
                     base_time + Minute(mod(row - 1, 240))
     end
     longitude, latitude = if geometry === :fixed
@@ -34,7 +34,7 @@ function batch_inputs(rows::Integer, geometry::Symbol = :fixed)
             [isodd(row) ? -74.0060 : 151.2093 for row in 1:rows],
             [isodd(row) ? 40.7128 : -33.8688 for row in 1:rows],
         )
-    elseif geometry === :unique
+    elseif geometry === :unique || geometry === :grid
         (
             [-100.0 + 30.0 * (row - 1) / rows for row in 1:rows],
             [30.0 + 20.0 * (row - 0.5) / rows for row in 1:rows],
@@ -182,7 +182,7 @@ function _parse_arguments(args::Vector{String})
     end
     samples > 0 && all(>(0), rows) || throw(ArgumentError("samples and rows must be positive"))
     all(geometry -> geometry in GEOMETRY_MODES, geometries) ||
-        throw(ArgumentError("geometry must be fixed, grouped, or unique"))
+        throw(ArgumentError("geometry must be fixed, grouped, unique, or grid"))
     return samples, rows, geometries, output_path
 end
 

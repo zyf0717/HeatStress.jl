@@ -2,7 +2,7 @@
 
 ```sh
 julia --threads=4 --project=benchmark benchmark/batch_e2e.jl \
-  --geometry=fixed,grouped,unique \
+  --geometry=fixed,grouped,unique,grid \
   --rows=10000,100000,1000000 \
   --samples=5
 ```
@@ -15,3 +15,10 @@ four-thread scaling falls by no more than 5%.
 The recorded candidate failed this gate and is not present in production
 source. Use the command to evaluate future geometry-sensitive candidates
 against the unchanged fused baseline.
+
+Use the solar-only harness for the flattened Kong-cardinality comparison:
+
+```sh
+julia --project=benchmark benchmark/solar_geometry_e2e.jl \
+  --rows=100000 --samples=10
+```

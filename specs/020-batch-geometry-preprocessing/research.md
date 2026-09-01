@@ -39,4 +39,18 @@ preserve that operation order.
 ## Decision
 
 Reject the prepared-geometry candidate and retain the worker-local fused path.
-Keep the benchmark's fixed, grouped and unique workloads for future profiling.
+Keep the benchmark's fixed, grouped, unique and grid workloads for future
+profiling. The grid workload holds time constant while assigning each row a
+distinct coordinate pair, isolating the ERA5-style raster cardinality that was
+absent from the original candidate evaluation.
+
+The original solar-only harness timed scalar reference generation and equality
+checking together with the batch call. The corrected harness validates outside
+timed regions and compares distinct timestamps at one coordinate directly with
+one timestamp at distinct coordinates.
+
+On the local `goldmont` host with Julia 1.10.11, a ten-sample 100,000-row run
+measured fixed time-series/grid medians of 13.056/6.570 ms and minima of
+11.678/6.210 ms. The time-series layout was therefore 1.99× slower by median,
+far below the reported 76× Kong layout asymmetry. This is local solar-only
+evidence, not a cross-language performance claim.

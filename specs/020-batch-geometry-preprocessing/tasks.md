@@ -14,6 +14,9 @@
 - [x] Run matched 100,000- and 1,000,000-row baseline/candidate comparisons.
 - [x] Reject and remove the candidate after it failed the retention gate.
 - [x] Preserve the historical fixed benchmark default.
+- [x] Add a grid workload with one timestamp and distinct row coordinates.
+- [x] Exclude scalar reference generation and equality checks from solar-only
+  timing.
 - [x] Record evidence and synchronize completion status with `specs/README.md`.
 
 ## Evidence
@@ -33,9 +36,19 @@
 - The candidate failed the 5% repeated-key retention gate and was removed.
   Production source and tests match `main`; only reproducible benchmark and
   specification evidence remain.
+- A follow-up adds the previously missing grid cardinality to both retained
+  harnesses. The candidate is not restored; this extends the reproducible
+  workload matrix for any future reevaluation.
+- The corrected ten-sample solar-only comparison at 100,000 rows measured
+  13.056 ms median for distinct timestamps at one coordinate and 6.570 ms for
+  one timestamp at distinct coordinates: a 1.99× layout difference, not a
+  Kong-scale asymmetry (`goldmont`, Julia 1.10.11, 2026-09-02).
+- `julia --threads=4 --project=benchmark benchmark/batch_e2e.jl
+  --geometry=grid --rows=1000 --samples=1` passed all scalar/batch and
+  serial/threaded equality checks.
 - `git diff --exit-code HEAD -- src test` and `git diff --check` passed. The
-  retained benchmark matrix passed a four-thread smoke run for all three modes:
+  retained benchmark matrix passed a four-thread smoke run for all four modes:
   `julia --threads=4 --project=benchmark benchmark/batch_e2e.jl
-  --geometry=fixed,grouped,unique --rows=1000 --samples=1`. Package tests were
-  not rerun after restoring `main` source and tests because the final change is
-  limited to benchmark tooling and documentation.
+  --geometry=fixed,grouped,unique,grid --rows=1000 --samples=1`.
+- `julia --project=. -e 'using Pkg; Pkg.test()'` passed 7,464 assertions on
+  2026-09-02.

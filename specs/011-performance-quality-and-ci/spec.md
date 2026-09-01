@@ -133,7 +133,7 @@ CI.
 Any future comparison or optimisation specification must require:
 
 - correctness-gated HeatStressR scalar, serial batch and parallel comparisons
-  cover the selected fixed, grouped and unique workloads;
+  cover the selected fixed, grouped, unique and spatial-grid workloads;
 - deeper profiling and optimisation decisions cite measured evidence;
 - any public cross-language claim has a reproducible committed report;
 - no retained optimisation harms numerical correctness or threaded scaling.
