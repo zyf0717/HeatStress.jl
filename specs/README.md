@@ -48,7 +48,8 @@ domain in spec 022.
 Spec 020 records the rejected shared batch-geometry preprocessing experiment.
 The candidate did not meet its end-to-end retention gate, so the released
 worker-local fused path remains unchanged; reusable fixed, grouped and unique
-benchmark workloads were retained.
+benchmark workloads were retained, then extended with the missing spatial-grid
+cardinality.
 
 Spec 021 adds the RCCD167L and RCC-documented Dim228 + RCC-NWS estimated-WBGT
 models for the v0.4.0 release. Source audit, implementation and local

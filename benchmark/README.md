@@ -20,27 +20,39 @@ raw timing samples. This is the scalar fixed-station slice of spec 011, not a
 cross-language or batch benchmark; it neither publishes HeatStressR ratios nor
 replaces the independent scientific validation gate.
 
-`batch_e2e.jl` supports deterministic fixed, grouped and unique solar-geometry
-workloads for five comparable modes: a public scalar loop retaining
-`WBGTResult`s, a public scalar loop writing three preallocated component arrays,
-preallocated serial batch, allocating serial batch, and (when Julia has
-multiple threads) preallocated threaded batch. It validates all component
-values outside timed regions. The primary spec-008 comparison is the public scalar/preallocated
-output loop against preallocated serial batch. It reports minimum and median
-time, throughput, bytes, allocations, raw timing samples, the host,
-Julia/BenchmarkTools versions and repository state. Inputs, compilation,
-equality validation and report writing are excluded; all work performed by the
-public batch call is included. It is local evidence only:
+`batch_e2e.jl` supports deterministic fixed, grouped, unique and grid
+solar-geometry workloads for five comparable modes: a public scalar loop
+retaining `WBGTResult`s, a public scalar loop writing three preallocated
+component arrays, preallocated serial batch, allocating serial batch, and (when
+Julia has multiple threads) preallocated threaded batch. It validates all
+component values outside timed regions. The primary spec-008 comparison is the
+public scalar/preallocated output loop against preallocated serial batch. It
+reports minimum and median time, throughput, bytes, allocations, raw timing
+samples, the host, Julia/BenchmarkTools versions and repository state. Inputs,
+compilation, equality validation and report writing are excluded; all work
+performed by the public batch call is included. It is local evidence only:
 
 ```sh
 julia --project=benchmark benchmark/batch_e2e.jl
 julia --threads=auto --project=benchmark benchmark/batch_e2e.jl --rows=10000 --samples=3 --output=benchmark/results/batch-e2e.toml
-julia --threads=4 --project=benchmark benchmark/batch_e2e.jl --geometry=fixed,grouped,unique --rows=10000,100000 --samples=5
+julia --threads=4 --project=benchmark benchmark/batch_e2e.jl --geometry=fixed,grouped,unique,grid --rows=10000,100000 --samples=5
 ```
 
 The default remains the historical fixed-station workload. Select grouped and
 unique modes explicitly with `--geometry` when evaluating geometry-sensitive
-changes.
+changes. `grid` is the ERA5-style cardinality regime: one timestamp and one
+distinct coordinate pair per row.
+
+`solar_geometry_e2e.jl` times only `solar_zenith_batch`; scalar reference
+generation and equality checks are outside the timed region. Its `fixed` and
+`grid` rows are the natural flattened equivalents of `(100000, 1, 1)` and
+`(1, 1, 100000)`: distinct timestamps at one location versus one timestamp at
+distinct locations. The grouped and unique modes complete the cardinality
+matrix:
+
+```sh
+julia --project=benchmark benchmark/solar_geometry_e2e.jl --rows=100000 --samples=5
+```
 
 `rcc_e2e.jl` provides a smaller scalar/aligned-batch benchmark for RCCD167L
 and RCC/NWS, with Liljegren scalar timing included only as algorithmic-cost
