@@ -59,7 +59,8 @@ After scalar scientific validation:
 - group repeated coordinate pairs using typed keys or index maps;
 - preserve input order;
 - avoid string construction in hot paths;
-- benchmark fixed, grouped and unique-coordinate workloads separately.
+- benchmark fixed, grouped, unique-coordinate and spatial-grid workloads
+  separately.
 
 ## Psychrometric functions
 

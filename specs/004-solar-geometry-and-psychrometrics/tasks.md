@@ -29,5 +29,9 @@
   --project=benchmark -e 'include("benchmark/solar_geometry_e2e.jl");
   main(10000)'` passed scalar/batch equivalence for fixed, grouped and unique
   coordinates (0.0019 s smoke measurements on `znver3`).
+- Follow-up: `julia --project=benchmark benchmark/solar_geometry_e2e.jl
+  --rows=100000 --samples=10` passed scalar/batch equivalence for fixed,
+  grouped, unique and grid cardinalities on 2026-09-02. Scalar reference
+  generation and equality checks were outside the timed region.
 - Commits: `b87ba0a` implements the sourced solar and psychrometric kernels;
   `c315048` records the release-scoped validation and benchmark evidence.
